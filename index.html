@@ -287,7 +287,7 @@
     <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
@@ -680,14 +680,14 @@
             XLSX.writeFile(workbook, "Land_Record_Sample.xlsx");
         }
 
-        // --- ENHANCED EXCEL UPLOAD WITHOUT BLOCKING ALERTS ---
+        // --- OPTIMIZED BATCH EXCEL UPLOAD FOR LIGHTNING FAST PERFORMANCE ---
         window.uploadExcel = function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-blue-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> এক্সেল ফাইল পড়া এবং প্রসেস করা হচ্ছে...`;
+            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> এক্সেল ফাইল প্রসেস ও ব্যাচ আপলোড করা হচ্ছে...`;
             statusBanner.classList.remove('hidden');
 
             const reader = new FileReader();
@@ -705,7 +705,11 @@
                         return;
                     }
 
-                    let uploadCount = 0;
+                    // Firestore batch supports up to 500 operations per batch
+                    let batch = writeBatch(db);
+                    let operationCounter = 0;
+                    let totalUploaded = 0;
+
                     for (let rawItem of rawJsonData) {
                         const item = {};
                         Object.keys(rawItem).forEach(key => {
@@ -727,17 +731,29 @@
                             status: "NOK"
                         };
 
-                        await addDoc(collection(db, "land_records"), newRec);
-                        uploadCount++;
+                        const newDocRef = doc(collection(db, "land_records"));
+                        batch.set(newDocRef, newRec);
+                        operationCounter++;
+                        totalUploaded++;
+
+                        if (operationCounter >= 400) {
+                            await batch.commit();
+                            batch = writeBatch(db);
+                            operationCounter = 0;
+                        }
+                    }
+
+                    if (operationCounter > 0) {
+                        await batch.commit();
                     }
 
                     statusBanner.className = "bg-emerald-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> সফলভাবে ${uploadCount} টি রেকর্ড ফায়ারবেসে আপলোড করা হয়েছে!`;
+                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> সফলভাবে ${totalUploaded} টি রেকর্ড ফায়ারবেসে আপলোড করা হয়েছে!`;
                     setTimeout(() => { statusBanner.classList.add('hidden'); }, 4000);
 
                     await fetchRecordsFromFirebase();
                 } catch (err) {
-                    console.error("Excel Upload Exception: ", err);
+                    console.error("Excel Batch Upload Exception: ", err);
                     statusBanner.className = "bg-rose-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
                     statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> আপলোড ত্রুটি: ${err.message}`;
                     alert("এক্সেল আপলোড করতে সমস্যা হয়েছে: " + err.message);
