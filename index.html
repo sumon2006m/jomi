@@ -237,14 +237,12 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">খতিয়ান নম্বর ফিল্টার</label>
-                    <select id="filterKhatian" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল খতিয়ান</option>
-                    </select>
-                </div>
-                <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মালিকের নাম সার্চ</label>
                     <input type="text" id="filterOwner" placeholder="নাম লিখে খুঁজুন..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">দাগ নম্বর সার্চ</label>
+                    <input type="text" id="filterDag" placeholder="দাগ নম্বর লিখে খুঁজুন..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
             </div>
 
@@ -275,9 +273,9 @@
                                 <td class="p-3.5 cell-upa">সাভার</td>
                                 <td class="p-3.5 cell-mouza">AMINABAD</td>
                                 <td class="p-3.5 cell-jl">১২</td>
-                                <td class="p-3.5 font-semibold text-slate-800 cell-khatian">৪৫/১</td>
+                                <td class="p-3.5 cell-khatian">৪৫/১</td>
                                 <td class="p-3.5 font-semibold text-slate-800 cell-owner">আব্দুর রহমান</td>
-                                <td class="p-3.5 cell-dag">১০৮</td>
+                                <td class="p-3.5 font-semibold text-slate-800 cell-dag">১০৮</td>
                                 <td class="p-3.5 cell-totalacre">০.০২</td>
                                 <td class="p-3.5 text-center">
                                     <div id="statusContainer-1" class="inline-block">
@@ -298,9 +296,9 @@
                                 <td class="p-3.5 cell-upa">সীতাকুণ্ড</td>
                                 <td class="p-3.5 cell-mouza">KUMIRA</td>
                                 <td class="p-3.5 cell-jl">১৫</td>
-                                <td class="p-3.5 font-semibold text-slate-800 cell-khatian">১২/২</td>
+                                <td class="p-3.5 cell-khatian">১২/২</td>
                                 <td class="p-3.5 font-semibold text-slate-800 cell-owner">রফিকুল ইসলাম</td>
-                                <td class="p-3.5 cell-dag">২০৫</td>
+                                <td class="p-3.5 font-semibold text-slate-800 cell-dag">২০৫</td>
                                 <td class="p-3.5 cell-totalacre">০.০৫</td>
                                 <td class="p-3.5 text-center">
                                     <div id="statusContainer-2" class="inline-block">
@@ -385,21 +383,18 @@
             const districts = new Set();
             const upazilas = new Set();
             const mouzas = new Set();
-            const khatians = new Set();
 
             rows.forEach(row => {
                 divisions.add(row.getAttribute('data-division'));
                 districts.add(row.getAttribute('data-district'));
                 upazilas.add(row.getAttribute('data-upazila'));
                 mouzas.add(row.getAttribute('data-mouza'));
-                khatians.add(row.getAttribute('data-khatian'));
             });
 
             populateDropdown('filterDivision', divisions, 'সকল বিভাগ');
             populateDropdown('filterDistrict', districts, 'সকল জেলা');
             populateDropdown('filterUpazila', upazilas, 'সকল উপজেলা');
             populateDropdown('filterMouza', mouzas, 'সকল মৌজা');
-            populateDropdown('filterKhatian', khatians, 'সকল খতিয়ান');
 
             updateCounter(rows.length);
         }
@@ -419,8 +414,8 @@
             const selectedDist = document.getElementById('filterDistrict').value;
             const selectedUpa = document.getElementById('filterUpazila').value;
             const selectedMouza = document.getElementById('filterMouza').value;
-            const selectedKhatian = document.getElementById('filterKhatian').value;
             const searchOwner = document.getElementById('filterOwner').value.toLowerCase();
+            const searchDag = document.getElementById('filterDag').value.toLowerCase();
 
             const rows = document.querySelectorAll('.data-row');
             let visibleCount = 0;
@@ -430,16 +425,16 @@
                 const dist = row.getAttribute('data-district');
                 const upa = row.getAttribute('data-upazila');
                 const mouza = row.getAttribute('data-mouza');
-                const khatian = row.getAttribute('data-khatian');
                 const owner = row.getAttribute('data-owner').toLowerCase();
+                const dag = row.getAttribute('data-dag').toLowerCase();
 
                 let match = true;
                 if(selectedDiv && div !== selectedDiv) match = false;
                 if(selectedDist && dist !== selectedDist) match = false;
                 if(selectedUpa && upa !== selectedUpa) match = false;
                 if(selectedMouza && mouza !== selectedMouza) match = false;
-                if(selectedKhatian && khatian !== selectedKhatian) match = false;
                 if(searchOwner && !owner.includes(searchOwner)) match = false;
+                if(searchDag && !dag.includes(searchDag)) match = false;
 
                 if(match) {
                     row.style.display = "";
@@ -645,6 +640,7 @@
                     tr.setAttribute('data-mouza', mouza);
                     tr.setAttribute('data-khatian', khatian);
                     tr.setAttribute('data-owner', owner);
+                    tr.setAttribute('data-dag', dag);
 
                     tr.innerHTML = `
                         <td class="p-3.5 font-medium cell-div">${div}</td>
@@ -652,9 +648,9 @@
                         <td class="p-3.5 cell-upa">${upa}</td>
                         <td class="p-3.5 cell-mouza">${mouza}</td>
                         <td class="p-3.5 cell-jl">${jl}</td>
-                        <td class="p-3.5 font-semibold text-slate-800 cell-khatian">${khatian}</td>
+                        <td class="p-3.5 cell-khatian">${khatian}</td>
                         <td class="p-3.5 font-semibold text-slate-800 cell-owner">${owner}</td>
-                        <td class="p-3.5 cell-dag">${dag}</td>
+                        <td class="p-3.5 font-semibold text-slate-800 cell-dag">${dag}</td>
                         <td class="p-3.5 cell-totalacre">${totalAcre}</td>
                         <td class="p-3.5 text-center">
                             <div id="statusContainer-${id}" class="inline-block">
