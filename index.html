@@ -220,43 +220,46 @@
                 </div>
             </div>
 
-            <!-- Filters -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
+            <!-- Filters (Updated with Text/Dropdown combined or search inputs) -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-9 gap-3">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ ফিল্টার</label>
-                    <select id="filterDivision" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল বিভাগ</option>
-                    </select>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ</label>
+                    <input type="text" id="filterDivision" list="listDivision" placeholder="বিভাগ লিখুন বা বেছে নিন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="listDivision"></datalist>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেলা ফিল্টার</label>
-                    <select id="filterDistrict" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল জেলা</option>
-                    </select>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেলা</label>
+                    <input type="text" id="filterDistrict" list="listDistrict" placeholder="জেলা লিখুন বা বেছে নিন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="listDistrict"></datalist>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">উপজেলা ফিল্টার</label>
-                    <select id="filterUpazila" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল উপজেলা</option>
-                    </select>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">উপজেলা</label>
+                    <input type="text" id="filterUpazila" list="listUpazila" placeholder="উপজেলা লিখুন বা বেছে নিন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="listUpazila"></datalist>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মৌজা ফিল্টার</label>
-                    <select id="filterMouza" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল মৌজা</option>
-                    </select>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মৌজা</label>
+                    <input type="text" id="filterMouza" list="listMouza" placeholder="মৌজা লিখুন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="listMouza"></datalist>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মালিকের নাম সার্চ</label>
-                    <input type="text" id="filterOwner" placeholder="নাম লিখে খুঁজুন..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেএল নম্বর</label>
+                    <input type="text" id="filterJl" placeholder="জেএল নম্বর..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">খতিয়ান নম্বর সার্চ</label>
-                    <input type="text" id="filterKhatianSearch" placeholder="খতিয়ান লিখে খুঁজুন..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">খতিয়ান নম্বর</label>
+                    <input type="text" id="filterKhatianSearch" placeholder="খতিয়ান..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">দাগ নম্বর সার্চ</label>
-                    <input type="text" id="filterDag" placeholder="দাগ নম্বর লিখে খুঁজুন..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মালিকের নাম</label>
+                    <input type="text" id="filterOwner" placeholder="নাম..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">দাগ নম্বর</label>
+                    <input type="text" id="filterDag" placeholder="দাগ নম্বর..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="resetFilters()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded-xl text-xs font-bold transition">রিসেট</button>
                 </div>
             </div>
 
@@ -345,7 +348,6 @@
             }
         };
 
-        // ফায়ারবেসে পাসওয়ার্ড চেক করা (না থাকলে ডিফল্ট পাসওয়ার্ড সেট হবে)
         async function ensureCloudPasswordExists() {
             try {
                 const passDocRef = doc(db, "settings", "app_auth");
@@ -360,7 +362,6 @@
 
         window.handleLogin = async function() {
             const inputPass = document.getElementById('loginPassword').value.trim();
-            
             try {
                 const passDocRef = doc(db, "settings", "app_auth");
                 const docSnap = await getDoc(passDocRef);
@@ -412,7 +413,6 @@
                 if(cur === cloudPass) {
                     if(newP.length >= 4) {
                         await updateDoc(passDocRef, { password: newP });
-                        
                         msg.innerText = "পাসওয়ার্ড সফলভাবে ক্লাউডে আপডেট হয়েছে!";
                         msg.className = "text-xs text-center font-medium text-emerald-600";
                         msg.classList.remove('hidden');
@@ -434,8 +434,6 @@
                 msg.classList.remove('hidden');
             }
         }
-
-        // --- FIREBASE FIRESTORE OPERATIONS ---
 
         async function fetchRecordsFromFirebase() {
             const statusBanner = document.getElementById('connectionStatus');
@@ -471,55 +469,76 @@
                 if(rec.mouza) mouzas.add(rec.mouza);
             });
 
-            populateDropdown('filterDivision', divisions, 'সকল বিভাগ');
-            populateDropdown('filterDistrict', districts, 'সকল জেলা');
-            populateDropdown('filterUpazila', upazilas, 'সকল উপজেলা');
-            populateDropdown('filterMouza', mouzas, 'সকল মৌজা');
+            populateDatalist('listDivision', divisions);
+            populateDatalist('listDistrict', districts);
+            populateDatalist('listUpazila', upazilas);
+            populateDatalist('listMouza', mouzas);
 
             filterTable();
         }
 
-        function populateDropdown(elementId, items, defaultText) {
-            const select = document.getElementById(elementId);
-            const currentVal = select.value;
-            select.innerHTML = `<option value="">${defaultText}</option>`;
+        function populateDatalist(elementId, items) {
+            const list = document.getElementById(elementId);
+            list.innerHTML = "";
             items.forEach(item => {
-                select.innerHTML += `<option value="${item}">${item}</option>`;
+                list.innerHTML += `<option value="${item}">`;
             });
-            select.value = currentVal;
+        }
+
+        // বাংলা নম্বরকে ইংরেজিতে রূপান্তর করার হেল্পার ফাংশন (বাংলা ও ইংরেজি উভয় উপায়ে সার্চ কার্যকর করতে)
+        function convertToEnglishDigits(str) {
+            if (!str) return "";
+            const bengaliDigits = {'০': '0', '১': '1', '২': '2', '৩': '3', '৪': '4', '৫': '5', '৬': '6', '৭': '7', '৮': '8', '৯': '9'};
+            return str.replace(/[০-৯]/g, match => bengaliDigits[match]).toLowerCase();
         }
 
         window.filterTable = function() {
-            const selectedDiv = document.getElementById('filterDivision').value;
-            const selectedDist = document.getElementById('filterDistrict').value;
-            const selectedUpa = document.getElementById('filterUpazila').value;
-            const selectedMouza = document.getElementById('filterMouza').value;
-            const searchOwner = document.getElementById('filterOwner').value.toLowerCase();
-            const searchKhatian = document.getElementById('filterKhatianSearch').value.toLowerCase();
-            const searchDag = document.getElementById('filterDag').value.toLowerCase();
+            const selectedDiv = document.getElementById('filterDivision').value.toLowerCase().trim();
+            const selectedDist = document.getElementById('filterDistrict').value.toLowerCase().trim();
+            const selectedUpa = document.getElementById('filterUpazila').value.toLowerCase().trim();
+            const selectedMouza = document.getElementById('filterMouza').value.toLowerCase().trim();
+            
+            const searchJl = convertToEnglishDigits(document.getElementById('filterJl').value);
+            const searchKhatian = convertToEnglishDigits(document.getElementById('filterKhatianSearch').value);
+            const searchOwner = document.getElementById('filterOwner').value.toLowerCase().trim();
+            const searchDag = convertToEnglishDigits(document.getElementById('filterDag').value);
 
             filteredRecords = records.filter(rec => {
-                const div = rec.division || "";
-                const dist = rec.district || "";
-                const upa = rec.upazila || "";
-                const mouza = rec.mouza || "";
+                const div = (rec.division || "").toLowerCase();
+                const dist = (rec.district || "").toLowerCase();
+                const upa = (rec.upazila || "").toLowerCase();
+                const mouza = (rec.mouza || "").toLowerCase();
+                const jl = convertToEnglishDigits(String(rec.jl || ""));
+                const khatian = convertToEnglishDigits(String(rec.khatian || ""));
                 const owner = (rec.owner || "").toLowerCase();
-                const khatian = (rec.khatian || "").toLowerCase();
-                const dag = (rec.dag || "").toLowerCase();
+                const dag = convertToEnglishDigits(String(rec.dag || ""));
 
-                if(selectedDiv && div !== selectedDiv) return false;
-                if(selectedDist && dist !== selectedDist) return false;
-                if(selectedUpa && upa !== selectedUpa) return false;
-                if(selectedMouza && mouza !== selectedMouza) return false;
+                if(selectedDiv && !div.includes(selectedDiv)) return false;
+                if(selectedDist && !dist.includes(selectedDist)) return false;
+                if(selectedUpa && !upa.includes(selectedUpa)) return false;
+                if(selectedMouza && !mouza.includes(selectedMouza)) return false;
+                if(searchJl && !jl.includes(searchJl) && !String(rec.jl || "").toLowerCase().includes(document.getElementById('filterJl').value.toLowerCase().trim())) return false;
+                if(searchKhatian && !khatian.includes(searchKhatian) && !String(rec.khatian || "").toLowerCase().includes(document.getElementById('filterKhatianSearch').value.toLowerCase().trim())) return false;
                 if(searchOwner && !owner.includes(searchOwner)) return false;
-                if(searchKhatian && !khatian.includes(searchKhatian)) return false;
-                if(searchDag && !dag.includes(searchDag)) return false;
+                if(searchDag && !dag.includes(searchDag) && !String(rec.dag || "").toLowerCase().includes(document.getElementById('filterDag').value.toLowerCase().trim())) return false;
 
                 return true;
             });
 
             currentPage = 1;
             renderTablePage();
+        }
+
+        window.resetFilters = function() {
+            document.getElementById('filterDivision').value = "";
+            document.getElementById('filterDistrict').value = "";
+            document.getElementById('filterUpazila').value = "";
+            document.getElementById('filterMouza').value = "";
+            document.getElementById('filterJl').value = "";
+            document.getElementById('filterKhatianSearch').value = "";
+            document.getElementById('filterOwner').value = "";
+            document.getElementById('filterDag').value = "";
+            filterTable();
         }
 
         window.changeRowsPerPage = function() {
