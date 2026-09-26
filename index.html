@@ -313,7 +313,7 @@
     <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
@@ -329,12 +329,12 @@
         const db = getFirestore(app);
 
         let records = [];
-        let filteredRecords = [];
+        let filteredRecords = []; // Stores filtered items for pagination & searching
         let currentPage = 1;
         let rowsPerPage = 10;
         
-        // ডিফল্ট পাসওয়ার্ড
-        const DEFAULT_PASSWORD = "01717087424";
+        // ডিফল্ট পাসওয়ার্ড হিসেবে প্রথমবার নিচের SHA-256 হ্যাশটি ফায়ারবেসে সেভ হবে যদি ডাটাবেসে কিছু না থাকে (পাসওয়ার্ড: 01717087424)
+        const DEFAULT_PASSWORD_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
 
         window.onload = async function() {
             await ensureCloudPasswordExists();
@@ -345,13 +345,20 @@
             }
         };
 
-        // ফায়ারবেসে পাসওয়ার্ড চেক করা (না থাকলে ডিফল্ট পাসওয়ার্ড সেট হবে)
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // ফায়ারবেসে পাসওয়ার্ড ডকুমেন্ট আছে কিনা চেক করা, না থাকলে ডিফল্ট সেট করা
         async function ensureCloudPasswordExists() {
             try {
                 const passDocRef = doc(db, "settings", "app_auth");
                 const docSnap = await getDoc(passDocRef);
                 if (!docSnap.exists()) {
-                    await setDoc(passDocRef, { password: DEFAULT_PASSWORD });
+                    await setDoc(passDocRef, { passwordHash: DEFAULT_PASSWORD_HASH });
                 }
             } catch (err) {
                 console.error("পাসওয়ার্ড ইনিশিয়ালাইজ করতে সমস্যা হয়েছে:", err);
@@ -359,14 +366,15 @@
         }
 
         window.handleLogin = async function() {
-            const inputPass = document.getElementById('loginPassword').value.trim();
+            const pass = document.getElementById('loginPassword').value;
+            const hashedInput = await sha256(pass);
             
             try {
                 const passDocRef = doc(db, "settings", "app_auth");
                 const docSnap = await getDoc(passDocRef);
-                const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
+                const cloudHash = docSnap.exists() ? docSnap.data().passwordHash : DEFAULT_PASSWORD_HASH;
 
-                if(inputPass === cloudPass) {
+                if(hashedInput === cloudHash) {
                     sessionStorage.setItem('isLoggedIn', 'true');
                     document.getElementById('loginModal').classList.add('hidden');
                     document.getElementById('dashboard').classList.remove('hidden');
@@ -400,18 +408,20 @@
         }
 
         window.updatePassword = async function() {
-            const cur = document.getElementById('currentPass').value.trim();
-            const newP = document.getElementById('newPass').value.trim();
+            const cur = document.getElementById('currentPass').value;
+            const newP = document.getElementById('newPass').value;
             const msg = document.getElementById('settingsMsg');
+            const hashedCur = await sha256(cur);
 
             try {
                 const passDocRef = doc(db, "settings", "app_auth");
                 const docSnap = await getDoc(passDocRef);
-                const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
+                const cloudHash = docSnap.exists() ? docSnap.data().passwordHash : DEFAULT_PASSWORD_HASH;
 
-                if(cur === cloudPass) {
+                if(hashedCur === cloudHash) {
                     if(newP.length >= 4) {
-                        await updateDoc(passDocRef, { password: newP });
+                        const newHashed = await sha256(newP);
+                        await updateDoc(passDocRef, { passwordHash: newHashed });
                         
                         msg.innerText = "পাসওয়ার্ড সফলভাবে ক্লাউডে আপডেট হয়েছে!";
                         msg.className = "text-xs text-center font-medium text-emerald-600";
@@ -476,7 +486,7 @@
             populateDropdown('filterUpazila', upazilas, 'সকল উপজেলা');
             populateDropdown('filterMouza', mouzas, 'সকল মৌজা');
 
-            filterTable();
+            filterTable(); // Apply initial filter (which includes all records)
         }
 
         function populateDropdown(elementId, items, defaultText) {
@@ -518,7 +528,7 @@
                 return true;
             });
 
-            currentPage = 1;
+            currentPage = 1; // Reset to page 1 on filter change
             renderTablePage();
         }
 
@@ -538,7 +548,7 @@
             tableBody.innerHTML = "";
 
             const totalFiltered = filteredRecords.length;
-            document.getElementById('counterVal').innerText = records.length;
+            document.getElementById('counterVal').innerText = records.length; // Total global counter
 
             if(totalFiltered === 0) {
                 tableBody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">কোনো রেকর্ড পাওয়া যায়নি।</td></tr>`;
@@ -584,7 +594,10 @@
                 tableBody.appendChild(tr);
             });
 
+            // Update Counter & Pagination info
             document.getElementById('paginationInfo').innerText = `দেখাচ্ছে ${startIndex + 1} থেকে ${endIndex} টি, ফিল্টারকৃত মোট: ${totalFiltered} টি`;
+
+            // Render Pagination Buttons
             renderPaginationButtons(totalPages);
         }
 
@@ -594,9 +607,11 @@
 
             if(totalPages <= 1) return;
 
+            // Previous Button
             const prevDisabled = currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-200";
             container.innerHTML += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition ${prevDisabled}"><i class="fa-solid fa-chevron-left mr-1"></i> আগের</button>`;
 
+            // Page numbers
             for(let i = 1; i <= totalPages; i++) {
                 if(i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
                     const activeClass = i === currentPage ? "bg-blue-600 text-white shadow-md shadow-blue-600/30" : "bg-slate-100 text-slate-700 hover:bg-slate-200";
@@ -606,6 +621,7 @@
                 }
             }
 
+            // Next Button
             const nextDisabled = currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-200";
             container.innerHTML += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition ${nextDisabled}">পরবর্তী <i class="fa-solid fa-chevron-right ml-1"></i></button>`;
         }
@@ -764,6 +780,7 @@
             XLSX.writeFile(workbook, "Land_Record_Sample.xlsx");
         }
 
+        // --- OPTIMIZED BATCH EXCEL UPLOAD WITH DUPLICATE CHECK ---
         window.uploadExcel = function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -874,6 +891,12 @@
                 }
             };
             
+            reader.onerror = function(err) {
+                console.error("FileReader error:", err);
+                alert("ফাইল রিড করা সম্ভব হয়নি!");
+                statusBanner.classList.add('hidden');
+            };
+
             reader.readAsArrayBuffer(file);
         }
 
