@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম - সিকিউরড এডিশন</title>
+    <title>ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম - ফায়ারবেস ক্লাউড এডিশন</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -23,10 +23,10 @@
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
             <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner">
-                    <i class="fa-solid fa-shield-halved"></i>
+                    <i class="fa-solid fa-fire text-amber-500"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800">সিস্টেম লগইন</h2>
-                <p class="text-xs text-slate-500 mt-1">নিরাপদ প্রবেশাধিকারের জন্য পাসওয়ার্ড দিন</p>
+                <h2 class="text-2xl font-bold text-slate-800">ফায়ারবেস সিস্টেম লগইন</h2>
+                <p class="text-xs text-slate-500 mt-1">নিরাপদ ক্লাউড অ্যাক্সেসের জন্য পাসওয়ার্ড দিন</p>
             </div>
             <div class="space-y-4">
                 <div>
@@ -91,7 +91,7 @@
         </div>
     </div>
 
-    <!-- Edit Popup Modal with Code, URL Preview & Delete Option -->
+    <!-- Edit Popup Modal -->
     <div id="editModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
         <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
@@ -102,7 +102,7 @@
                 <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <input type="hidden" id="editRowId">
+            <input type="hidden" id="editDocId">
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-xs">
                 <div>
@@ -176,11 +176,11 @@
             <div class="max-w-[98%] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex items-center space-x-4 text-center md:text-left">
                     <div class="bg-blue-600 p-4 rounded-2xl text-white shadow-lg shadow-blue-600/50">
-                        <i class="fa-solid fa-landmark text-3xl"></i>
+                        <i class="fa-solid fa-fire text-amber-400 text-3xl"></i>
                     </div>
                     <div>
                         <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide">ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম</h1>
-                        <p class="text-sm text-blue-200 mt-1">ক্লাউড ও লাইভ সার্ভার সিঙ্ক সিকিউরড পোর্টাল</p>
+                        <p class="text-sm text-blue-200 mt-1">ফায়ারবেস ক্লাউড ডাটাবেস সিকিউরড পোর্টাল</p>
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-3">
@@ -271,7 +271,7 @@
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="text-xs text-slate-600 divide-y divide-slate-100">
-                            <!-- Dynamic records will be rendered here -->
+                            <!-- Firebase records will be rendered here dynamically -->
                         </tbody>
                     </table>
                 </div>
@@ -279,30 +279,38 @@
         </main>
     </div>
 
-    <!-- JavaScript Application Logic with SPA & Live Server Support -->
-    <script>
-        // Initial Mock Database Records (Can be replaced with Live API fetch)
-        let records = [
-            { id: 1, division: "ঢাকা", district: "ঢাকা", upazila: "সাভার", mouza: "AMINABAD", jl: "১২", khatian: "৪৫/১", owner: "আব্দুর রহমান", dag: "১০৮", totalAcre: "০.০২", code: "", status: "NOK" },
-            { id: 2, division: "চট্টগ্রাম", district: "চট্টগ্রাম", upazila: "সীতাকুণ্ড", mouza: "KUMIRA", jl: "১৫", khatian: "১২/২", owner: "রফিকুল ইসলাম", dag: "২০৫", totalAcre: "০.০৫", code: "", status: "NOK" }
-        ];
+    <!-- Firebase SDKs (Modular v10) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        let currentPasswordHash = localStorage.getItem('app_password_hash') || "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // Default sha256 for '1234' or saved pass
-        let nextRowId = 3;
+        // আপনার দেওয়া ফায়ারবেস কনফিগারেশন
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
+            authDomain: "myjomi-220c0.firebaseapp.com",
+            projectId: "myjomi-220c0",
+            storageBucket: "myjomi-220c0.firebasestorage.app",
+            messagingSenderId: "1023755664718",
+            appId: "1:1023755664718:web:db0e30a4d8c92da8aa321f",
+            measurementId: "G-ZNBZDP5VPR"
+        };
 
-        // API Endpoint Configuration for Live Server Sync (MySQL/PHP/Node.js)
-        const API_ENDPOINT = "https://your-live-server.com/api/records.php"; // Replace with your actual live server endpoint
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let records = [];
+        let currentPasswordHash = localStorage.getItem('app_password_hash') || "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // Default sha256 for '1234'
 
         // Check Session on Page Load
         window.onload = function() {
             if(sessionStorage.getItem('isLoggedIn') === 'true') {
                 document.getElementById('loginModal').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-                loadRecordsToTable();
+                fetchRecordsFromFirebase();
             }
         };
 
-        // Simple Hash Function for Security (SHA-256 simulation)
         async function sha256(message) {
             const msgBuffer = new TextEncoder().encode(message);
             const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -310,22 +318,21 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        async function handleLogin() {
+        window.handleLogin = async function() {
             const pass = document.getElementById('loginPassword').value;
             const hashedInput = await sha256(pass);
             
-            // Fallback for default plain text password check
             if(pass === "01717087424" || hashedInput === currentPasswordHash) {
                 sessionStorage.setItem('isLoggedIn', 'true');
                 document.getElementById('loginModal').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-                loadRecordsToTable();
+                fetchRecordsFromFirebase();
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }
         }
 
-        function handleLogout() {
+        window.handleLogout = function() {
             sessionStorage.removeItem('isLoggedIn');
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('loginModal').classList.remove('hidden');
@@ -333,16 +340,16 @@
             document.getElementById('loginError').classList.add('hidden');
         }
 
-        function openSettings() {
+        window.openSettings = function() {
             document.getElementById('settingsModal').classList.remove('hidden');
         }
 
-        function closeSettings() {
+        window.closeSettings = function() {
             document.getElementById('settingsModal').classList.add('hidden');
             document.getElementById('settingsMsg').classList.add('hidden');
         }
 
-        async function updatePassword() {
+        window.updatePassword = async function() {
             const cur = document.getElementById('currentPass').value;
             const newP = document.getElementById('newPass').value;
             const msg = document.getElementById('settingsMsg');
@@ -368,42 +375,62 @@
             }
         }
 
-        // Render Table Records dynamically without page reload
+        // --- FIREBASE FIRESTORE OPERATIONS ---
+
+        async function fetchRecordsFromFirebase() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "land_records"));
+                records = [];
+                querySnapshot.forEach((docSnap) => {
+                    records.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                loadRecordsToTable();
+            } catch (error) {
+                console.error("ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
+            }
+        }
+
         function loadRecordsToTable() {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = "";
+
+            if(records.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">কোনো রেকর্ড পাওয়া যায়নি। এক্সেল আপলোড করুন অথবা নতুন এন্ট্রি দিন।</td></tr>`;
+                updateCounter(0);
+                return;
+            }
 
             records.forEach(rec => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition data-row";
                 tr.setAttribute('data-id', rec.id);
-                tr.setAttribute('data-division', rec.division);
-                tr.setAttribute('data-district', rec.district);
-                tr.setAttribute('data-upazila', rec.upazila);
-                tr.setAttribute('data-mouza', rec.mouza);
-                tr.setAttribute('data-owner', rec.owner);
-                tr.setAttribute('data-dag', rec.dag);
+                tr.setAttribute('data-division', rec.division || "");
+                tr.setAttribute('data-district', rec.district || "");
+                tr.setAttribute('data-upazila', rec.upazila || "");
+                tr.setAttribute('data-mouza', rec.mouza || "");
+                tr.setAttribute('data-owner', rec.owner || "");
+                tr.setAttribute('data-dag', rec.dag || "");
 
                 const statusBadge = rec.status === "OK" 
                     ? `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold text-[11px] shadow-sm">OK</span>`
-                    : `<div id="statusContainer-${rec.id}" class="inline-block"><button onclick="toggleOkNok(${rec.id})" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button></div>`;
+                    : `<div id="statusContainer-${rec.id}" class="inline-block"><button onclick="toggleOkNok('${rec.id}')" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button></div>`;
 
                 tr.innerHTML = `
-                    <td class="p-3.5 font-medium cell-div">${rec.division}</td>
-                    <td class="p-3.5 cell-dist">${rec.district}</td>
-                    <td class="p-3.5 cell-upa">${rec.upazila}</td>
-                    <td class="p-3.5 cell-mouza">${rec.mouza}</td>
-                    <td class="p-3.5 cell-jl">${rec.jl}</td>
-                    <td class="p-3.5 cell-khatian">${rec.khatian}</td>
-                    <td class="p-3.5 font-semibold text-slate-800 cell-owner">${rec.owner}</td>
-                    <td class="p-3.5 font-semibold text-slate-800 cell-dag">${rec.dag}</td>
-                    <td class="p-3.5 cell-totalacre">${rec.totalAcre}</td>
+                    <td class="p-3.5 font-medium cell-div">${rec.division || "-"}</td>
+                    <td class="p-3.5 cell-dist">${rec.district || "-"}</td>
+                    <td class="p-3.5 cell-upa">${rec.upazila || "-"}</td>
+                    <td class="p-3.5 cell-mouza">${rec.mouza || "-"}</td>
+                    <td class="p-3.5 cell-jl">${rec.jl || "-"}</td>
+                    <td class="p-3.5 cell-khatian">${rec.khatian || "-"}</td>
+                    <td class="p-3.5 font-semibold text-slate-800 cell-owner">${rec.owner || "-"}</td>
+                    <td class="p-3.5 font-semibold text-slate-800 cell-dag">${rec.dag || "-"}</td>
+                    <td class="p-3.5 cell-totalacre">${rec.totalAcre || "-"}</td>
                     <td class="p-3.5 text-center">${statusBadge}</td>
                     <td class="p-3.5 text-center">
                         <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="viewRow(${rec.id})" class="bg-sky-50 text-sky-600 hover:bg-sky-100 p-2 rounded-lg transition" title="ভিউ"><i class="fa-solid fa-eye"></i></button>
-                            <button onclick="editRow(${rec.id})" class="bg-amber-50 text-amber-600 hover:bg-amber-100 p-2 rounded-lg transition" title="এডিট"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteRecord(${rec.id})" class="bg-rose-50 text-rose-600 hover:bg-rose-100 p-2 rounded-lg transition" title="ডিলিট"><i class="fa-solid fa-trash-can"></i></button>
+                            <button onclick="viewRow('${rec.id}')" class="bg-sky-50 text-sky-600 hover:bg-sky-100 p-2 rounded-lg transition" title="ভিউ"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="editRow('${rec.id}')" class="bg-amber-50 text-amber-600 hover:bg-amber-100 p-2 rounded-lg transition" title="এডিট"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteRecord('${rec.id}')" class="bg-rose-50 text-rose-600 hover:bg-rose-100 p-2 rounded-lg transition" title="ডিলিট"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </td>
                 `;
@@ -413,6 +440,152 @@
             initTableFilters();
         }
 
+        window.toggleOkNok = function(id) {
+            const container = document.getElementById(`statusContainer-${id}`);
+            container.innerHTML = `
+                <div class="flex items-center gap-1">
+                    <input type="text" id="secretCodeInput-${id}" placeholder="কোড দিন" class="w-20 px-2 py-1 text-xs border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <button onclick="saveCodeInline('${id}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">সেভ</button>
+                </div>
+            `;
+        }
+
+        window.saveCodeInline = async function(id) {
+            const codeInput = document.getElementById(`secretCodeInput-${id}`).value.trim();
+            if(!codeInput) {
+                alert("দয়া করে কোডটি লিখুন!");
+                return;
+            }
+            try {
+                const docRef = doc(db, "land_records", id);
+                await updateDoc(docRef, { code: codeInput, status: "OK" });
+                
+                const rec = records.find(r => r.id === id);
+                if(rec) { rec.code = codeInput; rec.status = "OK"; }
+                
+                loadRecordsToTable();
+                alert("কোড ও স্ট্যাটাস সফলভাবে ক্লাউডে সংরক্ষিত হয়েছে!");
+            } catch (error) {
+                console.error("Error updating status: ", error);
+            }
+        }
+
+        window.viewRow = function(id) {
+            const rec = records.find(r => r.id === id);
+            if(!rec) return;
+
+            document.getElementById('modalDiv').innerText = rec.division || "-";
+            document.getElementById('modalDist').innerText = rec.district || "-";
+            document.getElementById('modalUpa').innerText = rec.upazila || "-";
+            document.getElementById('modalMouza').innerText = rec.mouza || "-";
+            document.getElementById('modalJl').innerText = rec.jl || "-";
+            document.getElementById('modalKhatian').innerText = rec.khatian || "-";
+            document.getElementById('modalOwner').innerText = rec.owner || "-";
+            document.getElementById('modalDag').innerText = rec.dag || "-";
+            document.getElementById('modalTotalAcre').innerText = rec.totalAcre || "-";
+
+            const linksContainer = document.getElementById('modalLinksContainer');
+            if(!rec.code) {
+                linksContainer.innerHTML = `<span class="text-rose-500 text-xs font-medium italic"><i class="fa-solid fa-triangle-exclamation mr-1"></i>এই রেকর্ডে এখনও কোনো কোড যুক্ত করা হয়নি (NOK অবস্থায় আছে)।</span>`;
+            } else {
+                linksContainer.innerHTML = `
+                    <a href="https://example.com/pdf/application?code=${rec.code}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-blue-600"></i> আবেদন পত্র</a>
+                    <a href="https://example.com/pdf/khatian?code=${rec.code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী খতিয়ান</a>
+                    <a href="https://example.com/pdf/dc?code=${rec.code}" target="_blank" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-amber-600"></i> ডিসিয়ার কপি</a>
+                `;
+            }
+            document.getElementById('viewModal').classList.remove('hidden');
+        }
+
+        window.closeViewModal = function() {
+            document.getElementById('viewModal').classList.add('hidden');
+        }
+
+        window.editRow = function(id) {
+            const rec = records.find(r => r.id === id);
+            if(!rec) return;
+
+            document.getElementById('editDocId').value = rec.id;
+            document.getElementById('editDiv').value = rec.division || "";
+            document.getElementById('editDist').value = rec.district || "";
+            document.getElementById('editUpa').value = rec.upazila || "";
+            document.getElementById('editMouza').value = rec.mouza || "";
+            document.getElementById('editJl').value = rec.jl || "";
+            document.getElementById('editKhatian').value = rec.khatian || "";
+            document.getElementById('editOwner').value = rec.owner || "";
+            document.getElementById('editDag').value = rec.dag || "";
+            document.getElementById('editTotalAcre').value = rec.totalAcre || "";
+            document.getElementById('editCode').value = rec.code || "";
+            
+            updateUrlPreview();
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        window.closeEditModal = function() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        window.updateUrlPreview = function() {
+            const code = document.getElementById('editCode').value.trim();
+            const container = document.getElementById('urlPreviewContainer');
+            if(code) {
+                container.classList.remove('hidden');
+                document.getElementById('previewUrlApp').innerText = `https://example.com/pdf/application?code=${code}`;
+                document.getElementById('previewUrlKhat').innerText = `https://example.com/pdf/khatian?code=${code}`;
+                document.getElementById('previewUrlDc').innerText = `https://example.com/pdf/dc?code=${code}`;
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        window.saveEditedRow = async function() {
+            const id = document.getElementById('editDocId').value;
+            const updatedData = {
+                division: document.getElementById('editDiv').value,
+                district: document.getElementById('editDist').value,
+                upazila: document.getElementById('editUpa').value,
+                mouza: document.getElementById('editMouza').value,
+                jl: document.getElementById('editJl').value,
+                khatian: document.getElementById('editKhatian').value,
+                owner: document.getElementById('editOwner').value,
+                dag: document.getElementById('editDag').value,
+                totalAcre: document.getElementById('editTotalAcre').value,
+                code: document.getElementById('editCode').value.trim(),
+                status: document.getElementById('editCode').value.trim() ? "OK" : "NOK"
+            };
+
+            try {
+                const docRef = doc(db, "land_records", id);
+                await updateDoc(docRef, updatedData);
+                
+                await fetchRecordsFromFirebase();
+                closeEditModal();
+                alert("তথ্য সফলভাবে ক্লাউডে আপডেট করা হয়েছে!");
+            } catch (error) {
+                console.error("Error updating document: ", error);
+            }
+        }
+
+        window.deleteRecord = async function(id) {
+            if(confirm("আপনি কি নিশ্চিতভাবে এই রেকর্ডটি ফায়ারবেস থেকে ডিলিট করতে চান?")) {
+                try {
+                    await deleteDoc(doc(db, "land_records", id));
+                    await fetchRecordsFromFirebase();
+                    alert("রেকর্ডটি সফলভাবে মুছে ফেলা হয়েছে!");
+                } catch (error) {
+                    console.error("Error deleting document: ", error);
+                }
+            }
+        }
+
+        window.deleteRecordFromEdit = function() {
+            const id = document.getElementById('editDocId').value;
+            closeEditModal();
+            deleteRecord(id);
+        }
+
+        // --- FILTERS & EXCEL ---
+
         function initTableFilters() {
             const rows = document.querySelectorAll('.data-row');
             const divisions = new Set();
@@ -421,10 +594,10 @@
             const mouzas = new Set();
 
             rows.forEach(row => {
-                divisions.add(row.getAttribute('data-division'));
-                districts.add(row.getAttribute('data-district'));
-                upazilas.add(row.getAttribute('data-upazila'));
-                mouzas.add(row.getAttribute('data-mouza'));
+                if(row.getAttribute('data-division')) divisions.add(row.getAttribute('data-division'));
+                if(row.getAttribute('data-district')) districts.add(row.getAttribute('data-district'));
+                if(row.getAttribute('data-upazila')) upazilas.add(row.getAttribute('data-upazila'));
+                if(row.getAttribute('data-mouza')) mouzas.add(row.getAttribute('data-mouza'));
             });
 
             populateDropdown('filterDivision', divisions, 'সকল বিভাগ');
@@ -440,14 +613,12 @@
             const currentVal = select.value;
             select.innerHTML = `<option value="">${defaultText}</option>`;
             items.forEach(item => {
-                if(item) {
-                    select.innerHTML += `<option value="${item}">${item}</option>`;
-                }
+                select.innerHTML += `<option value="${item}">${item}</option>`;
             });
             select.value = currentVal;
         }
 
-        function filterTable() {
+        window.filterTable = function() {
             const selectedDiv = document.getElementById('filterDivision').value;
             const selectedDist = document.getElementById('filterDistrict').value;
             const selectedUpa = document.getElementById('filterUpazila').value;
@@ -489,166 +660,7 @@
             document.getElementById('counterVal').innerText = count;
         }
 
-        function toggleOkNok(id) {
-            const container = document.getElementById(`statusContainer-${id}`);
-            container.innerHTML = `
-                <div class="flex items-center gap-1">
-                    <input type="text" id="secretCodeInput-${id}" placeholder="কোড দিন" class="w-20 px-2 py-1 text-xs border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <button onclick="saveCodeInline(${id})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">সেভ</button>
-                </div>
-            `;
-        }
-
-        function saveCodeInline(id) {
-            const codeInput = document.getElementById(`secretCodeInput-${id}`).value.trim();
-            if(!codeInput) {
-                alert("দয়া করে কোডটি লিখুন!");
-                return;
-            }
-            const rec = records.find(r => r.id === id);
-            if(rec) {
-                rec.code = codeInput;
-                rec.status = "OK";
-                syncWithServer(rec, 'update'); // Sync with live backend
-            }
-            loadRecordsToTable();
-        }
-
-        function viewRow(id) {
-            const rec = records.find(r => r.id === id);
-            if(!rec) return;
-
-            document.getElementById('modalDiv').innerText = rec.division;
-            document.getElementById('modalDist').innerText = rec.district;
-            document.getElementById('modalUpa').innerText = rec.upazila;
-            document.getElementById('modalMouza').innerText = rec.mouza;
-            document.getElementById('modalJl').innerText = rec.jl;
-            document.getElementById('modalKhatian').innerText = rec.khatian;
-            document.getElementById('modalOwner').innerText = rec.owner;
-            document.getElementById('modalDag').innerText = rec.dag;
-            document.getElementById('modalTotalAcre').innerText = rec.totalAcre;
-
-            const linksContainer = document.getElementById('modalLinksContainer');
-
-            if(!rec.code) {
-                linksContainer.innerHTML = `<span class="text-rose-500 text-xs font-medium italic"><i class="fa-solid fa-triangle-exclamation mr-1"></i>এই রেকর্ডে এখনও কোনো কোড যুক্ত করা হয়নি (NOK অবস্থায় আছে)। কোড সেভ করার পর লিংক দেখা যাবে।</span>`;
-            } else {
-                linksContainer.innerHTML = `
-                    <a href="https://example.com/pdf/application?code=${rec.code}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-blue-600"></i> আবেদন পত্র</a>
-                    <a href="https://example.com/pdf/khatian?code=${rec.code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী খতিয়ান</a>
-                    <a href="https://example.com/pdf/dc?code=${rec.code}" target="_blank" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-amber-600"></i> ডিসিয়ার কপি</a>
-                `;
-            }
-
-            document.getElementById('viewModal').classList.remove('hidden');
-        }
-
-        function closeViewModal() {
-            document.getElementById('viewModal').classList.add('hidden');
-        }
-
-        function editRow(id) {
-            const rec = records.find(r => r.id === id);
-            if(!rec) return;
-
-            document.getElementById('editRowId').value = rec.id;
-            document.getElementById('editDiv').value = rec.division;
-            document.getElementById('editDist').value = rec.district;
-            document.getElementById('editUpa').value = rec.upazila;
-            document.getElementById('editMouza').value = rec.mouza;
-            document.getElementById('editJl').value = rec.jl;
-            document.getElementById('editKhatian').value = rec.khatian;
-            document.getElementById('editOwner').value = rec.owner;
-            document.getElementById('editDag').value = rec.dag;
-            document.getElementById('editTotalAcre').value = rec.totalAcre;
-            document.getElementById('editCode').value = rec.code || "";
-            
-            updateUrlPreview();
-            document.getElementById('editModal').classList.remove('hidden');
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
-        }
-
-        function updateUrlPreview() {
-            const code = document.getElementById('editCode').value.trim();
-            const container = document.getElementById('urlPreviewContainer');
-
-            if(code) {
-                container.classList.remove('hidden');
-                document.getElementById('previewUrlApp').innerText = `https://example.com/pdf/application?code=${code}`;
-                document.getElementById('previewUrlKhat').innerText = `https://example.com/pdf/khatian?code=${code}`;
-                document.getElementById('previewUrlDc').innerText = `https://example.com/pdf/dc?code=${code}`;
-            } else {
-                container.classList.add('hidden');
-            }
-        }
-
-        function saveEditedRow() {
-            const id = parseInt(document.getElementById('editRowId').value);
-            const rec = records.find(r => r.id === id);
-            if(!rec) return;
-
-            rec.division = document.getElementById('editDiv').value;
-            rec.district = document.getElementById('editDist').value;
-            rec.upazila = document.getElementById('editUpa').value;
-            rec.mouza = document.getElementById('editMouza').value;
-            rec.jl = document.getElementById('editJl').value;
-            rec.khatian = document.getElementById('editKhatian').value;
-            rec.owner = document.getElementById('editOwner').value;
-            rec.dag = document.getElementById('editDag').value;
-            rec.totalAcre = document.getElementById('editTotalAcre').value;
-            
-            const code = document.getElementById('editCode').value.trim();
-            if(code) {
-                rec.code = code;
-                rec.status = "OK";
-            }
-
-            syncWithServer(rec, 'update'); // Live Server Sync
-            closeEditModal();
-            loadRecordsToTable();
-        }
-
-        function deleteRecord(id) {
-            if(confirm("আপনি কি নিশ্চিতভাবে এই রেকর্ডটি ডিলিট করতে চান?")) {
-                records = records.filter(r => r.id !== id);
-                syncWithServer({ id: id }, 'delete'); // Live Server Sync
-                loadRecordsToTable();
-            }
-        }
-
-        function deleteRecordFromEdit() {
-            const id = parseInt(document.getElementById('editRowId').value);
-            closeEditModal();
-            deleteRecord(id);
-        }
-
-        // --- LIVE SERVER SYNCHRONIZATION (API Support) ---
-        function syncWithServer(data, action) {
-            // Local storage backup for offline/browser persistence
-            localStorage.setItem('land_records_db', JSON.stringify(records));
-
-            /* 
-               লাইভ সার্ভার (MySQL/Node.js/PHP) এর সাথে সংযোগ করার জন্য নিচের ফ্লেক্সিবল ফেচ (Fetch) এপিআই ব্যবহার করতে পারেন।
-               আপনার ব্যাকএন্ডে রিসিভ করার জন্য API_ENDPOINT এ ডেটা পোস্ট হবে।
-            */
-            /*
-            fetch(API_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: action, payload: data })
-            })
-            .then(res => res.json())
-            .then(response => console.log('Server synced successfully:', response))
-            .catch(err => console.error('Server sync failed:', err));
-            */
-        }
-
-        // --- EXCEL FEATURES ---
-
-        function downloadSampleExcel() {
+        window.downloadSampleExcel = function() {
             const sampleData = [
                 { "বিভাগ": "ঢাকা", "জেলা": "ঢাকা", "উপজেলা": "সাভার", "মৌজা": "AMINABAD", "জেএল নম্বর": "১২", "খতিয়ান নম্বর": "৪৫/১", "মালিকের নাম": "আব্দুর রহমান", "দাগ নম্বর": "১০৮", "মোট জমি (একর)": "০.০২" }
             ];
@@ -658,21 +670,20 @@
             XLSX.writeFile(workbook, "Land_Record_Sample.xlsx");
         }
 
-        function uploadExcel(event) {
+        window.uploadExcel = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-                jsonData.forEach(item => {
+                for (let item of jsonData) {
                     const newRec = {
-                        id: nextRowId++,
                         division: item["বিভাগ"] || "-",
                         district: item["জেলা"] || "-",
                         upazila: item["উপজেলা"] || "-",
@@ -685,18 +696,17 @@
                         code: "",
                         status: "NOK"
                     };
-                    records.push(newRec);
-                    syncWithServer(newRec, 'insert');
-                });
+                    await addDoc(collection(db, "land_records"), newRec);
+                }
 
-                loadRecordsToTable();
-                alert(`${jsonData.length} টি নতুন রেকর্ড সফলভাবে আপলোড ও যুক্ত করা হয়েছে!`);
+                await fetchRecordsFromFirebase();
+                alert(`${jsonData.length} টি নতুন রেকর্ড সফলভাবে ফায়ারবেসে আপলোড করা হয়েছে!`);
                 event.target.value = "";
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function downloadFilteredExcel() {
+        window.downloadFilteredExcel = function() {
             const rows = document.querySelectorAll('.data-row');
             const exportData = [];
 
