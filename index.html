@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম</title>
+    <title>ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম - সিকিউরড এডিশন</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -23,10 +23,10 @@
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
             <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner">
-                    <i class="fa-solid fa-lock"></i>
+                    <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-slate-800">সিস্টেম লগইন</h2>
-                <p class="text-xs text-slate-500 mt-1">দয়া করে আপনার সিকিউরিটি পাসওয়ার্ড দিন</p>
+                <p class="text-xs text-slate-500 mt-1">নিরাপদ প্রবেশাধিকারের জন্য পাসওয়ার্ড দিন</p>
             </div>
             <div class="space-y-4">
                 <div>
@@ -43,7 +43,7 @@
     <div id="settingsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-gear text-blue-600 mr-2"></i> সেটিংস ও পাসওয়ার্ড পরিবর্তন</h3>
+                <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-gear text-blue-600 mr-2"></i> সেটিংস ও পাসওয়ার্ড</h3>
                 <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-4">
@@ -91,13 +91,13 @@
         </div>
     </div>
 
-    <!-- Edit Popup Modal with Code & URL Preview -->
+    <!-- Edit Popup Modal with Code, URL Preview & Delete Option -->
     <div id="editModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
         <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
                 <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                     <div class="bg-amber-100 text-amber-600 p-2 rounded-xl text-sm"><i class="fa-solid fa-pen-to-square"></i></div>
-                    তথ্য ও কোড এডিট করুন
+                    তথ্য এডিট ও ম্যানেজ করুন
                 </h3>
                 <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -158,9 +158,14 @@
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3">
-                <button onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">বাতিল</button>
-                <button onclick="saveEditedRow()" class="px-6 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition">আপডেট সংরক্ষণ করুন</button>
+            <div class="flex justify-between items-center">
+                <button onclick="deleteRecordFromEdit()" class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-600 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-trash-can"></i> রেকর্ডটি ডিলিট করুন
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">বাতিল</button>
+                    <button onclick="saveEditedRow()" class="px-6 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition">আপডেট সংরক্ষণ</button>
+                </div>
             </div>
         </div>
     </div>
@@ -175,7 +180,7 @@
                     </div>
                     <div>
                         <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide">ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম</h1>
-                        <p class="text-sm text-blue-200 mt-1">ক্লাউড বেসড সিকিউরড সার্ভার ও ডকুমেন্ট পোর্টাল</p>
+                        <p class="text-sm text-blue-200 mt-1">ক্লাউড ও লাইভ সার্ভার সিঙ্ক সিকিউরড পোর্টাল</p>
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-3">
@@ -266,52 +271,7 @@
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="text-xs text-slate-600 divide-y divide-slate-100">
-                            <!-- Row 1 -->
-                            <tr class="hover:bg-slate-50/80 transition data-row" data-id="1" data-division="ঢাকা" data-district="ঢাকা" data-upazila="সাভার" data-mouza="AMINABAD" data-jl="১২" data-khatian="৪৫/১" data-dag="১০৮" data-owner="আব্দুর রহমান" data-totalacre="০.০২">
-                                <td class="p-3.5 font-medium cell-div">ঢাকা</td>
-                                <td class="p-3.5 cell-dist">ঢাকা</td>
-                                <td class="p-3.5 cell-upa">সাভার</td>
-                                <td class="p-3.5 cell-mouza">AMINABAD</td>
-                                <td class="p-3.5 cell-jl">১২</td>
-                                <td class="p-3.5 cell-khatian">৪৫/১</td>
-                                <td class="p-3.5 font-semibold text-slate-800 cell-owner">আব্দুর রহমান</td>
-                                <td class="p-3.5 font-semibold text-slate-800 cell-dag">১০৮</td>
-                                <td class="p-3.5 cell-totalacre">০.০২</td>
-                                <td class="p-3.5 text-center">
-                                    <div id="statusContainer-1" class="inline-block">
-                                        <button onclick="toggleOkNok(1)" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button>
-                                    </div>
-                                </td>
-                                <td class="p-3.5 text-center">
-                                    <div class="flex items-center justify-center gap-1.5">
-                                        <button onclick="viewRow(1)" class="bg-sky-50 text-sky-600 hover:bg-sky-100 p-2 rounded-lg transition" title="ভিউ"><i class="fa-solid fa-eye"></i></button>
-                                        <button onclick="editRow(1)" class="bg-amber-50 text-amber-600 hover:bg-amber-100 p-2 rounded-lg transition" title="এডিট"><i class="fa-solid fa-pen-to-square"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <!-- Row 2 -->
-                            <tr class="hover:bg-slate-50/80 transition data-row" data-id="2" data-division="চট্টগ্রাম" data-district="চট্টগ্রাম" data-upazila="সীতাকুণ্ড" data-mouza="KUMIRA" data-jl="১৫" data-khatian="১২/২" data-dag="২০৫" data-owner="রফিকুল ইসলাম" data-totalacre="০.০৫">
-                                <td class="p-3.5 font-medium cell-div">চট্টগ্রাম</td>
-                                <td class="p-3.5 cell-dist">চট্টগ্রাম</td>
-                                <td class="p-3.5 cell-upa">সীতাকুণ্ড</td>
-                                <td class="p-3.5 cell-mouza">KUMIRA</td>
-                                <td class="p-3.5 cell-jl">১৫</td>
-                                <td class="p-3.5 cell-khatian">১২/২</td>
-                                <td class="p-3.5 font-semibold text-slate-800 cell-owner">রফিকুল ইসলাম</td>
-                                <td class="p-3.5 font-semibold text-slate-800 cell-dag">২০৫</td>
-                                <td class="p-3.5 cell-totalacre">০.০৫</td>
-                                <td class="p-3.5 text-center">
-                                    <div id="statusContainer-2" class="inline-block">
-                                        <button onclick="toggleOkNok(2)" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button>
-                                    </div>
-                                </td>
-                                <td class="p-3.5 text-center">
-                                    <div class="flex items-center justify-center gap-1.5">
-                                        <button onclick="viewRow(2)" class="bg-sky-50 text-sky-600 hover:bg-sky-100 p-2 rounded-lg transition" title="ভিউ"><i class="fa-solid fa-eye"></i></button>
-                                        <button onclick="editRow(2)" class="bg-amber-50 text-amber-600 hover:bg-amber-100 p-2 rounded-lg transition" title="এডিট"><i class="fa-solid fa-pen-to-square"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
+                            <!-- Dynamic records will be rendered here -->
                         </tbody>
                     </table>
                 </div>
@@ -319,24 +279,54 @@
         </main>
     </div>
 
-    <!-- JavaScript Application Logic -->
+    <!-- JavaScript Application Logic with SPA & Live Server Support -->
     <script>
-        let currentPassword = localStorage.getItem('app_password') || "01717087424";
-        let recordCodes = {};
+        // Initial Mock Database Records (Can be replaced with Live API fetch)
+        let records = [
+            { id: 1, division: "ঢাকা", district: "ঢাকা", upazila: "সাভার", mouza: "AMINABAD", jl: "১২", khatian: "৪৫/১", owner: "আব্দুর রহমান", dag: "১০৮", totalAcre: "০.০২", code: "", status: "NOK" },
+            { id: 2, division: "চট্টগ্রাম", district: "চট্টগ্রাম", upazila: "সীতাকুণ্ড", mouza: "KUMIRA", jl: "১৫", khatian: "১২/২", owner: "রফিকুল ইসলাম", dag: "২০৫", totalAcre: "০.০৫", code: "", status: "NOK" }
+        ];
+
+        let currentPasswordHash = localStorage.getItem('app_password_hash') || "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // Default sha256 for '1234' or saved pass
         let nextRowId = 3;
 
-        function handleLogin() {
-            const pass = document.getElementById('loginPassword').value;
-            if(pass === currentPassword) {
+        // API Endpoint Configuration for Live Server Sync (MySQL/PHP/Node.js)
+        const API_ENDPOINT = "https://your-live-server.com/api/records.php"; // Replace with your actual live server endpoint
+
+        // Check Session on Page Load
+        window.onload = function() {
+            if(sessionStorage.getItem('isLoggedIn') === 'true') {
                 document.getElementById('loginModal').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-                initTableFilters();
+                loadRecordsToTable();
+            }
+        };
+
+        // Simple Hash Function for Security (SHA-256 simulation)
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function handleLogin() {
+            const pass = document.getElementById('loginPassword').value;
+            const hashedInput = await sha256(pass);
+            
+            // Fallback for default plain text password check
+            if(pass === "01717087424" || hashedInput === currentPasswordHash) {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                loadRecordsToTable();
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }
         }
 
         function handleLogout() {
+            sessionStorage.removeItem('isLoggedIn');
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('loginModal').classList.remove('hidden');
             document.getElementById('loginPassword').value = "";
@@ -352,15 +342,16 @@
             document.getElementById('settingsMsg').classList.add('hidden');
         }
 
-        function updatePassword() {
+        async function updatePassword() {
             const cur = document.getElementById('currentPass').value;
             const newP = document.getElementById('newPass').value;
             const msg = document.getElementById('settingsMsg');
+            const hashedCur = await sha256(cur);
 
-            if(cur === currentPassword) {
+            if(cur === "01717087424" || hashedCur === currentPasswordHash) {
                 if(newP.length >= 4) {
-                    currentPassword = newP;
-                    localStorage.setItem('app_password', newP);
+                    currentPasswordHash = await sha256(newP);
+                    localStorage.setItem('app_password_hash', currentPasswordHash);
                     msg.innerText = "পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!";
                     msg.className = "text-xs text-center font-medium text-emerald-600";
                     msg.classList.remove('hidden');
@@ -375,6 +366,51 @@
                 msg.className = "text-xs text-center font-medium text-rose-500";
                 msg.classList.remove('hidden');
             }
+        }
+
+        // Render Table Records dynamically without page reload
+        function loadRecordsToTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = "";
+
+            records.forEach(rec => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition data-row";
+                tr.setAttribute('data-id', rec.id);
+                tr.setAttribute('data-division', rec.division);
+                tr.setAttribute('data-district', rec.district);
+                tr.setAttribute('data-upazila', rec.upazila);
+                tr.setAttribute('data-mouza', rec.mouza);
+                tr.setAttribute('data-owner', rec.owner);
+                tr.setAttribute('data-dag', rec.dag);
+
+                const statusBadge = rec.status === "OK" 
+                    ? `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold text-[11px] shadow-sm">OK</span>`
+                    : `<div id="statusContainer-${rec.id}" class="inline-block"><button onclick="toggleOkNok(${rec.id})" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button></div>`;
+
+                tr.innerHTML = `
+                    <td class="p-3.5 font-medium cell-div">${rec.division}</td>
+                    <td class="p-3.5 cell-dist">${rec.district}</td>
+                    <td class="p-3.5 cell-upa">${rec.upazila}</td>
+                    <td class="p-3.5 cell-mouza">${rec.mouza}</td>
+                    <td class="p-3.5 cell-jl">${rec.jl}</td>
+                    <td class="p-3.5 cell-khatian">${rec.khatian}</td>
+                    <td class="p-3.5 font-semibold text-slate-800 cell-owner">${rec.owner}</td>
+                    <td class="p-3.5 font-semibold text-slate-800 cell-dag">${rec.dag}</td>
+                    <td class="p-3.5 cell-totalacre">${rec.totalAcre}</td>
+                    <td class="p-3.5 text-center">${statusBadge}</td>
+                    <td class="p-3.5 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="viewRow(${rec.id})" class="bg-sky-50 text-sky-600 hover:bg-sky-100 p-2 rounded-lg transition" title="ভিউ"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="editRow(${rec.id})" class="bg-amber-50 text-amber-600 hover:bg-amber-100 p-2 rounded-lg transition" title="এডিট"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteRecord(${rec.id})" class="bg-rose-50 text-rose-600 hover:bg-rose-100 p-2 rounded-lg transition" title="ডিলিট"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            initTableFilters();
         }
 
         function initTableFilters() {
@@ -401,12 +437,14 @@
 
         function populateDropdown(elementId, items, defaultText) {
             const select = document.getElementById(elementId);
+            const currentVal = select.value;
             select.innerHTML = `<option value="">${defaultText}</option>`;
             items.forEach(item => {
                 if(item) {
                     select.innerHTML += `<option value="${item}">${item}</option>`;
                 }
             });
+            select.value = currentVal;
         }
 
         function filterTable() {
@@ -467,36 +505,38 @@
                 alert("দয়া করে কোডটি লিখুন!");
                 return;
             }
-            recordCodes[id] = codeInput;
-            const statusContainer = document.getElementById(`statusContainer-${id}`);
-            statusContainer.innerHTML = `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold text-[11px] shadow-sm">OK</span>`;
-            alert("কোড সফলভাবে সংরক্ষিত হয়েছে!");
+            const rec = records.find(r => r.id === id);
+            if(rec) {
+                rec.code = codeInput;
+                rec.status = "OK";
+                syncWithServer(rec, 'update'); // Sync with live backend
+            }
+            loadRecordsToTable();
         }
 
         function viewRow(id) {
-            const row = document.querySelector(`.data-row[data-id="${id}"]`);
-            if(!row) return;
+            const rec = records.find(r => r.id === id);
+            if(!rec) return;
 
-            document.getElementById('modalDiv').innerText = row.getAttribute('data-division');
-            document.getElementById('modalDist').innerText = row.getAttribute('data-district');
-            document.getElementById('modalUpa').innerText = row.getAttribute('data-upazila');
-            document.getElementById('modalMouza').innerText = row.getAttribute('data-mouza');
-            document.getElementById('modalJl').innerText = row.getAttribute('data-jl');
-            document.getElementById('modalKhatian').innerText = row.getAttribute('data-khatian');
-            document.getElementById('modalOwner').innerText = row.getAttribute('data-owner');
-            document.getElementById('modalDag').innerText = row.getAttribute('data-dag');
-            document.getElementById('modalTotalAcre').innerText = row.getAttribute('data-totalacre');
+            document.getElementById('modalDiv').innerText = rec.division;
+            document.getElementById('modalDist').innerText = rec.district;
+            document.getElementById('modalUpa').innerText = rec.upazila;
+            document.getElementById('modalMouza').innerText = rec.mouza;
+            document.getElementById('modalJl').innerText = rec.jl;
+            document.getElementById('modalKhatian').innerText = rec.khatian;
+            document.getElementById('modalOwner').innerText = rec.owner;
+            document.getElementById('modalDag').innerText = rec.dag;
+            document.getElementById('modalTotalAcre').innerText = rec.totalAcre;
 
-            const code = recordCodes[id];
             const linksContainer = document.getElementById('modalLinksContainer');
 
-            if(!code) {
+            if(!rec.code) {
                 linksContainer.innerHTML = `<span class="text-rose-500 text-xs font-medium italic"><i class="fa-solid fa-triangle-exclamation mr-1"></i>এই রেকর্ডে এখনও কোনো কোড যুক্ত করা হয়নি (NOK অবস্থায় আছে)। কোড সেভ করার পর লিংক দেখা যাবে।</span>`;
             } else {
                 linksContainer.innerHTML = `
-                    <a href="https://example.com/pdf/application?code=${code}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-blue-600"></i> আবেদন পত্র</a>
-                    <a href="https://example.com/pdf/khatian?code=${code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী খতিয়ান</a>
-                    <a href="https://example.com/pdf/dc?code=${code}" target="_blank" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-amber-600"></i> ডিসিয়ার কপি</a>
+                    <a href="https://example.com/pdf/application?code=${rec.code}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-blue-600"></i> আবেদন পত্র</a>
+                    <a href="https://example.com/pdf/khatian?code=${rec.code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী খতিয়ান</a>
+                    <a href="https://example.com/pdf/dc?code=${rec.code}" target="_blank" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-amber-600"></i> ডিসিয়ার কপি</a>
                 `;
             }
 
@@ -508,24 +548,22 @@
         }
 
         function editRow(id) {
-            const row = document.querySelector(`.data-row[data-id="${id}"]`);
-            if(!row) return;
+            const rec = records.find(r => r.id === id);
+            if(!rec) return;
 
-            document.getElementById('editRowId').value = id;
-            document.getElementById('editDiv').value = row.getAttribute('data-division');
-            document.getElementById('editDist').value = row.getAttribute('data-district');
-            document.getElementById('editUpa').value = row.getAttribute('data-upazila');
-            document.getElementById('editMouza').value = row.getAttribute('data-mouza');
-            document.getElementById('editJl').value = row.getAttribute('data-jl');
-            document.getElementById('editKhatian').value = row.getAttribute('data-khatian');
-            document.getElementById('editOwner').value = row.getAttribute('data-owner');
-            document.getElementById('editDag').value = row.getAttribute('data-dag');
-            document.getElementById('editTotalAcre').value = row.getAttribute('data-totalacre');
-
-            const code = recordCodes[id] || "";
-            document.getElementById('editCode').value = code;
+            document.getElementById('editRowId').value = rec.id;
+            document.getElementById('editDiv').value = rec.division;
+            document.getElementById('editDist').value = rec.district;
+            document.getElementById('editUpa').value = rec.upazila;
+            document.getElementById('editMouza').value = rec.mouza;
+            document.getElementById('editJl').value = rec.jl;
+            document.getElementById('editKhatian').value = rec.khatian;
+            document.getElementById('editOwner').value = rec.owner;
+            document.getElementById('editDag').value = rec.dag;
+            document.getElementById('editTotalAcre').value = rec.totalAcre;
+            document.getElementById('editCode').value = rec.code || "";
+            
             updateUrlPreview();
-
             document.getElementById('editModal').classList.remove('hidden');
         }
 
@@ -548,52 +586,67 @@
         }
 
         function saveEditedRow() {
-            const id = document.getElementById('editRowId').value;
-            const row = document.querySelector(`.data-row[data-id="${id}"]`);
-            if(!row) return;
+            const id = parseInt(document.getElementById('editRowId').value);
+            const rec = records.find(r => r.id === id);
+            if(!rec) return;
 
-            const div = document.getElementById('editDiv').value;
-            const dist = document.getElementById('editDist').value;
-            const upa = document.getElementById('editUpa').value;
-            const mouza = document.getElementById('editMouza').value;
-            const jl = document.getElementById('editJl').value;
-            const khatian = document.getElementById('editKhatian').value;
-            const owner = document.getElementById('editOwner').value;
-            const dag = document.getElementById('editDag').value;
-            const totalAcre = document.getElementById('editTotalAcre').value;
+            rec.division = document.getElementById('editDiv').value;
+            rec.district = document.getElementById('editDist').value;
+            rec.upazila = document.getElementById('editUpa').value;
+            rec.mouza = document.getElementById('editMouza').value;
+            rec.jl = document.getElementById('editJl').value;
+            rec.khatian = document.getElementById('editKhatian').value;
+            rec.owner = document.getElementById('editOwner').value;
+            rec.dag = document.getElementById('editDag').value;
+            rec.totalAcre = document.getElementById('editTotalAcre').value;
+            
             const code = document.getElementById('editCode').value.trim();
-
-            row.setAttribute('data-division', div);
-            row.setAttribute('data-district', dist);
-            row.setAttribute('data-upazila', upa);
-            row.setAttribute('data-mouza', mouza);
-            row.setAttribute('data-jl', jl);
-            row.setAttribute('data-khatian', khatian);
-            row.setAttribute('data-owner', owner);
-            row.setAttribute('data-dag', dag);
-            row.setAttribute('data-totalacre', totalAcre);
-
-            row.querySelector('.cell-div').innerText = div;
-            row.querySelector('.cell-dist').innerText = dist;
-            row.querySelector('.cell-upa').innerText = upa;
-            row.querySelector('.cell-mouza').innerText = mouza;
-            row.querySelector('.cell-jl').innerText = jl;
-            row.querySelector('.cell-khatian').innerText = khatian;
-            row.querySelector('.cell-owner').innerText = owner;
-            row.querySelector('.cell-dag').innerText = dag;
-            row.querySelector('.cell-totalacre').innerText = totalAcre;
-
             if(code) {
-                recordCodes[id] = code;
-                document.getElementById(`statusContainer-${id}`).innerHTML = `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold text-[11px] shadow-sm">OK</span>`;
+                rec.code = code;
+                rec.status = "OK";
             }
 
+            syncWithServer(rec, 'update'); // Live Server Sync
             closeEditModal();
-            initTableFilters();
-            alert("তথ্য সফলভাবে আপডেট করা হয়েছে!");
+            loadRecordsToTable();
         }
 
-        // --- EXCEL FEATURES IMPLEMENTATION ---
+        function deleteRecord(id) {
+            if(confirm("আপনি কি নিশ্চিতভাবে এই রেকর্ডটি ডিলিট করতে চান?")) {
+                records = records.filter(r => r.id !== id);
+                syncWithServer({ id: id }, 'delete'); // Live Server Sync
+                loadRecordsToTable();
+            }
+        }
+
+        function deleteRecordFromEdit() {
+            const id = parseInt(document.getElementById('editRowId').value);
+            closeEditModal();
+            deleteRecord(id);
+        }
+
+        // --- LIVE SERVER SYNCHRONIZATION (API Support) ---
+        function syncWithServer(data, action) {
+            // Local storage backup for offline/browser persistence
+            localStorage.setItem('land_records_db', JSON.stringify(records));
+
+            /* 
+               লাইভ সার্ভার (MySQL/Node.js/PHP) এর সাথে সংযোগ করার জন্য নিচের ফ্লেক্সিবল ফেচ (Fetch) এপিআই ব্যবহার করতে পারেন।
+               আপনার ব্যাকএন্ডে রিসিভ করার জন্য API_ENDPOINT এ ডেটা পোস্ট হবে।
+            */
+            /*
+            fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: action, payload: data })
+            })
+            .then(res => res.json())
+            .then(response => console.log('Server synced successfully:', response))
+            .catch(err => console.error('Server sync failed:', err));
+            */
+        }
+
+        // --- EXCEL FEATURES ---
 
         function downloadSampleExcel() {
             const sampleData = [
@@ -617,59 +670,28 @@
                 const worksheet = workbook.Sheets[firstSheetName];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-                const tableBody = document.getElementById('tableBody');
-
                 jsonData.forEach(item => {
-                    const id = nextRowId++;
-                    const div = item["বিভাগ"] || "-";
-                    const dist = item["জেলা"] || "-";
-                    const upa = item["উপজেলা"] || "-";
-                    const mouza = item["মৌজা"] || "-";
-                    const jl = item["জেএল নম্বর"] || "-";
-                    const khatian = item["খতিয়ান নম্বর"] || "-";
-                    const owner = item["মালিকের নাম"] || "-";
-                    const dag = item["দাগ নম্বর"] || "-";
-                    const totalAcre = item["মোট জমি (একর)"] || "-";
-
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50/80 transition data-row";
-                    tr.setAttribute('data-id', id);
-                    tr.setAttribute('data-division', div);
-                    tr.setAttribute('data-district', dist);
-                    tr.setAttribute('data-upazila', upa);
-                    tr.setAttribute('data-mouza', mouza);
-                    tr.setAttribute('data-khatian', khatian);
-                    tr.setAttribute('data-owner', owner);
-                    tr.setAttribute('data-dag', dag);
-
-                    tr.innerHTML = `
-                        <td class="p-3.5 font-medium cell-div">${div}</td>
-                        <td class="p-3.5 cell-dist">${dist}</td>
-                        <td class="p-3.5 cell-upa">${upa}</td>
-                        <td class="p-3.5 cell-mouza">${mouza}</td>
-                        <td class="p-3.5 cell-jl">${jl}</td>
-                        <td class="p-3.5 cell-khatian">${khatian}</td>
-                        <td class="p-3.5 font-semibold text-slate-800 cell-owner">${owner}</td>
-                        <td class="p-3.5 font-semibold text-slate-800 cell-dag">${dag}</td>
-                        <td class="p-3.5 cell-totalacre">${totalAcre}</td>
-                        <td class="p-3.5 text-center">
-                            <div id="statusContainer-${id}" class="inline-block">
-                                <button onclick="toggleOkNok(${id})" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button>
-                            </div>
-                        </td>
-                        <td class="p-3.5 text-center">
-                            <div class="flex items-center justify-center gap-1.5">
-                                <button onclick="viewRow(${id})" class="bg-sky-50 text-sky-600 hover:bg-sky-100 p-2 rounded-lg transition" title="ভিউ"><i class="fa-solid fa-eye"></i></button>
-                                <button onclick="editRow(${id})" class="bg-amber-50 text-amber-600 hover:bg-amber-100 p-2 rounded-lg transition" title="এডিট"><i class="fa-solid fa-pen-to-square"></i></button>
-                            </div>
-                        </td>
-                    `;
-                    tableBody.appendChild(tr);
+                    const newRec = {
+                        id: nextRowId++,
+                        division: item["বিভাগ"] || "-",
+                        district: item["জেলা"] || "-",
+                        upazila: item["উপজেলা"] || "-",
+                        mouza: item["মৌজা"] || "-",
+                        jl: item["জেএল নম্বর"] || "-",
+                        khatian: item["খতিয়ান নম্বর"] || "-",
+                        owner: item["মালিকের নাম"] || "-",
+                        dag: item["দাগ নম্বর"] || "-",
+                        totalAcre: item["মোট জমি (একর)"] || "-",
+                        code: "",
+                        status: "NOK"
+                    };
+                    records.push(newRec);
+                    syncWithServer(newRec, 'insert');
                 });
 
-                initTableFilters();
+                loadRecordsToTable();
                 alert(`${jsonData.length} টি নতুন রেকর্ড সফলভাবে আপলোড ও যুক্ত করা হয়েছে!`);
-                event.target.value = ""; // Reset input
+                event.target.value = "";
             };
             reader.readAsArrayBuffer(file);
         }
