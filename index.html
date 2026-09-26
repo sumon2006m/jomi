@@ -338,6 +338,7 @@
     </div>
 
     <!-- Firebase SDKs & App Logic -->
+    <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -370,6 +371,26 @@
                 document.getElementById('dashboard').classList.remove('hidden');
                 fetchRecordsFromFirebase();
             }
+
+            // পাসওয়ার্ড কনফার্মেশন বাটনের ইভেন্ট এখানে বাইন্ড করা হলো যাতে সঠিকভাবে কাজ করে
+            document.getElementById('confirmActionBtn').onclick = async function() {
+                const enteredPass = document.getElementById('actionConfirmPassword').value.trim();
+                try {
+                    const passDocRef = doc(db, "settings", "app_auth");
+                    const docSnap = await getDoc(passDocRef);
+                    const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
+
+                    if (enteredPass === cloudPass) {
+                        closePasswordConfirmModal();
+                        if (pendingActionCallback) pendingActionCallback();
+                    } else {
+                        document.getElementById('confirmErrorMsg').classList.remove('hidden');
+                    }
+                } catch (err) {
+                    console.error("পাসওয়ার্ড কনফার্ম করতে সমস্যা:", err);
+                    document.getElementById('confirmErrorMsg').classList.remove('hidden');
+                }
+            };
         };
 
         async function ensureCloudPasswordExists() {
@@ -459,7 +480,6 @@
             }
         }
 
-        // --- Password Confirmation Modal Handler Functions ---
         function openPasswordConfirmModal(titleText, callback) {
             document.getElementById('confirmModalText').innerText = titleText;
             document.getElementById('actionConfirmPassword').value = "";
@@ -473,26 +493,6 @@
             pendingActionCallback = null;
         }
 
-        document.getElementById('confirmActionBtn').onclick = async function() {
-            const enteredPass = document.getElementById('actionConfirmPassword').value.trim();
-            try {
-                const passDocRef = doc(db, "settings", "app_auth");
-                const docSnap = await getDoc(passDocRef);
-                const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
-
-                if (enteredPass === cloudPass) {
-                    closePasswordConfirmModal();
-                    if (pendingActionCallback) pendingActionCallback();
-                } else {
-                    document.getElementById('confirmErrorMsg').classList.remove('hidden');
-                }
-            } catch (err) {
-                console.error("পাসওয়ার্ড কনফার্ম করতে সমস্যা:", err);
-                document.getElementById('confirmErrorMsg').classList.remove('hidden');
-            }
-        };
-
-        // --- Clear Database Feature ---
         window.promptClearDatabase = function() {
             openPasswordConfirmModal("ডাটাবেসের সমস্ত ডেটা চিরতরে মুছে ফেলতে পাসওয়ার্ড দিন", async () => {
                 const statusBanner = document.getElementById('connectionStatus');
@@ -547,7 +547,6 @@
             }
         }
 
-        // --- Dependent Dropdowns / Filters Setup ---
         function initTableFiltersAndData() {
             updateDivisionOptions();
             filterTable();
@@ -566,11 +565,10 @@
         }
 
         function updateDistrictOptions() {
-            const selectedDiv = document.getElementById('filterDivision').value.toLowerCase().trim();
+            const selectedDiv = document.getElementById('filterDivision').value.trim();
             const districts = new Set();
             records.forEach(rec => {
-                const div = (rec.division || "").toLowerCase();
-                if(!selectedDiv || div.includes(selectedDiv)) {
+                if(!selectedDiv || rec.division === selectedDiv) {
                     if(rec.district) districts.add(rec.district);
                 }
             });
@@ -584,13 +582,13 @@
         }
 
         function updateUpazilaOptions() {
-            const selectedDiv = document.getElementById('filterDivision').value.toLowerCase().trim();
-            const selectedDist = document.getElementById('filterDistrict').value.toLowerCase().trim();
+            const selectedDiv = document.getElementById('filterDivision').value.trim();
+            const selectedDist = document.getElementById('filterDistrict').value.trim();
             const upazilas = new Set();
             records.forEach(rec => {
-                const div = (rec.division || "").toLowerCase();
-                const dist = (rec.district || "").toLowerCase();
-                if((!selectedDiv || div.includes(selectedDiv)) && (!selectedDist || dist.includes(selectedDist))) {
+                const matchDiv = !selectedDiv || rec.division === selectedDiv;
+                const matchDist = !selectedDist || rec.district === selectedDist;
+                if(matchDiv && matchDist) {
                     if(rec.upazila) upazilas.add(rec.upazila);
                 }
             });
@@ -604,17 +602,15 @@
         }
 
         function updateMouzaOptions() {
-            const selectedDiv = document.getElementById('filterDivision').value.toLowerCase().trim();
-            const selectedDist = document.getElementById('filterDistrict').value.toLowerCase().trim();
-            const selectedUpa = document.getElementById('filterUpazila').value.toLowerCase().trim();
+            const selectedDiv = document.getElementById('filterDivision').value.trim();
+            const selectedDist = document.getElementById('filterDistrict').value.trim();
+            const selectedUpa = document.getElementById('filterUpazila').value.trim();
             const mouzas = new Set();
             records.forEach(rec => {
-                const div = (rec.division || "").toLowerCase();
-                const dist = (rec.district || "").toLowerCase();
-                const upa = (rec.upazila || "").toLowerCase();
-                if((!selectedDiv || div.includes(selectedDiv)) && 
-                   (!selectedDist || dist.includes(selectedDist)) && 
-                   (!selectedUpa || upa.includes(selectedUpa))) {
+                const matchDiv = !selectedDiv || rec.division === selectedDiv;
+                const matchDist = !selectedDist || rec.district === selectedDist;
+                const matchUpa = !selectedUpa || rec.upazila === selectedUpa;
+                if(matchDiv && matchDist && matchUpa) {
                     if(rec.mouza) mouzas.add(rec.mouza);
                 }
             });
@@ -901,7 +897,6 @@
             }
         }
 
-        // --- Delete Record With Password Confirmation ---
         window.deleteRecord = function(id) {
             openPasswordConfirmModal("এই রেকর্ডটি ফায়ারবেস থেকে মুছে ফেলতে পাসওয়ার্ড দিন", async () => {
                 try {
