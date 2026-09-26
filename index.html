@@ -338,7 +338,6 @@
     </div>
 
     <!-- Firebase SDKs & App Logic -->
-    <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -372,7 +371,7 @@
                 fetchRecordsFromFirebase();
             }
 
-            // পাসওয়ার্ড কনফার্মেশন বাটনের ইভেন্ট লিসেনার
+            // পাসওয়ার্ড কনফার্মেশন বাটনের ইভেন্ট হ্যান্ডলার
             const confirmBtn = document.getElementById('confirmActionBtn');
             if (confirmBtn) {
                 confirmBtn.onclick = async function() {
@@ -499,11 +498,12 @@
             pendingActionCallback = null;
         }
 
+        // সব ডেটা একসাথে ডিলিট (All Delete) ফাংশন
         window.promptClearDatabase = function() {
             openPasswordConfirmModal("ডাটাবেসের সমস্ত ডেটা চিরতরে মুছে ফেলতে পাসওয়ার্ড দিন", async () => {
                 const statusBanner = document.getElementById('connectionStatus');
                 statusBanner.className = "bg-rose-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ডাটাবেস ক্লিয়ার করা হচ্ছে...`;
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ডাটাবেस ক্লিয়ার করা হচ্ছে...`;
                 statusBanner.classList.remove('hidden');
 
                 try {
@@ -728,6 +728,7 @@
                     ? `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold text-[11px] shadow-sm">OK</span>`
                     : `<div id="statusContainer-${rec.id}" class="inline-block"><button onclick="toggleOkNok('${rec.id}')" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button></div>`;
 
+                // এখানে ডিলিট (Trash) বাটন যুক্ত করা হলো যাতে সিঙ্গেল ডিলিট করা যায়
                 tr.innerHTML = `
                     <td class="p-3.5 font-medium cell-div">${rec.division || "-"}</td>
                     <td class="p-3.5 cell-dist">${rec.district || "-"}</td>
@@ -743,6 +744,7 @@
                         <div class="flex items-center justify-center gap-1.5">
                             <button onclick="viewRow('${rec.id}')" class="bg-sky-50 text-sky-600 hover:bg-sky-100 p-2 rounded-lg transition" title="ভিউ"><i class="fa-solid fa-eye"></i></button>
                             <button onclick="editRow('${rec.id}')" class="bg-amber-50 text-amber-600 hover:bg-amber-100 p-2 rounded-lg transition" title="এডিট"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteRecord('${rec.id}')" class="bg-rose-50 text-rose-600 hover:bg-rose-100 p-2 rounded-lg transition" title="ডিলিট"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </td>
                 `;
@@ -903,6 +905,7 @@
             }
         }
 
+        // সিঙ্গেল রেকর্ড ডিলিট (পাসওয়ার্ড কনফার্মেশন সহ)
         window.deleteRecord = function(id) {
             openPasswordConfirmModal("এই রেকর্ডটি ফায়ারবেস থেকে মুছে ফেলতে পাসওয়ার্ড দিন", async () => {
                 try {
