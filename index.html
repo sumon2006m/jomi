@@ -74,13 +74,13 @@
             
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 text-xs">
                 <div><span class="text-slate-500 block">বিভাগ:</span> <span id="modalDiv" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">জেলা:</span> <span id="modalDist" class="font-bold text-slate-800">-</span></div>
                 <div><span class="text-slate-500 block">উপজেলা:</span> <span id="modalUpa" class="font-bold text-slate-800">-</span></div>
                 <div><span class="text-slate-500 block">মৌজা:</span> <span id="modalMouza" class="font-bold text-slate-800">-</span></div>
-                <div><span class="text-slate-500 block">জেএল নং:</span> <span id="modalJl" class="font-bold text-slate-800">-</span></div>
-                <div><span class="text-slate-500 block">খতিয়ান নং:</span> <span id="modalKhatian" class="font-bold text-slate-800">-</span></div>
-                <div><span class="text-slate-500 block">দাগ নম্বর:</span> <span id="modalDag" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">জেএল নম্বর:</span> <span id="modalJl" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">খতিয়ান নম্বর:</span> <span id="modalKhatian" class="font-bold text-slate-800">-</span></div>
                 <div class="col-span-2"><span class="text-slate-500 block">মালিকের নাম:</span> <span id="modalOwner" class="font-bold text-slate-800 text-sm">-</span></div>
-                <div><span class="text-slate-500 block">জমি:</span> <span id="modalLand" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">দাগ নম্বর:</span> <span id="modalDag" class="font-bold text-slate-800">-</span></div>
                 <div><span class="text-slate-500 block">মোট জমি (একর):</span> <span id="modalTotalAcre" class="font-bold text-slate-800">-</span></div>
             </div>
 
@@ -110,6 +110,10 @@
                     <input type="text" id="editDiv" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
+                    <label class="block font-semibold text-slate-600 mb-1">জেলা</label>
+                    <input type="text" id="editDist" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
                     <label class="block font-semibold text-slate-600 mb-1">উপজেলা</label>
                     <input type="text" id="editUpa" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
@@ -118,24 +122,20 @@
                     <input type="text" id="editMouza" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">জেএল নং</label>
+                    <label class="block font-semibold text-slate-600 mb-1">জেএল নম্বর</label>
                     <input type="text" id="editJl" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">খতিয়ান নং</label>
+                    <label class="block font-semibold text-slate-600 mb-1">খতিয়ান নম্বর</label>
                     <input type="text" id="editKhatian" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">দাগ নম্বর</label>
-                    <input type="text" id="editDag" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div class="sm:col-span-2">
                     <label class="block font-semibold text-slate-600 mb-1">মালিকের নাম</label>
                     <input type="text" id="editOwner" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">জমি</label>
-                    <input type="text" id="editLand" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label class="block font-semibold text-slate-600 mb-1">দাগ নম্বর</label>
+                    <input type="text" id="editDag" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-600 mb-1">মোট জমি (একর)</label>
@@ -211,11 +211,17 @@
             </div>
 
             <!-- Filters -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ ফিল্টার</label>
                     <select id="filterDivision" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <option value="">সকল বিভাগ</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেলা ফিল্টার</label>
+                    <select id="filterDistrict" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">সকল জেলা</option>
                     </select>
                 </div>
                 <div>
@@ -231,7 +237,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">খতিয়ান নং ফিল্টার</label>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">খতিয়ান নম্বর ফিল্টার</label>
                     <select id="filterKhatian" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <option value="">সকল খতিয়ান</option>
                     </select>
@@ -249,13 +255,13 @@
                         <thead>
                             <tr class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
                                 <th class="p-3.5">বিভাগ</th>
+                                <th class="p-3.5">জেলা</th>
                                 <th class="p-3.5">উপজেলা</th>
                                 <th class="p-3.5">মৌজা</th>
-                                <th class="p-3.5">জেএল নং</th>
-                                <th class="p-3.5">খতিয়ান নং</th>
-                                <th class="p-3.5">দাগ নম্বর</th>
+                                <th class="p-3.5">জেএল নম্বর</th>
+                                <th class="p-3.5">খতিয়ান নম্বর</th>
                                 <th class="p-3.5">মালিকের নাম</th>
-                                <th class="p-3.5">জমি</th>
+                                <th class="p-3.5">দাগ নম্বর</th>
                                 <th class="p-3.5">মোট জমি (একর)</th>
                                 <th class="p-3.5 text-center">অবস্থা (OK/NOK)</th>
                                 <th class="p-3.5 text-center">এ্যাকশন</th>
@@ -263,15 +269,15 @@
                         </thead>
                         <tbody id="tableBody" class="text-xs text-slate-600 divide-y divide-slate-100">
                             <!-- Row 1 -->
-                            <tr class="hover:bg-slate-50/80 transition data-row" data-id="1" data-division="ঢাকা" data-upazila="সাভার" data-mouza="AMINABAD" data-jl="১২" data-khatian="৪৫/১" data-dag="১০৮" data-owner="আব্দুর রহমান" data-land="২ শতক" data-totalacre="০.০২">
+                            <tr class="hover:bg-slate-50/80 transition data-row" data-id="1" data-division="ঢাকা" data-district="ঢাকা" data-upazila="সাভার" data-mouza="AMINABAD" data-jl="১২" data-khatian="৪৫/১" data-dag="১০৮" data-owner="আব্দুর রহমান" data-totalacre="০.০২">
                                 <td class="p-3.5 font-medium cell-div">ঢাকা</td>
+                                <td class="p-3.5 cell-dist">ঢাকা</td>
                                 <td class="p-3.5 cell-upa">সাভার</td>
                                 <td class="p-3.5 cell-mouza">AMINABAD</td>
                                 <td class="p-3.5 cell-jl">১২</td>
                                 <td class="p-3.5 font-semibold text-slate-800 cell-khatian">৪৫/১</td>
-                                <td class="p-3.5 cell-dag">১০৮</td>
                                 <td class="p-3.5 font-semibold text-slate-800 cell-owner">আব্দুর রহমান</td>
-                                <td class="p-3.5 cell-land">২ শতক</td>
+                                <td class="p-3.5 cell-dag">১০৮</td>
                                 <td class="p-3.5 cell-totalacre">০.০২</td>
                                 <td class="p-3.5 text-center">
                                     <div id="statusContainer-1" class="inline-block">
@@ -286,15 +292,15 @@
                                 </td>
                             </tr>
                             <!-- Row 2 -->
-                            <tr class="hover:bg-slate-50/80 transition data-row" data-id="2" data-division="চট্টগ্রাম" data-upazila="সীতাকুণ্ড" data-mouza="KUMIRA" data-jl="১৫" data-khatian="১২/২" data-dag="২০৫" data-owner="রফিকুল ইসলাম" data-land="৫ শতক" data-totalacre="০.০৫">
+                            <tr class="hover:bg-slate-50/80 transition data-row" data-id="2" data-division="চট্টগ্রাম" data-district="চট্টগ্রাম" data-upazila="সীতাকুণ্ড" data-mouza="KUMIRA" data-jl="১৫" data-khatian="১২/২" data-dag="২০৫" data-owner="রফিকুল ইসলাম" data-totalacre="০.০৫">
                                 <td class="p-3.5 font-medium cell-div">চট্টগ্রাম</td>
+                                <td class="p-3.5 cell-dist">চট্টগ্রাম</td>
                                 <td class="p-3.5 cell-upa">সীতাকুণ্ড</td>
                                 <td class="p-3.5 cell-mouza">KUMIRA</td>
                                 <td class="p-3.5 cell-jl">১৫</td>
                                 <td class="p-3.5 font-semibold text-slate-800 cell-khatian">১২/২</td>
-                                <td class="p-3.5 cell-dag">২০৫</td>
                                 <td class="p-3.5 font-semibold text-slate-800 cell-owner">রফিকুল ইসলাম</td>
-                                <td class="p-3.5 cell-land">৫ শতক</td>
+                                <td class="p-3.5 cell-dag">২০৫</td>
                                 <td class="p-3.5 cell-totalacre">০.০৫</td>
                                 <td class="p-3.5 text-center">
                                     <div id="statusContainer-2" class="inline-block">
@@ -376,18 +382,21 @@
         function initTableFilters() {
             const rows = document.querySelectorAll('.data-row');
             const divisions = new Set();
+            const districts = new Set();
             const upazilas = new Set();
             const mouzas = new Set();
             const khatians = new Set();
 
             rows.forEach(row => {
                 divisions.add(row.getAttribute('data-division'));
+                districts.add(row.getAttribute('data-district'));
                 upazilas.add(row.getAttribute('data-upazila'));
                 mouzas.add(row.getAttribute('data-mouza'));
                 khatians.add(row.getAttribute('data-khatian'));
             });
 
             populateDropdown('filterDivision', divisions, 'সকল বিভাগ');
+            populateDropdown('filterDistrict', districts, 'সকল জেলা');
             populateDropdown('filterUpazila', upazilas, 'সকল উপজেলা');
             populateDropdown('filterMouza', mouzas, 'সকল মৌজা');
             populateDropdown('filterKhatian', khatians, 'সকল খতিয়ান');
@@ -407,6 +416,7 @@
 
         function filterTable() {
             const selectedDiv = document.getElementById('filterDivision').value;
+            const selectedDist = document.getElementById('filterDistrict').value;
             const selectedUpa = document.getElementById('filterUpazila').value;
             const selectedMouza = document.getElementById('filterMouza').value;
             const selectedKhatian = document.getElementById('filterKhatian').value;
@@ -417,6 +427,7 @@
 
             rows.forEach(row => {
                 const div = row.getAttribute('data-division');
+                const dist = row.getAttribute('data-district');
                 const upa = row.getAttribute('data-upazila');
                 const mouza = row.getAttribute('data-mouza');
                 const khatian = row.getAttribute('data-khatian');
@@ -424,6 +435,7 @@
 
                 let match = true;
                 if(selectedDiv && div !== selectedDiv) match = false;
+                if(selectedDist && dist !== selectedDist) match = false;
                 if(selectedUpa && upa !== selectedUpa) match = false;
                 if(selectedMouza && mouza !== selectedMouza) match = false;
                 if(selectedKhatian && khatian !== selectedKhatian) match = false;
@@ -471,13 +483,13 @@
             if(!row) return;
 
             document.getElementById('modalDiv').innerText = row.getAttribute('data-division');
+            document.getElementById('modalDist').innerText = row.getAttribute('data-district');
             document.getElementById('modalUpa').innerText = row.getAttribute('data-upazila');
             document.getElementById('modalMouza').innerText = row.getAttribute('data-mouza');
             document.getElementById('modalJl').innerText = row.getAttribute('data-jl');
             document.getElementById('modalKhatian').innerText = row.getAttribute('data-khatian');
-            document.getElementById('modalDag').innerText = row.getAttribute('data-dag');
             document.getElementById('modalOwner').innerText = row.getAttribute('data-owner');
-            document.getElementById('modalLand').innerText = row.getAttribute('data-land');
+            document.getElementById('modalDag').innerText = row.getAttribute('data-dag');
             document.getElementById('modalTotalAcre').innerText = row.getAttribute('data-totalacre');
 
             const code = recordCodes[id];
@@ -506,13 +518,13 @@
 
             document.getElementById('editRowId').value = id;
             document.getElementById('editDiv').value = row.getAttribute('data-division');
+            document.getElementById('editDist').value = row.getAttribute('data-district');
             document.getElementById('editUpa').value = row.getAttribute('data-upazila');
             document.getElementById('editMouza').value = row.getAttribute('data-mouza');
             document.getElementById('editJl').value = row.getAttribute('data-jl');
             document.getElementById('editKhatian').value = row.getAttribute('data-khatian');
-            document.getElementById('editDag').value = row.getAttribute('data-dag');
             document.getElementById('editOwner').value = row.getAttribute('data-owner');
-            document.getElementById('editLand').value = row.getAttribute('data-land');
+            document.getElementById('editDag').value = row.getAttribute('data-dag');
             document.getElementById('editTotalAcre').value = row.getAttribute('data-totalacre');
 
             const code = recordCodes[id] || "";
@@ -546,34 +558,34 @@
             if(!row) return;
 
             const div = document.getElementById('editDiv').value;
+            const dist = document.getElementById('editDist').value;
             const upa = document.getElementById('editUpa').value;
             const mouza = document.getElementById('editMouza').value;
             const jl = document.getElementById('editJl').value;
             const khatian = document.getElementById('editKhatian').value;
-            const dag = document.getElementById('editDag').value;
             const owner = document.getElementById('editOwner').value;
-            const land = document.getElementById('editLand').value;
+            const dag = document.getElementById('editDag').value;
             const totalAcre = document.getElementById('editTotalAcre').value;
             const code = document.getElementById('editCode').value.trim();
 
             row.setAttribute('data-division', div);
+            row.setAttribute('data-district', dist);
             row.setAttribute('data-upazila', upa);
             row.setAttribute('data-mouza', mouza);
             row.setAttribute('data-jl', jl);
             row.setAttribute('data-khatian', khatian);
-            row.setAttribute('data-dag', dag);
             row.setAttribute('data-owner', owner);
-            row.setAttribute('data-land', land);
+            row.setAttribute('data-dag', dag);
             row.setAttribute('data-totalacre', totalAcre);
 
             row.querySelector('.cell-div').innerText = div;
+            row.querySelector('.cell-dist').innerText = dist;
             row.querySelector('.cell-upa').innerText = upa;
             row.querySelector('.cell-mouza').innerText = mouza;
             row.querySelector('.cell-jl').innerText = jl;
             row.querySelector('.cell-khatian').innerText = khatian;
-            row.querySelector('.cell-dag').innerText = dag;
             row.querySelector('.cell-owner').innerText = owner;
-            row.querySelector('.cell-land').innerText = land;
+            row.querySelector('.cell-dag').innerText = dag;
             row.querySelector('.cell-totalacre').innerText = totalAcre;
 
             if(code) {
@@ -590,7 +602,7 @@
 
         function downloadSampleExcel() {
             const sampleData = [
-                { "বিভাগ": "ঢাকা", "উপজেলা": "সাভার", "মৌজা": "AMINABAD", "জেএল নং": "১২", "খতিয়ান নং": "৪৫/১", "দাগ নম্বর": "১০৮", "মালিকের নাম": "আব্দুর রহমান", "জমি": "২ শতক", "মোট জমি (একর)": "০.০২" }
+                { "বিভাগ": "ঢাকা", "জেলা": "ঢাকা", "উপজেলা": "সাভার", "মৌজা": "AMINABAD", "জেএল নম্বর": "১২", "খতিয়ান নম্বর": "৪৫/১", "মালিকের নাম": "আব্দুর রহমান", "দাগ নম্বর": "১০৮", "মোট জমি (একর)": "০.০২" }
             ];
             const worksheet = XLSX.utils.json_to_sheet(sampleData);
             const workbook = XLSX.utils.book_new();
@@ -615,19 +627,20 @@
                 jsonData.forEach(item => {
                     const id = nextRowId++;
                     const div = item["বিভাগ"] || "-";
+                    const dist = item["জেলা"] || "-";
                     const upa = item["উপজেলা"] || "-";
                     const mouza = item["মৌজা"] || "-";
-                    const jl = item["জেএল নং"] || "-";
-                    const khatian = item["খতিয়ান নং"] || "-";
-                    const dag = item["দাগ নম্বর"] || "-";
+                    const jl = item["জেএল নম্বর"] || "-";
+                    const khatian = item["খতিয়ান নম্বর"] || "-";
                     const owner = item["মালিকের নাম"] || "-";
-                    const land = item["জমি"] || "-";
+                    const dag = item["দাগ নম্বর"] || "-";
                     const totalAcre = item["মোট জমি (একর)"] || "-";
 
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50/80 transition data-row";
                     tr.setAttribute('data-id', id);
                     tr.setAttribute('data-division', div);
+                    tr.setAttribute('data-district', dist);
                     tr.setAttribute('data-upazila', upa);
                     tr.setAttribute('data-mouza', mouza);
                     tr.setAttribute('data-khatian', khatian);
@@ -635,13 +648,13 @@
 
                     tr.innerHTML = `
                         <td class="p-3.5 font-medium cell-div">${div}</td>
+                        <td class="p-3.5 cell-dist">${dist}</td>
                         <td class="p-3.5 cell-upa">${upa}</td>
                         <td class="p-3.5 cell-mouza">${mouza}</td>
                         <td class="p-3.5 cell-jl">${jl}</td>
                         <td class="p-3.5 font-semibold text-slate-800 cell-khatian">${khatian}</td>
-                        <td class="p-3.5 cell-dag">${dag}</td>
                         <td class="p-3.5 font-semibold text-slate-800 cell-owner">${owner}</td>
-                        <td class="p-3.5 cell-land">${land}</td>
+                        <td class="p-3.5 cell-dag">${dag}</td>
                         <td class="p-3.5 cell-totalacre">${totalAcre}</td>
                         <td class="p-3.5 text-center">
                             <div id="statusContainer-${id}" class="inline-block">
@@ -673,13 +686,13 @@
                 if (row.style.display !== "none") {
                     exportData.push({
                         "বিভাগ": row.querySelector('.cell-div').innerText,
+                        "জেলা": row.querySelector('.cell-dist').innerText,
                         "উপজেলা": row.querySelector('.cell-upa').innerText,
                         "মৌজা": row.querySelector('.cell-mouza').innerText,
-                        "জেএল নং": row.querySelector('.cell-jl').innerText,
-                        "খতিয়ান নং": row.querySelector('.cell-khatian').innerText,
-                        "দাগ নম্বর": row.querySelector('.cell-dag').innerText,
+                        "জেএল নম্বর": row.querySelector('.cell-jl').innerText,
+                        "খতিয়ান নম্বর": row.querySelector('.cell-khatian').innerText,
                         "মালিকের নাম": row.querySelector('.cell-owner').innerText,
-                        "জমি": row.querySelector('.cell-land').innerText,
+                        "দাগ নম্বর": row.querySelector('.cell-dag').innerText,
                         "মোট জমি (একর)": row.querySelector('.cell-totalacre').innerText
                     });
                 }
