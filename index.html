@@ -284,7 +284,7 @@
         </main>
     </div>
 
-    <!-- Firebase SDKs (Modular v10) -->
+    <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -388,9 +388,8 @@
                     records.push({ id: docSnap.id, ...docSnap.data() });
                 });
                 
-                // সফলভাবে কানেক্ট হলে স্ট্যাটাস বার সবুজ দেখাবে
                 statusBanner.className = "bg-emerald-600 text-white text-center py-1 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> ফায়ারবেস ক্লাউড ডাটাবেসের সাথে সফলভাবে সংযুক্ত রয়েছে (${records.length} টি রেকর্ড পাওয়া গেছে)`;
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> ফায়ারবেস ক্লাউড ডাটাবেসের সাথে সংযুক্ত (${records.length} টি রেকর্ড)`;
                 setTimeout(() => { statusBanner.classList.add('hidden'); }, 4000);
 
                 loadRecordsToTable();
@@ -681,9 +680,12 @@
             XLSX.writeFile(workbook, "Land_Record_Sample.xlsx");
         }
 
+        // --- ENHANCED EXCEL UPLOAD WITH ROBUST KEY CLEANING & DEBUGGING ---
         window.uploadExcel = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
+
+            alert("এক্সেল ফাইল পড়া শুরু হয়েছে...");
 
             const reader = new FileReader();
             reader.onload = async function(e) {
@@ -692,42 +694,58 @@
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    const rawJsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
-                    if(jsonData.length === 0) {
+                    console.log("Raw Excel Data:", rawJsonData);
+
+                    if(!rawJsonData || rawJsonData.length === 0) {
                         alert("এক্সেল ফাইলে কোনো ডেটা পাওয়া যায়নি!");
                         return;
                     }
 
-                    // Uploading with indicator alert
                     let uploadCount = 0;
-                    for (let item of jsonData) {
+                    for (let rawItem of rawJsonData) {
+                        // Clean keys to handle hidden whitespace or invisible chars in excel column headers
+                        const item = {};
+                        Object.keys(rawItem).forEach(key => {
+                            const cleanKey = key.trim();
+                            item[cleanKey] = rawItem[key];
+                        });
+
                         const newRec = {
-                            division: String(item["বিভাগ"] || "-"),
-                            district: String(item["জেলা"] || "-"),
-                            upazila: String(item["উপজেলা"] || "-"),
-                            mouza: String(item["মৌজা"] || "-"),
-                            jl: String(item["জেএল নম্বর"] || "-"),
-                            khatian: String(item["খতিয়ান নম্বর"] || "-"),
-                            owner: String(item["মালিকের নাম"] || "-"),
-                            dag: String(item["দাগ নম্বর"] || "-"),
-                            totalAcre: String(item["মোট জমি (একর)"] || "-"),
+                            division: String(item["বিভাগ"] || item["Division"] || "-"),
+                            district: String(item["জেলা"] || item["District"] || "-"),
+                            upazila: String(item["উপজেলা"] || item["Upazila"] || "-"),
+                            mouza: String(item["মৌজা"] || item["Mouza"] || "-"),
+                            jl: String(item["জেএল নম্বর"] || item["JL"] || "-"),
+                            khatian: String(item["খতিয়ান নম্বর"] || item["Khatian"] || "-"),
+                            owner: String(item["মালিকের নাম"] || item["Owner"] || "-"),
+                            dag: String(item["দাগ নম্বর"] || item["Dag"] || "-"),
+                            totalAcre: String(item["মোট জমি (একর)"] || item["Acre"] || "-"),
                             code: "",
                             status: "NOK"
                         };
+
+                        console.log("Inserting record to Firestore:", newRec);
                         await addDoc(collection(db, "land_records"), newRec);
                         uploadCount++;
                     }
 
-                    await fetchRecordsFromFirebase();
                     alert(`সফলভাবে ${uploadCount} টি রেকর্ড ফায়ারবেস ক্লাউডে আপলোড করা হয়েছে!`);
+                    await fetchRecordsFromFirebase();
                 } catch (err) {
-                    console.error("Excel Upload Error: ", err);
+                    console.error("Excel Upload Exception: ", err);
                     alert("এক্সেল আপলোড করতে সমস্যা হয়েছে: " + err.message);
                 } finally {
                     event.target.value = "";
                 }
             };
+            
+            reader.onerror = function(err) {
+                console.error("FileReader error:", err);
+                alert("ফাইল রিড করা সম্ভব হয়নি!");
+            };
+
             reader.readAsArrayBuffer(file);
         }
 
