@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS (XLSX Library) for Excel Handling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Google Fonts (Hind Siliguri) -->
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -59,7 +61,7 @@
         </div>
     </div>
 
-    <!-- View Details Popup Modal with All Info & Links -->
+    <!-- View Details Popup Modal -->
     <div id="viewModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
         <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
@@ -70,7 +72,6 @@
                 <button onclick="closeViewModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <!-- Details Grid -->
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 text-xs">
                 <div><span class="text-slate-500 block">বিভাগ:</span> <span id="modalDiv" class="font-bold text-slate-800">-</span></div>
                 <div><span class="text-slate-500 block">উপজেলা:</span> <span id="modalUpa" class="font-bold text-slate-800">-</span></div>
@@ -83,19 +84,89 @@
                 <div><span class="text-slate-500 block">মোট জমি (একর):</span> <span id="modalTotalAcre" class="font-bold text-slate-800">-</span></div>
             </div>
 
-            <!-- PDF Links Section inside Popup -->
             <div>
                 <h4 class="text-xs font-bold uppercase text-slate-500 mb-3 tracking-wide">ডকুমেন্ট লিংকসমূহ (PDF)</h4>
-                <div id="modalLinksContainer" class="flex flex-wrap gap-2">
-                    <!-- Dynamic Link Buttons Will Appear Here -->
+                <div id="modalLinksContainer" class="flex flex-wrap gap-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Popup Modal with Code & URL Preview -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <div class="bg-amber-100 text-amber-600 p-2 rounded-xl text-sm"><i class="fa-solid fa-pen-to-square"></i></div>
+                    তথ্য ও কোড এডিট করুন
+                </h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <input type="hidden" id="editRowId">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">বিভাগ</label>
+                    <input type="text" id="editDiv" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">উপজেলা</label>
+                    <input type="text" id="editUpa" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">মৌজা</label>
+                    <input type="text" id="editMouza" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">জেএল নং</label>
+                    <input type="text" id="editJl" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">খতিয়ান নং</label>
+                    <input type="text" id="editKhatian" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">দাগ নম্বর</label>
+                    <input type="text" id="editDag" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block font-semibold text-slate-600 mb-1">মালিকের নাম</label>
+                    <input type="text" id="editOwner" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">জমি</label>
+                    <input type="text" id="editLand" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">মোট জমি (একর)</label>
+                    <input type="text" id="editTotalAcre" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 mb-5 space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-blue-900 mb-1">সিক্রেট কোড (Code)</label>
+                    <input type="text" id="editCode" placeholder="কোড লিখলে নিচের URL লিংক দেখতে পাবেন..." oninput="updateUrlPreview()" class="w-full bg-white border border-blue-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div id="urlPreviewContainer" class="hidden space-y-1.5 pt-2 border-t border-blue-100">
+                    <span class="text-[11px] font-bold text-slate-500 uppercase">জেনারেটেড URL লিংকসমূহ:</span>
+                    <div class="bg-white p-3 rounded-xl border border-blue-200 text-[11px] space-y-1 font-mono text-blue-700 overflow-x-auto">
+                        <div>🔗 আবেদন পত্র: <span id="previewUrlApp" class="text-slate-600"></span></div>
+                        <div>🔗 নামজারী খতিয়ান: <span id="previewUrlKhat" class="text-slate-600"></span></div>
+                        <div>🔗 ডিসিয়ার কপি: <span id="previewUrlDc" class="text-slate-600"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">বাতিল</button>
+                <button onclick="saveEditedRow()" class="px-6 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition">আপডেট সংরক্ষণ করুন</button>
             </div>
         </div>
     </div>
 
     <!-- Main Dashboard -->
     <div id="dashboard" class="hidden min-h-screen flex flex-col">
-        <!-- Big Professional Header -->
         <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white shadow-xl px-6 py-8">
             <div class="max-w-[98%] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex items-center space-x-4 text-center md:text-left">
@@ -121,18 +192,15 @@
             </div>
         </header>
 
-        <!-- Main Content Area -->
         <main class="flex-1 p-6 max-w-[98%] mx-auto w-full space-y-6">
-            
-            <!-- Toolbar: Upload & Download Options -->
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4">
                 <div class="flex items-center gap-3">
-                    <a href="#" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+                    <button onclick="downloadSampleExcel()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition cursor-pointer">
                         <i class="fa-solid fa-file-arrow-down"></i> নমুনা ডাউনলোড (Excel)
-                    </a>
+                    </button>
                     <label class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer transition">
                         <i class="fa-solid fa-cloud-arrow-up"></i> এক্সেল আপলোড
-                        <input type="file" id="excelUpload" class="hidden" accept=".xlsx, .csv" onchange="uploadExcel(event)">
+                        <input type="file" id="excelUpload" class="hidden" accept=".xlsx, .xls, .csv" onchange="uploadExcel(event)">
                     </label>
                 </div>
                 <div>
@@ -142,7 +210,7 @@
                 </div>
             </div>
 
-            <!-- Dependent Dropdown & Column Filters -->
+            <!-- Filters -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ ফিল্টার</label>
@@ -174,7 +242,7 @@
                 </div>
             </div>
 
-            <!-- Data Table Container -->
+            <!-- Table -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse" id="dataTable">
@@ -194,17 +262,17 @@
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="text-xs text-slate-600 divide-y divide-slate-100">
-                            <!-- ডেমো রো ১ -->
+                            <!-- Row 1 -->
                             <tr class="hover:bg-slate-50/80 transition data-row" data-id="1" data-division="ঢাকা" data-upazila="সাভার" data-mouza="AMINABAD" data-jl="১২" data-khatian="৪৫/১" data-dag="১০৮" data-owner="আব্দুর রহমান" data-land="২ শতক" data-totalacre="০.০২">
-                                <td class="p-3.5 font-medium">ঢাকা</td>
-                                <td class="p-3.5">সাভার</td>
-                                <td class="p-3.5">AMINABAD</td>
-                                <td class="p-3.5">১২</td>
-                                <td class="p-3.5 font-semibold text-slate-800">৪৫/১</td>
-                                <td class="p-3.5">১০৮</td>
-                                <td class="p-3.5 font-semibold text-slate-800">আব্দুর রহমান</td>
-                                <td class="p-3.5">২ শতক</td>
-                                <td class="p-3.5">০.০২</td>
+                                <td class="p-3.5 font-medium cell-div">ঢাকা</td>
+                                <td class="p-3.5 cell-upa">সাভার</td>
+                                <td class="p-3.5 cell-mouza">AMINABAD</td>
+                                <td class="p-3.5 cell-jl">১২</td>
+                                <td class="p-3.5 font-semibold text-slate-800 cell-khatian">৪৫/১</td>
+                                <td class="p-3.5 cell-dag">১০৮</td>
+                                <td class="p-3.5 font-semibold text-slate-800 cell-owner">আব্দুর রহমান</td>
+                                <td class="p-3.5 cell-land">২ শতক</td>
+                                <td class="p-3.5 cell-totalacre">০.০২</td>
                                 <td class="p-3.5 text-center">
                                     <div id="statusContainer-1" class="inline-block">
                                         <button onclick="toggleOkNok(1)" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button>
@@ -217,17 +285,17 @@
                                     </div>
                                 </td>
                             </tr>
-                            <!-- ডেমো রো ২ -->
+                            <!-- Row 2 -->
                             <tr class="hover:bg-slate-50/80 transition data-row" data-id="2" data-division="চট্টগ্রাম" data-upazila="সীতাকুণ্ড" data-mouza="KUMIRA" data-jl="১৫" data-khatian="১২/২" data-dag="২০৫" data-owner="রফিকুল ইসলাম" data-land="৫ শতক" data-totalacre="০.০৫">
-                                <td class="p-3.5 font-medium">চট্টগ্রাম</td>
-                                <td class="p-3.5">সীতাকুণ্ড</td>
-                                <td class="p-3.5">KUMIRA</td>
-                                <td class="p-3.5">১৫</td>
-                                <td class="p-3.5 font-semibold text-slate-800">১২/২</td>
-                                <td class="p-3.5">২০৫</td>
-                                <td class="p-3.5 font-semibold text-slate-800">রফিকুল ইসলাম</td>
-                                <td class="p-3.5">৫ শতক</td>
-                                <td class="p-3.5">০.০৫</td>
+                                <td class="p-3.5 font-medium cell-div">চট্টগ্রাম</td>
+                                <td class="p-3.5 cell-upa">সীতাকুণ্ড</td>
+                                <td class="p-3.5 cell-mouza">KUMIRA</td>
+                                <td class="p-3.5 cell-jl">১৫</td>
+                                <td class="p-3.5 font-semibold text-slate-800 cell-khatian">১২/২</td>
+                                <td class="p-3.5 cell-dag">২০৫</td>
+                                <td class="p-3.5 font-semibold text-slate-800 cell-owner">রফিকুল ইসলাম</td>
+                                <td class="p-3.5 cell-land">৫ শতক</td>
+                                <td class="p-3.5 cell-totalacre">০.০৫</td>
                                 <td class="p-3.5 text-center">
                                     <div id="statusContainer-2" class="inline-block">
                                         <button onclick="toggleOkNok(2)" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button>
@@ -251,6 +319,7 @@
     <script>
         let currentPassword = localStorage.getItem('app_password') || "01717087424";
         let recordCodes = {};
+        let nextRowId = 3;
 
         function handleLogin() {
             const pass = document.getElementById('loginPassword').value;
@@ -380,23 +449,20 @@
             container.innerHTML = `
                 <div class="flex items-center gap-1">
                     <input type="text" id="secretCodeInput-${id}" placeholder="কোড দিন" class="w-20 px-2 py-1 text-xs border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <button onclick="saveCode(${id})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">সেভ</button>
+                    <button onclick="saveCodeInline(${id})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">সেভ</button>
                 </div>
             `;
         }
 
-        function saveCode(id) {
+        function saveCodeInline(id) {
             const codeInput = document.getElementById(`secretCodeInput-${id}`).value.trim();
             if(!codeInput) {
                 alert("দয়া করে কোডটি লিখুন!");
                 return;
             }
-
             recordCodes[id] = codeInput;
-
             const statusContainer = document.getElementById(`statusContainer-${id}`);
             statusContainer.innerHTML = `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold text-[11px] shadow-sm">OK</span>`;
-
             alert("কোড সফলভাবে সংরক্ষিত হয়েছে!");
         }
 
@@ -404,7 +470,6 @@
             const row = document.querySelector(`.data-row[data-id="${id}"]`);
             if(!row) return;
 
-            // ডেটা মডালে সেট করা
             document.getElementById('modalDiv').innerText = row.getAttribute('data-division');
             document.getElementById('modalUpa').innerText = row.getAttribute('data-upazila');
             document.getElementById('modalMouza').innerText = row.getAttribute('data-mouza');
@@ -422,9 +487,9 @@
                 linksContainer.innerHTML = `<span class="text-rose-500 text-xs font-medium italic"><i class="fa-solid fa-triangle-exclamation mr-1"></i>এই রেকর্ডে এখনও কোনো কোড যুক্ত করা হয়নি (NOK অবস্থায় আছে)। কোড সেভ করার পর লিংক দেখা যাবে।</span>`;
             } else {
                 linksContainer.innerHTML = `
-                    <a href="#" onclick="openPdf('আবেদন পত্র', '${code}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-blue-600"></i> আবেদন পত্র</a>
-                    <a href="#" onclick="openPdf('নামজারী খতিয়ান', '${code}')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী খতিয়ান</a>
-                    <a href="#" onclick="openPdf('ডিসিয়ার কপি', '${code}')" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-amber-600"></i> ডিসিয়ার কপি</a>
+                    <a href="https://example.com/pdf/application?code=${code}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-blue-600"></i> আবেদন পত্র</a>
+                    <a href="https://example.com/pdf/khatian?code=${code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী খতিয়ান</a>
+                    <a href="https://example.com/pdf/dc?code=${code}" target="_blank" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-amber-600"></i> ডিসিয়ার কপি</a>
                 `;
             }
 
@@ -436,20 +501,199 @@
         }
 
         function editRow(id) {
-            viewRow(id);
-            alert("এডিট মোড: আপনি এই পপআপ থেকে তথ্য ও কোড আপডেট করতে পারবেন।");
+            const row = document.querySelector(`.data-row[data-id="${id}"]`);
+            if(!row) return;
+
+            document.getElementById('editRowId').value = id;
+            document.getElementById('editDiv').value = row.getAttribute('data-division');
+            document.getElementById('editUpa').value = row.getAttribute('data-upazila');
+            document.getElementById('editMouza').value = row.getAttribute('data-mouza');
+            document.getElementById('editJl').value = row.getAttribute('data-jl');
+            document.getElementById('editKhatian').value = row.getAttribute('data-khatian');
+            document.getElementById('editDag').value = row.getAttribute('data-dag');
+            document.getElementById('editOwner').value = row.getAttribute('data-owner');
+            document.getElementById('editLand').value = row.getAttribute('data-land');
+            document.getElementById('editTotalAcre').value = row.getAttribute('data-totalacre');
+
+            const code = recordCodes[id] || "";
+            document.getElementById('editCode').value = code;
+            updateUrlPreview();
+
+            document.getElementById('editModal').classList.remove('hidden');
         }
 
-        function openPdf(docType, code) {
-            alert(`${docType} প্রিভিউ ও ডাউনলোড হচ্ছে... (কোড: ${code})`);
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function updateUrlPreview() {
+            const code = document.getElementById('editCode').value.trim();
+            const container = document.getElementById('urlPreviewContainer');
+
+            if(code) {
+                container.classList.remove('hidden');
+                document.getElementById('previewUrlApp').innerText = `https://example.com/pdf/application?code=${code}`;
+                document.getElementById('previewUrlKhat').innerText = `https://example.com/pdf/khatian?code=${code}`;
+                document.getElementById('previewUrlDc').innerText = `https://example.com/pdf/dc?code=${code}`;
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function saveEditedRow() {
+            const id = document.getElementById('editRowId').value;
+            const row = document.querySelector(`.data-row[data-id="${id}"]`);
+            if(!row) return;
+
+            const div = document.getElementById('editDiv').value;
+            const upa = document.getElementById('editUpa').value;
+            const mouza = document.getElementById('editMouza').value;
+            const jl = document.getElementById('editJl').value;
+            const khatian = document.getElementById('editKhatian').value;
+            const dag = document.getElementById('editDag').value;
+            const owner = document.getElementById('editOwner').value;
+            const land = document.getElementById('editLand').value;
+            const totalAcre = document.getElementById('editTotalAcre').value;
+            const code = document.getElementById('editCode').value.trim();
+
+            row.setAttribute('data-division', div);
+            row.setAttribute('data-upazila', upa);
+            row.setAttribute('data-mouza', mouza);
+            row.setAttribute('data-jl', jl);
+            row.setAttribute('data-khatian', khatian);
+            row.setAttribute('data-dag', dag);
+            row.setAttribute('data-owner', owner);
+            row.setAttribute('data-land', land);
+            row.setAttribute('data-totalacre', totalAcre);
+
+            row.querySelector('.cell-div').innerText = div;
+            row.querySelector('.cell-upa').innerText = upa;
+            row.querySelector('.cell-mouza').innerText = mouza;
+            row.querySelector('.cell-jl').innerText = jl;
+            row.querySelector('.cell-khatian').innerText = khatian;
+            row.querySelector('.cell-dag').innerText = dag;
+            row.querySelector('.cell-owner').innerText = owner;
+            row.querySelector('.cell-land').innerText = land;
+            row.querySelector('.cell-totalacre').innerText = totalAcre;
+
+            if(code) {
+                recordCodes[id] = code;
+                document.getElementById(`statusContainer-${id}`).innerHTML = `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold text-[11px] shadow-sm">OK</span>`;
+            }
+
+            closeEditModal();
+            initTableFilters();
+            alert("তথ্য সফলভাবে আপডেট করা হয়েছে!");
+        }
+
+        // --- EXCEL FEATURES IMPLEMENTATION ---
+
+        function downloadSampleExcel() {
+            const sampleData = [
+                { "বিভাগ": "ঢাকা", "উপজেলা": "সাভার", "মৌজা": "AMINABAD", "জেএল নং": "১২", "খতিয়ান নং": "৪৫/১", "দাগ নম্বর": "১০৮", "মালিকের নাম": "আব্দুর রহমান", "জমি": "২ শতক", "মোট জমি (একর)": "০.০২" }
+            ];
+            const worksheet = XLSX.utils.json_to_sheet(sampleData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Sample");
+            XLSX.writeFile(workbook, "Land_Record_Sample.xlsx");
         }
 
         function uploadExcel(event) {
-            alert("এক্সেল ফাইল সফলভাবে আপলোড হয়েছে।");
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                const tableBody = document.getElementById('tableBody');
+
+                jsonData.forEach(item => {
+                    const id = nextRowId++;
+                    const div = item["বিভাগ"] || "-";
+                    const upa = item["উপজেলা"] || "-";
+                    const mouza = item["মৌজা"] || "-";
+                    const jl = item["জেএল নং"] || "-";
+                    const khatian = item["খতিয়ান নং"] || "-";
+                    const dag = item["দাগ নম্বর"] || "-";
+                    const owner = item["মালিকের নাম"] || "-";
+                    const land = item["জমি"] || "-";
+                    const totalAcre = item["মোট জমি (একর)"] || "-";
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50/80 transition data-row";
+                    tr.setAttribute('data-id', id);
+                    tr.setAttribute('data-division', div);
+                    tr.setAttribute('data-upazila', upa);
+                    tr.setAttribute('data-mouza', mouza);
+                    tr.setAttribute('data-khatian', khatian);
+                    tr.setAttribute('data-owner', owner);
+
+                    tr.innerHTML = `
+                        <td class="p-3.5 font-medium cell-div">${div}</td>
+                        <td class="p-3.5 cell-upa">${upa}</td>
+                        <td class="p-3.5 cell-mouza">${mouza}</td>
+                        <td class="p-3.5 cell-jl">${jl}</td>
+                        <td class="p-3.5 font-semibold text-slate-800 cell-khatian">${khatian}</td>
+                        <td class="p-3.5 cell-dag">${dag}</td>
+                        <td class="p-3.5 font-semibold text-slate-800 cell-owner">${owner}</td>
+                        <td class="p-3.5 cell-land">${land}</td>
+                        <td class="p-3.5 cell-totalacre">${totalAcre}</td>
+                        <td class="p-3.5 text-center">
+                            <div id="statusContainer-${id}" class="inline-block">
+                                <button onclick="toggleOkNok(${id})" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button>
+                            </div>
+                        </td>
+                        <td class="p-3.5 text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button onclick="viewRow(${id})" class="bg-sky-50 text-sky-600 hover:bg-sky-100 p-2 rounded-lg transition" title="ভিউ"><i class="fa-solid fa-eye"></i></button>
+                                <button onclick="editRow(${id})" class="bg-amber-50 text-amber-600 hover:bg-amber-100 p-2 rounded-lg transition" title="এডিট"><i class="fa-solid fa-pen-to-square"></i></button>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                initTableFilters();
+                alert(`${jsonData.length} টি নতুন রেকর্ড সফলভাবে আপলোড ও যুক্ত করা হয়েছে!`);
+                event.target.value = ""; // Reset input
+            };
+            reader.readAsArrayBuffer(file);
         }
 
         function downloadFilteredExcel() {
-            alert("ফিল্টার ও খতিয়ান অনুযায়ী এক্সেল ফাইল ডাউনলোড শুরু হয়েছে।");
+            const rows = document.querySelectorAll('.data-row');
+            const exportData = [];
+
+            rows.forEach(row => {
+                if (row.style.display !== "none") {
+                    exportData.push({
+                        "বিভাগ": row.querySelector('.cell-div').innerText,
+                        "উপজেলা": row.querySelector('.cell-upa').innerText,
+                        "মৌজা": row.querySelector('.cell-mouza').innerText,
+                        "জেএল নং": row.querySelector('.cell-jl').innerText,
+                        "খতিয়ান নং": row.querySelector('.cell-khatian').innerText,
+                        "দাগ নম্বর": row.querySelector('.cell-dag').innerText,
+                        "মালিকের নাম": row.querySelector('.cell-owner').innerText,
+                        "জমি": row.querySelector('.cell-land').innerText,
+                        "মোট জমি (একর)": row.querySelector('.cell-totalacre').innerText
+                    });
+                }
+            });
+
+            if (exportData.length === 0) {
+                alert("ডাউনলোড করার মত কোনো ডেটা পাওয়া যায়নি!");
+                return;
+            }
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered_Records");
+            XLSX.writeFile(workbook, "Filtered_Land_Records.xlsx");
         }
     </script>
 </body>
