@@ -10,11 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SheetJS (XLSX Library) for Excel Handling -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Google Fonts (SolaimanLipi) -->
-    <!-- <link href="https://fonts.googleapis.com/css2?family=SolaimanLipi:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'SolaimanLipi', Arial, sans-serif; }
-    </style> -->
     <!-- Google Fonts (Kalpurush) -->
     <link href="https://fonts.googleapis.com/css2?family=Kalpurush&display=swap" rel="stylesheet">
     <style>
@@ -226,7 +221,7 @@
                 </div>
             </div>
 
-            <!-- Filters (Updated with Text/Dropdown combined or search inputs) -->
+            <!-- Filters -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-9 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ</label>
@@ -269,7 +264,7 @@
                 </div>
             </div>
 
-            <!-- Table Controls (Rows Per Page & Counter Info) -->
+            <!-- Table Controls -->
             <div class="bg-white px-5 py-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4 text-xs">
                 <div class="flex items-center gap-2">
                     <span class="font-semibold text-slate-600">প্রতি পেজে দেখাও:</span>
@@ -312,10 +307,8 @@
                 </div>
             </div>
 
-            <!-- Pagination Controls (Footer) -->
-            <div class="flex justify-center items-center gap-2 py-2" id="paginationControls">
-                <!-- Pagination buttons generated dynamically -->
-            </div>
+            <!-- Pagination Controls -->
+            <div class="flex justify-center items-center gap-2 py-2" id="paginationControls"></div>
         </main>
     </div>
 
@@ -342,7 +335,6 @@
         let currentPage = 1;
         let rowsPerPage = 10;
         
-        // ডিফল্ট পাসওয়ার্ড
         const DEFAULT_PASSWORD = "01717087424";
 
         window.onload = async function() {
@@ -491,7 +483,6 @@
             });
         }
 
-        // বাংলা নম্বরকে ইংরেজিতে রূপান্তর করার হেল্পার ফাংশন (বাংলা ও ইংরেজি উভয় উপায়ে সার্চ কার্যকর করতে)
         function convertToEnglishDigits(str) {
             if (!str) return "";
             const bengaliDigits = {'০': '0', '১': '1', '২': '2', '৩': '3', '৪': '4', '৫': '5', '৬': '6', '৭': '7', '৮': '8', '৯': '9'};
@@ -729,7 +720,7 @@
                 document.getElementById('previewUrlApp').innerText = `https://mutation.land.gov.bd/print/${code}`;
                 document.getElementById('previewUrlKhat').innerText = `https://mutation.land.gov.bd/khotian-download/${code}`;
                 document.getElementById('previewUrlDc').innerText = `https://mutation.land.gov.bd/online-dcr/${code}`;
-                 document.getElementById('previewUrlQr').innerText = `https://mutation.land.gov.bd/qr-vk/${code}`;
+                document.getElementById('previewUrlQr').innerText = `https://mutation.land.gov.bd/qr-vk/${code}`;
             } else {
                 container.classList.add('hidden');
             }
