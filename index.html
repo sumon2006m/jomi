@@ -372,25 +372,31 @@
                 fetchRecordsFromFirebase();
             }
 
-            // পাসওয়ার্ড কনফার্মেশন বাটনের ইভেন্ট এখানে বাইন্ড করা হলো যাতে সঠিকভাবে কাজ করে
-            document.getElementById('confirmActionBtn').onclick = async function() {
-                const enteredPass = document.getElementById('actionConfirmPassword').value.trim();
-                try {
-                    const passDocRef = doc(db, "settings", "app_auth");
-                    const docSnap = await getDoc(passDocRef);
-                    const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
+            // পাসওয়ার্ড কনফার্মেশন বাটনের ইভেন্ট লিসেনার
+            const confirmBtn = document.getElementById('confirmActionBtn');
+            if (confirmBtn) {
+                confirmBtn.onclick = async function() {
+                    const enteredPass = document.getElementById('actionConfirmPassword').value.trim();
+                    try {
+                        const passDocRef = doc(db, "settings", "app_auth");
+                        const docSnap = await getDoc(passDocRef);
+                        const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
 
-                    if (enteredPass === cloudPass) {
-                        closePasswordConfirmModal();
-                        if (pendingActionCallback) pendingActionCallback();
-                    } else {
+                        if (enteredPass === cloudPass) {
+                            closePasswordConfirmModal();
+                            if (typeof pendingActionCallback === 'function') {
+                                await pendingActionCallback();
+                                pendingActionCallback = null;
+                            }
+                        } else {
+                            document.getElementById('confirmErrorMsg').classList.remove('hidden');
+                        }
+                    } catch (err) {
+                        console.error("পাসওয়ার্ড কনফার্ম করতে সমস্যা:", err);
                         document.getElementById('confirmErrorMsg').classList.remove('hidden');
                     }
-                } catch (err) {
-                    console.error("পাসওয়ার্ড কনফার্ম করতে সমস্যা:", err);
-                    document.getElementById('confirmErrorMsg').classList.remove('hidden');
-                }
-            };
+                };
+            }
         };
 
         async function ensureCloudPasswordExists() {
