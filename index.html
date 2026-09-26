@@ -221,7 +221,7 @@
             </div>
 
             <!-- Filters -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ ফিল্টার</label>
                     <select id="filterDivision" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -249,6 +249,10 @@
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মালিকের নাম সার্চ</label>
                     <input type="text" id="filterOwner" placeholder="নাম লিখে খুঁজুন..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">খতিয়ান নম্বর সার্চ</label>
+                    <input type="text" id="filterKhatianSearch" placeholder="খতিয়ান লিখে খুঁজুন..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">দাগ নম্বর সার্চ</label>
@@ -419,6 +423,7 @@
                 tr.setAttribute('data-upazila', rec.upazila || "");
                 tr.setAttribute('data-mouza', rec.mouza || "");
                 tr.setAttribute('data-owner', rec.owner || "");
+                tr.setAttribute('data-khatian', rec.khatian || "");
                 tr.setAttribute('data-dag', rec.dag || "");
 
                 const statusBadge = rec.status === "OK" 
@@ -431,7 +436,7 @@
                     <td class="p-3.5 cell-upa">${rec.upazila || "-"}</td>
                     <td class="p-3.5 cell-mouza">${rec.mouza || "-"}</td>
                     <td class="p-3.5 cell-jl">${rec.jl || "-"}</td>
-                    <td class="p-3.5 cell-khatian">${rec.khatian || "-"}</td>
+                    <td class="p-3.5 font-semibold text-blue-600 cell-khatian">${rec.khatian || "-"}</td>
                     <td class="p-3.5 font-semibold text-slate-800 cell-owner">${rec.owner || "-"}</td>
                     <td class="p-3.5 font-semibold text-slate-800 cell-dag">${rec.dag || "-"}</td>
                     <td class="p-3.5 cell-totalacre">${rec.totalAcre || "-"}</td>
@@ -440,7 +445,6 @@
                         <div class="flex items-center justify-center gap-1.5">
                             <button onclick="viewRow('${rec.id}')" class="bg-sky-50 text-sky-600 hover:bg-sky-100 p-2 rounded-lg transition" title="ভিউ"><i class="fa-solid fa-eye"></i></button>
                             <button onclick="editRow('${rec.id}')" class="bg-amber-50 text-amber-600 hover:bg-amber-100 p-2 rounded-lg transition" title="এডিট"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteRecord('${rec.id}')" class="bg-rose-50 text-rose-600 hover:bg-rose-100 p-2 rounded-lg transition" title="ডিলিট"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </td>
                 `;
@@ -634,6 +638,7 @@
             const selectedUpa = document.getElementById('filterUpazila').value;
             const selectedMouza = document.getElementById('filterMouza').value;
             const searchOwner = document.getElementById('filterOwner').value.toLowerCase();
+            const searchKhatian = document.getElementById('filterKhatianSearch').value.toLowerCase();
             const searchDag = document.getElementById('filterDag').value.toLowerCase();
 
             const rows = document.querySelectorAll('.data-row');
@@ -645,6 +650,7 @@
                 const upa = row.getAttribute('data-upazila');
                 const mouza = row.getAttribute('data-mouza');
                 const owner = row.getAttribute('data-owner').toLowerCase();
+                const khatian = row.getAttribute('data-khatian').toLowerCase();
                 const dag = row.getAttribute('data-dag').toLowerCase();
 
                 let match = true;
@@ -653,6 +659,7 @@
                 if(selectedUpa && upa !== selectedUpa) match = false;
                 if(selectedMouza && mouza !== selectedMouza) match = false;
                 if(searchOwner && !owner.includes(searchOwner)) match = false;
+                if(searchKhatian && !khatian.includes(searchKhatian)) match = false;
                 if(searchDag && !dag.includes(searchDag)) match = false;
 
                 if(match) {
@@ -680,14 +687,14 @@
             XLSX.writeFile(workbook, "Land_Record_Sample.xlsx");
         }
 
-        // --- OPTIMIZED BATCH EXCEL UPLOAD FOR LIGHTNING FAST PERFORMANCE ---
+        // --- OPTIMIZED BATCH EXCEL UPLOAD WITH DUPLICATE CHECK ---
         window.uploadExcel = function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-blue-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> এক্সেল ফাইল প্রসেস ও ব্যাচ আপলোড করা হচ্ছে...`;
+            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> এক্সেল ফাইল প্রসেস ও ডুপ্লিকেট চেক করা হচ্ছে...`;
             statusBanner.classList.remove('hidden');
 
             const reader = new FileReader();
@@ -705,10 +712,10 @@
                         return;
                     }
 
-                    // Firestore batch supports up to 500 operations per batch
                     let batch = writeBatch(db);
                     let operationCounter = 0;
-                    let totalUploaded = 0;
+                    let totalNewAdded = 0;
+                    let duplicateCount = 0;
 
                     for (let rawItem of rawJsonData) {
                         const item = {};
@@ -717,16 +724,44 @@
                             item[cleanKey] = rawItem[key];
                         });
 
+                        const newDivision = String(item["বিভাগ"] || item["Division"] || "-").trim();
+                        const newDistrict = String(item["জেলা"] || item["District"] || "-").trim();
+                        const newUpazila = String(item["উপজেলা"] || item["Upazila"] || "-").trim();
+                        const newMouza = String(item["মৌজা"] || item["Mouza"] || "-").trim();
+                        const newJl = String(item["জেএল নম্বর"] || item["JL"] || "-").trim();
+                        const newKhatian = String(item["খতিয়ান নম্বর"] || item["Khatian"] || "-").trim();
+                        const newOwner = String(item["মালিকের নাম"] || item["Owner"] || "-").trim();
+                        const newDag = String(item["দাগ নম্বর"] || item["Dag"] || "-").trim();
+                        const newTotalAcre = String(item["মোট জমি (একর)"] || item["Acre"] || "-").trim();
+
+                        // Check for duplicate against existing records (all fields check)
+                        const isDuplicate = records.some(r => 
+                            String(r.division || "").trim() === newDivision &&
+                            String(r.district || "").trim() === newDistrict &&
+                            String(r.upazila || "").trim() === newUpazila &&
+                            String(r.mouza || "").trim() === newMouza &&
+                            String(r.jl || "").trim() === newJl &&
+                            String(r.khatian || "").trim() === newKhatian &&
+                            String(r.owner || "").trim() === newOwner &&
+                            String(r.dag || "").trim() === newDag &&
+                            String(r.totalAcre || "").trim() === newTotalAcre
+                        );
+
+                        if (isDuplicate) {
+                            duplicateCount++;
+                            continue;
+                        }
+
                         const newRec = {
-                            division: String(item["বিভাগ"] || item["Division"] || "-"),
-                            district: String(item["জেলা"] || item["District"] || "-"),
-                            upazila: String(item["উপজেলা"] || item["Upazila"] || "-"),
-                            mouza: String(item["মৌজা"] || item["Mouza"] || "-"),
-                            jl: String(item["জেএল নম্বর"] || item["JL"] || "-"),
-                            khatian: String(item["খতিয়ান নম্বর"] || item["Khatian"] || "-"),
-                            owner: String(item["মালিকের নাম"] || item["Owner"] || "-"),
-                            dag: String(item["দাগ নম্বর"] || item["Dag"] || "-"),
-                            totalAcre: String(item["মোট জমি (একর)"] || item["Acre"] || "-"),
+                            division: newDivision,
+                            district: newDistrict,
+                            upazila: newUpazila,
+                            mouza: newMouza,
+                            jl: newJl,
+                            khatian: newKhatian,
+                            owner: newOwner,
+                            dag: newDag,
+                            totalAcre: newTotalAcre,
                             code: "",
                             status: "NOK"
                         };
@@ -734,7 +769,7 @@
                         const newDocRef = doc(collection(db, "land_records"));
                         batch.set(newDocRef, newRec);
                         operationCounter++;
-                        totalUploaded++;
+                        totalNewAdded++;
 
                         if (operationCounter >= 400) {
                             await batch.commit();
@@ -748,8 +783,10 @@
                     }
 
                     statusBanner.className = "bg-emerald-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> সফলভাবে ${totalUploaded} টি রেকর্ড ফায়ারবেসে আপলোড করা হয়েছে!`;
-                    setTimeout(() => { statusBanner.classList.add('hidden'); }, 4000);
+                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> আপলোড সম্পন্ন! নতুন যুক্ত হয়েছে: ${totalNewAdded} টি, ডুপ্লিকেট বাদ পড়েছে: ${duplicateCount} টি।`;
+                    setTimeout(() => { statusBanner.classList.add('hidden'); }, 6000);
+
+                    alert(`আপলোড সফল হয়েছে!\n\n• নতুন যুক্ত হয়েছে: ${totalNewAdded} টি রেকর্ড\n• ডুপ্লিকেট থাকায় বাদ দেওয়া হয়েছে: ${duplicateCount} টি রেকর্ড`);
 
                     await fetchRecordsFromFirebase();
                 } catch (err) {
