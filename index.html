@@ -220,27 +220,31 @@
                 </div>
             </div>
 
-            <!-- Filters (Searchable Inputs with Datalist) -->
+            <!-- Filters -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ ফিল্টার</label>
-                    <input type="text" id="filterDivision" list="divisionList" placeholder="বিভাগ লিখুন বা বাছুন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <datalist id="divisionList"></datalist>
+                    <select id="filterDivision" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">সকল বিভাগ</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেলা ফিল্টার</label>
-                    <input type="text" id="filterDistrict" list="districtList" placeholder="জেলা লিখুন বা বাছুন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <datalist id="districtList"></datalist>
+                    <select id="filterDistrict" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">সকল জেলা</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">উপজেলা ফিল্টার</label>
-                    <input type="text" id="filterUpazila" list="upazilaList" placeholder="উপজেলা লিখুন বা বাছুন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <datalist id="upazilaList"></datalist>
+                    <select id="filterUpazila" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">সকল উপজেলা</option>
+                    </select>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মৌজা বা জেএল নম্বর</label>
-                    <input type="text" id="filterMouza" list="mouzaList" placeholder="মৌজা বা জেএল লিখুন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <datalist id="mouzaList"></datalist>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মৌজা ফিল্টার</label>
+                    <select id="filterMouza" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">সকল মৌজা</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মালিকের নাম সার্চ</label>
@@ -309,7 +313,7 @@
     <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
@@ -325,11 +329,12 @@
         const db = getFirestore(app);
 
         let records = [];
-        let filteredRecords = []; 
+        let filteredRecords = [];
         let currentPage = 1;
         let rowsPerPage = 10;
         
-        const DEFAULT_PASSWORD_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
+        // ডিফল্ট পাসওয়ার্ড
+        const DEFAULT_PASSWORD = "01717087424";
 
         window.onload = async function() {
             await ensureCloudPasswordExists();
@@ -340,19 +345,13 @@
             }
         };
 
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
+        // ফায়ারবেসে পাসওয়ার্ড চেক করা (না থাকলে ডিফল্ট পাসওয়ার্ড সেট হবে)
         async function ensureCloudPasswordExists() {
             try {
                 const passDocRef = doc(db, "settings", "app_auth");
                 const docSnap = await getDoc(passDocRef);
                 if (!docSnap.exists()) {
-                    await setDoc(passDocRef, { passwordHash: DEFAULT_PASSWORD_HASH });
+                    await setDoc(passDocRef, { password: DEFAULT_PASSWORD });
                 }
             } catch (err) {
                 console.error("পাসওয়ার্ড ইনিশিয়ালাইজ করতে সমস্যা হয়েছে:", err);
@@ -360,15 +359,14 @@
         }
 
         window.handleLogin = async function() {
-            const pass = document.getElementById('loginPassword').value;
-            const hashedInput = await sha256(pass);
+            const inputPass = document.getElementById('loginPassword').value.trim();
             
             try {
                 const passDocRef = doc(db, "settings", "app_auth");
                 const docSnap = await getDoc(passDocRef);
-                const cloudHash = docSnap.exists() ? docSnap.data().passwordHash : DEFAULT_PASSWORD_HASH;
+                const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
 
-                if(hashedInput === cloudHash) {
+                if(inputPass === cloudPass) {
                     sessionStorage.setItem('isLoggedIn', 'true');
                     document.getElementById('loginModal').classList.add('hidden');
                     document.getElementById('dashboard').classList.remove('hidden');
@@ -402,20 +400,18 @@
         }
 
         window.updatePassword = async function() {
-            const cur = document.getElementById('currentPass').value;
-            const newP = document.getElementById('newPass').value;
+            const cur = document.getElementById('currentPass').value.trim();
+            const newP = document.getElementById('newPass').value.trim();
             const msg = document.getElementById('settingsMsg');
-            const hashedCur = await sha256(cur);
 
             try {
                 const passDocRef = doc(db, "settings", "app_auth");
                 const docSnap = await getDoc(passDocRef);
-                const cloudHash = docSnap.exists() ? docSnap.data().passwordHash : DEFAULT_PASSWORD_HASH;
+                const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
 
-                if(hashedCur === cloudHash) {
+                if(cur === cloudPass) {
                     if(newP.length >= 4) {
-                        const newHashed = await sha256(newP);
-                        await updateDoc(passDocRef, { passwordHash: newHashed });
+                        await updateDoc(passDocRef, { password: newP });
                         
                         msg.innerText = "পাসওয়ার্ড সফলভাবে ক্লাউডে আপডেট হয়েছে!";
                         msg.className = "text-xs text-center font-medium text-emerald-600";
@@ -437,18 +433,6 @@
                 msg.className = "text-xs text-center font-medium text-rose-500";
                 msg.classList.remove('hidden');
             }
-        }
-
-        // --- DIGIT NORMALIZER FOR BENGALI/ENGLISH NUMERALS ---
-        function normalizeDigits(str) {
-            if (!str) return "";
-            const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
-            const enDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-            let res = String(str);
-            for (let i = 0; i < 10; i++) {
-                res = res.replace(new RegExp(bnDigits[i], 'g'), enDigits[i]);
-            }
-            return res.toLowerCase().trim();
         }
 
         // --- FIREBASE FIRESTORE OPERATIONS ---
@@ -487,64 +471,54 @@
                 if(rec.mouza) mouzas.add(rec.mouza);
             });
 
-            populateDatalist('divisionList', divisions);
-            populateDatalist('districtList', districts);
-            populateDatalist('upazilaList', upazilas);
-            populateDatalist('mouzaList', mouzas);
+            populateDropdown('filterDivision', divisions, 'সকল বিভাগ');
+            populateDropdown('filterDistrict', districts, 'সকল জেলা');
+            populateDropdown('filterUpazila', upazilas, 'সকল উপজেলা');
+            populateDropdown('filterMouza', mouzas, 'সকল মৌজা');
 
             filterTable();
         }
 
-        function populateDatalist(listId, items) {
-            const list = document.getElementById(listId);
-            list.innerHTML = "";
+        function populateDropdown(elementId, items, defaultText) {
+            const select = document.getElementById(elementId);
+            const currentVal = select.value;
+            select.innerHTML = `<option value="">${defaultText}</option>`;
             items.forEach(item => {
-                list.innerHTML += `<option value="${item}">`;
+                select.innerHTML += `<option value="${item}">${item}</option>`;
             });
+            select.value = currentVal;
         }
 
         window.filterTable = function() {
-            const selectedDiv = document.getElementById('filterDivision').value.toLowerCase().trim();
-            const selectedDist = document.getElementById('filterDistrict').value.toLowerCase().trim();
-            const selectedUpa = document.getElementById('filterUpazila').value.toLowerCase().trim();
-            const searchMouzaInput = document.getElementById('filterMouza').value.toLowerCase().trim();
-            const searchOwner = document.getElementById('filterOwner').value.toLowerCase().trim();
-            const searchKhatian = document.getElementById('filterKhatianSearch').value.toLowerCase().trim();
-            const searchDag = document.getElementById('filterDag').value.toLowerCase().trim();
-
-            const normSearchKhatian = normalizeDigits(searchKhatian);
-            const normSearchDag = normalizeDigits(searchDag);
-            const normSearchMouza = normalizeDigits(searchMouzaInput);
+            const selectedDiv = document.getElementById('filterDivision').value;
+            const selectedDist = document.getElementById('filterDistrict').value;
+            const selectedUpa = document.getElementById('filterUpazila').value;
+            const selectedMouza = document.getElementById('filterMouza').value;
+            const searchOwner = document.getElementById('filterOwner').value.toLowerCase();
+            const searchKhatian = document.getElementById('filterKhatianSearch').value.toLowerCase();
+            const searchDag = document.getElementById('filterDag').value.toLowerCase();
 
             filteredRecords = records.filter(rec => {
-                const div = (rec.division || "").toLowerCase();
-                const dist = (rec.district || "").toLowerCase();
-                const upa = (rec.upazila || "").toLowerCase();
-                const mouza = (rec.mouza || "").toLowerCase();
-                const jl = normalizeDigits(rec.jl || "");
+                const div = rec.division || "";
+                const dist = rec.district || "";
+                const upa = rec.upazila || "";
+                const mouza = rec.mouza || "";
                 const owner = (rec.owner || "").toLowerCase();
-                const khatian = normalizeDigits(rec.khatian || "");
-                const dag = normalizeDigits(rec.dag || "");
+                const khatian = (rec.khatian || "").toLowerCase();
+                const dag = (rec.dag || "").toLowerCase();
 
-                if(selectedDiv && !div.includes(selectedDiv)) return false;
-                if(selectedDist && !dist.includes(selectedDist)) return false;
-                if(selectedUpa && !upa.includes(selectedUpa)) return false;
-
-                // Mouza or JL number filter (supports typing either Mouza name or JL number in Bengali/English)
-                if(searchMouzaInput) {
-                    const matchMouza = mouza.includes(searchMouzaInput);
-                    const matchJl = jl.includes(normSearchMouza);
-                    if(!matchMouza && !matchJl) return false;
-                }
-
+                if(selectedDiv && div !== selectedDiv) return false;
+                if(selectedDist && dist !== selectedDist) return false;
+                if(selectedUpa && upa !== selectedUpa) return false;
+                if(selectedMouza && mouza !== selectedMouza) return false;
                 if(searchOwner && !owner.includes(searchOwner)) return false;
-                if(normSearchKhatian && !khatian.includes(normSearchKhatian)) return false;
-                if(normSearchDag && !dag.includes(normSearchDag)) return false;
+                if(searchKhatian && !khatian.includes(searchKhatian)) return false;
+                if(searchDag && !dag.includes(searchDag)) return false;
 
                 return true;
             });
 
-            currentPage = 1; 
+            currentPage = 1;
             renderTablePage();
         }
 
@@ -685,9 +659,9 @@
                 linksContainer.innerHTML = `<span class="text-rose-500 text-xs font-medium italic"><i class="fa-solid fa-triangle-exclamation mr-1"></i>এই রেকর্ডে এখনও কোনো কোড যুক্ত করা হয়নি (NOK অবস্থায় আছে)।</span>`;
             } else {
                 linksContainer.innerHTML = `
-                    <a href="https://mutation.land.gov.bd/print/${rec.code}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-blue-600"></i> আবেদন পত্র</a>
-                    <a href="https://mutation.land.gov.bd/khotian-download/${rec.code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী খতিয়ান</a>
-                    <a href="https://mutation.land.gov.bd/online-dcr/${rec.code}" target="_blank" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-amber-600"></i> ডিসিয়ার কপি</a>
+                    <a href="https://example.com/pdf/application?code=${rec.code}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-blue-600"></i> আবেদন পত্র</a>
+                    <a href="https://example.com/pdf/khatian?code=${rec.code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী খতিয়ান</a>
+                    <a href="https://example.com/pdf/dc?code=${rec.code}" target="_blank" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-amber-600"></i> ডিসিয়ার কপি</a>
                 `;
             }
             document.getElementById('viewModal').classList.remove('hidden');
@@ -726,9 +700,9 @@
             const container = document.getElementById('urlPreviewContainer');
             if(code) {
                 container.classList.remove('hidden');
-                document.getElementById('previewUrlApp').innerText = `https://mutation.land.gov.bd/print/${code}`;
-                document.getElementById('previewUrlKhat').innerText = `https://mutation.land.gov.bd/khotian-download/${code}`;
-                document.getElementById('previewUrlDc').innerText = `https://mutation.land.gov.bd/online-dcr/${code}`;
+                document.getElementById('previewUrlApp').innerText = `https://example.com/pdf/application?code=${code}`;
+                document.getElementById('previewUrlKhat').innerText = `https://example.com/pdf/khatian?code=${code}`;
+                document.getElementById('previewUrlDc').innerText = `https://example.com/pdf/dc?code=${code}`;
             } else {
                 container.classList.add('hidden');
             }
@@ -900,12 +874,6 @@
                 }
             };
             
-            reader.onerror = function(err) {
-                console.error("FileReader error:", err);
-                alert("ফাইল রিড করা সম্ভব হয়নি!");
-                statusBanner.classList.add('hidden');
-            };
-
             reader.readAsArrayBuffer(file);
         }
 
