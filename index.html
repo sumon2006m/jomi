@@ -3,293 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম - ফায়ারবেস ক্লাউড এডিশন</title>
+    <title>ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS (XLSX Library) for Excel Handling -->
+    <!-- SheetJS (XLSX) Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Google Fonts (Hind Siliguri) -->
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen text-gray-800">
+<body class="bg-slate-50 min-h-screen text-slate-800">
 
-    <!-- Connection Status Banner (Top Floating) -->
-    <div id="connectionStatus" class="bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2 transition-all">
-        <i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...
-    </div>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner">
-                    <i class="fa-solid fa-fire text-amber-500"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-800">ফায়ারবেস সিস্টেম লগইন</h2>
-                <p class="text-xs text-slate-500 mt-1">নিরাপদ ক্লাউড অ্যাক্সেসের জন্য পাসওয়ার্ড দিন</p>
-            </div>
-            <div class="space-y-4">
+    <!-- Top Header -->
+    <header class="bg-blue-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-yellow-400 text-xl font-bold">🏛️</div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">পাসওয়ার্ড</label>
-                    <input type="password" id="loginPassword" placeholder="পাসওয়ার্ড লিখুন..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm">
+                    <h1 class="text-xl font-bold">ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম</h1>
+                    <p class="text-xs text-blue-200">ফায়ারবেস ক্লাউড ডাটাবেস সিকিউরড পোর্টাল</p>
                 </div>
-                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl shadow-lg shadow-blue-600/30 transition duration-200">প্রবেশ করুন</button>
-                <p id="loginError" class="text-rose-500 text-xs text-center font-medium hidden">পাসওয়ার্ড ভুল হয়েছে! সঠিক পাসওয়ার্ড দিন।</p>
+            </div>
+            <div class="flex items-center space-x-4 mt-2 sm:mt-0">
+                <span class="bg-blue-800 px-3 py-1 rounded-full text-sm">মোট এন্ট্রি: <span id="totalCount" class="font-bold text-yellow-300">0</span></span>
+                <button onclick="openSettings()" class="bg-blue-700 hover:bg-blue-600 px-3 py-1.5 rounded text-sm flex items-center gap-1 transition">⚙️ সেটিংস</button>
             </div>
         </div>
-    </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        
+        <!-- Action Control Panel -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4 items-center justify-between">
+            <div class="flex flex-wrap gap-3 items-center">
+                <a href="#" onclick="downloadTemplate(event)" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition">
+                    📥 নমুনা ডাউনলোড (Excel)
+                </a>
+                <label class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm cursor-pointer transition">
+                    📤 এক্সেল আপলোড
+                    <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
+                </label>
+            </div>
+            <div>
+                <button onclick="exportFilteredData()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition">
+                    📊 ফিল্টারকৃত ডেটা ডাউনলোড
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Panel -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">বিভাগ ফিল্টার</label>
+                <select id="filterDiv" onchange="applyFilters()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="">সকল বিভাগ</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">জেলা ফিল্টার</label>
+                <select id="filterDist" onchange="applyFilters()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="">সকল জেলা</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">উপজেলা ফিল্টার</label>
+                <select id="filterUpazila" onchange="applyFilters()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="">সকল উপজেলা</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">মৌজা ফিল্টার</label>
+                <select id="filterMouza" onchange="applyFilters()" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="">সকল মৌজা</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">দাগ নম্বর সার্চ</label>
+                <input type="text" id="searchDag" oninput="applyFilters()" placeholder="দাগ নম্বর লিখে খুঁজুন..." class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">খতিয়ান নম্বর সার্চ</label>
+                <input type="text" id="searchKhatian" oninput="applyFilters()" placeholder="খতিয়ান নম্বর লিখে খুঁজুন..." class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 text-xs uppercase tracking-wider border-b border-slate-200">
+                            <th class="p-3">বিভাগ</th>
+                            <th class="p-3">জেলা</th>
+                            <th class="p-3">উপজেলা</th>
+                            <th class="p-3">মৌজা</th>
+                            <th class="p-3">জেএল নং</th>
+                            <th class="p-3">খতিয়ান নং</th>
+                            <th class="p-3">মালিকের নাম</th>
+                            <th class="p-3">দাগ নং</th>
+                            <th class="p-3 text-right">মোট জমি (একর)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody" class="divide-y divide-slate-200 text-sm">
+                        <tr>
+                            <td colspan="9" class="p-6 text-center text-slate-400">কোনো ডেটা পাওয়া যায়নি। এক্সেল আপলোড করুন।</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
     <!-- Settings Modal -->
-    <div id="settingsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-gear text-blue-600 mr-2"></i> সেটিংস ও পাসওয়ার্ড</h3>
-                <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">বর্তমান পাসওয়ার্ড</label>
-                    <input type="password" id="currentPass" placeholder="বর্তমান পাসওয়ার্ড দিন" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">নতুন পাসওয়ার্ড</label>
-                    <input type="password" id="newPass" placeholder="নতুন পাসওয়ার্ড দিন" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <button onclick="updatePassword()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl shadow-lg shadow-emerald-600/30 transition text-sm">পাসওয়ার্ড আপডেট করুন</button>
-                <p id="settingsMsg" class="text-xs text-center font-medium hidden"></p>
+    <div id="settingsModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">ফায়ারবেস কনফিগারেশন সেটিংস</h3>
+            <p class="text-xs text-slate-500 mb-4">আপনার ফায়ারবেস কনফিগ কোডটি নিচের বক্সে পেস্ট করে সেভ করুন।</p>
+            <textarea id="firebaseConfigInput" rows="8" class="w-full border border-slate-300 rounded-lg p-3 text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none mb-4"></textarea>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeSettings()" class="bg-slate-200 hover:bg-slate-300 px-4 py-2 rounded-lg text-sm font-medium transition">বাতিল</button>
+                <button onclick="saveFirebaseConfig()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">সংরক্ষণ করুন</button>
             </div>
         </div>
     </div>
 
-    <!-- View Details Popup Modal -->
-    <div id="viewModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
-        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
-                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <div class="bg-blue-100 text-blue-600 p-2 rounded-xl text-sm"><i class="fa-solid fa-file-lines"></i></div>
-                    এন্ট্রির বিস্তারিত তথ্য ও ডকুমেন্টস
-                </h3>
-                <button onclick="closeViewModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 text-xs">
-                <div><span class="text-slate-500 block">বিভাগ:</span> <span id="modalDiv" class="font-bold text-slate-800">-</span></div>
-                <div><span class="text-slate-500 block">জেলা:</span> <span id="modalDist" class="font-bold text-slate-800">-</span></div>
-                <div><span class="text-slate-500 block">উপজেলা:</span> <span id="modalUpa" class="font-bold text-slate-800">-</span></div>
-                <div><span class="text-slate-500 block">মৌজা:</span> <span id="modalMouza" class="font-bold text-slate-800">-</span></div>
-                <div><span class="text-slate-500 block">জেএল নম্বর:</span> <span id="modalJl" class="font-bold text-slate-800">-</span></div>
-                <div><span class="text-slate-500 block">খতিয়ান নম্বর:</span> <span id="modalKhatian" class="font-bold text-slate-800">-</span></div>
-                <div class="col-span-2"><span class="text-slate-500 block">মালিকের নাম:</span> <span id="modalOwner" class="font-bold text-slate-800 text-sm">-</span></div>
-                <div><span class="text-slate-500 block">দাগ নম্বর:</span> <span id="modalDag" class="font-bold text-slate-800">-</span></div>
-                <div><span class="text-slate-500 block">মোট জমি (একর):</span> <span id="modalTotalAcre" class="font-bold text-slate-800">-</span></div>
-            </div>
-
-            <div>
-                <h4 class="text-xs font-bold uppercase text-slate-500 mb-3 tracking-wide">ডকুমেন্ট লিংকসমূহ (PDF)</h4>
-                <div id="modalLinksContainer" class="flex flex-wrap gap-2"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Popup Modal -->
-    <div id="editModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
-        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
-                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <div class="bg-amber-100 text-amber-600 p-2 rounded-xl text-sm"><i class="fa-solid fa-pen-to-square"></i></div>
-                    তথ্য এডিট ও ম্যানেজ করুন
-                </h3>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            
-            <input type="hidden" id="editDocId">
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">বিভাগ</label>
-                    <input type="text" id="editDiv" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">জেলা</label>
-                    <input type="text" id="editDist" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">উপজেলা</label>
-                    <input type="text" id="editUpa" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">মৌজা</label>
-                    <input type="text" id="editMouza" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">জেএল নম্বর</label>
-                    <input type="text" id="editJl" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">খতিয়ান নম্বর</label>
-                    <input type="text" id="editKhatian" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div class="sm:col-span-2">
-                    <label class="block font-semibold text-slate-600 mb-1">মালিকের নাম</label>
-                    <input type="text" id="editOwner" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">দাগ নম্বর</label>
-                    <input type="text" id="editDag" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-600 mb-1">মোট জমি (একর)</label>
-                    <input type="text" id="editTotalAcre" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-            </div>
-
-            <div class="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 mb-5 space-y-3">
-                <div>
-                    <label class="block text-xs font-bold text-blue-900 mb-1">সিক্রেট কোড (Code)</label>
-                    <input type="text" id="editCode" placeholder="কোড লিখলে নিচের URL লিংক দেখতে পাবেন..." oninput="updateUrlPreview()" class="w-full bg-white border border-blue-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div id="urlPreviewContainer" class="hidden space-y-1.5 pt-2 border-t border-blue-100">
-                    <span class="text-[11px] font-bold text-slate-500 uppercase">জেনারেটেড URL লিংকসমূহ:</span>
-                    <div class="bg-white p-3 rounded-xl border border-blue-200 text-[11px] space-y-1 font-mono text-blue-700 overflow-x-auto">
-                        <div>🔗 আবেদন পত্র: <span id="previewUrlApp" class="text-slate-600"></span></div>
-                        <div>🔗 নামজারী খতিয়ান: <span id="previewUrlKhat" class="text-slate-600"></span></div>
-                        <div>🔗 ডিসিয়ার কপি: <span id="previewUrlDc" class="text-slate-600"></span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex justify-between items-center">
-                <button onclick="deleteRecordFromEdit()" class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-600 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-trash-can"></i> রেকর্ডটি ডিলিট করুন
-                </button>
-                <div class="flex gap-2">
-                    <button onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">বাতিল</button>
-                    <button onclick="saveEditedRow()" class="px-6 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition">আপডেট সংরক্ষণ</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Dashboard -->
-    <div id="dashboard" class="hidden min-h-screen flex flex-col">
-        <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white shadow-xl px-6 py-8">
-            <div class="max-w-[98%] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="flex items-center space-x-4 text-center md:text-left">
-                    <div class="bg-blue-600 p-4 rounded-2xl text-white shadow-lg shadow-blue-600/50">
-                        <i class="fa-solid fa-fire text-amber-400 text-3xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide">ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম</h1>
-                        <p class="text-sm text-blue-200 mt-1">ফায়ারবেস ক্লাউড ডাটাবেস সিকিউরড পোর্টাল</p>
-                    </div>
-                </div>
-                <div class="flex flex-wrap items-center justify-center gap-3">
-                    <div id="totalCounter" class="bg-slate-800/80 border border-slate-700 px-5 py-2.5 rounded-2xl text-sm font-medium text-blue-400 shadow-inner flex items-center gap-2">
-                        <i class="fa-solid fa-database"></i> মোট এন্ট্রি: <span id="counterVal" class="text-white font-bold text-base">০</span>
-                    </div>
-                    <button onclick="openSettings()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-slate-700 flex items-center gap-2 shadow">
-                        <i class="fa-solid fa-gear"></i> সেটিংস
-                    </button>
-                    <button onclick="handleLogout()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-rose-500/30 flex items-center gap-2 shadow">
-                        <i class="fa-solid fa-right-from-bracket"></i> লগআউট
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <main class="flex-1 p-6 max-w-[98%] mx-auto w-full space-y-6">
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <button onclick="downloadSampleExcel()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition cursor-pointer">
-                        <i class="fa-solid fa-file-arrow-down"></i> নমুনা ডাউনলোড (Excel)
-                    </button>
-                    <label class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer transition">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> এক্সেল আপলোড
-                        <input type="file" id="excelUpload" class="hidden" accept=".xlsx, .xls, .csv" onchange="uploadExcel(event)">
-                    </label>
-                </div>
-                <div>
-                    <button onclick="downloadFilteredExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition">
-                        <i class="fa-solid fa-file-excel"></i> ফিল্টারকৃত ডেটা ডাউনলোড
-                    </button>
-                </div>
-            </div>
-
-            <!-- Filters -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ ফিল্টার</label>
-                    <select id="filterDivision" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল বিভাগ</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেলা ফিল্টার</label>
-                    <select id="filterDistrict" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল জেলা</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">উপজেলা ফিল্টার</label>
-                    <select id="filterUpazila" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল উপজেলা</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মৌজা ফিল্টার</label>
-                    <select id="filterMouza" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল মৌজা</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মালিকের নাম সার্চ</label>
-                    <input type="text" id="filterOwner" placeholder="নাম লিখে খুঁজুন..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">দাগ নম্বর সার্চ</label>
-                    <input type="text" id="filterDag" placeholder="দাগ নম্বর লিখে খুঁজুন..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-            </div>
-
-            <!-- Table -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse" id="dataTable">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
-                                <th class="p-3.5">বিভাগ</th>
-                                <th class="p-3.5">জেলা</th>
-                                <th class="p-3.5">উপজেলা</th>
-                                <th class="p-3.5">মৌজা</th>
-                                <th class="p-3.5">জেএল নম্বর</th>
-                                <th class="p-3.5">খতিয়ান নম্বর</th>
-                                <th class="p-3.5">মালিকের নাম</th>
-                                <th class="p-3.5">দাগ নম্বর</th>
-                                <th class="p-3.5">মোট জমি (একর)</th>
-                                <th class="p-3.5 text-center">অবস্থা (OK/NOK)</th>
-                                <th class="p-3.5 text-center">এ্যাকশন</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody" class="text-xs text-slate-600 divide-y divide-slate-100">
-                            <!-- Firebase records will be rendered here dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Firebase SDKs & App Logic -->
+    <!-- Firebase SDK Imports (Modular v10) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, writeBatch, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
+        let defaultFirebaseConfig = {
             apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
             authDomain: "myjomi-220c0.firebaseapp.com",
             projectId: "myjomi-220c0",
@@ -299,507 +144,258 @@
             measurementId: "G-ZNBZDP5VPR"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        let savedConfig = localStorage.getItem('myJomiFirebaseConfig');
+        let currentConfig = savedConfig ? JSON.parse(savedConfig) : defaultFirebaseConfig;
 
-        let records = [];
-        let currentPasswordHash = localStorage.getItem('app_password_hash') || "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // Default sha256 for '1234'
+        let app, db;
+        let allData = [];
+        let filteredData = [];
 
-        window.onload = function() {
-            if(sessionStorage.getItem('isLoggedIn') === 'true') {
-                document.getElementById('loginModal').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                fetchRecordsFromFirebase();
-            }
-        };
-
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        window.handleLogin = async function() {
-            const pass = document.getElementById('loginPassword').value;
-            const hashedInput = await sha256(pass);
-            
-            if(pass === "01717087424" || hashedInput === currentPasswordHash) {
-                sessionStorage.setItem('isLoggedIn', 'true');
-                document.getElementById('loginModal').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                fetchRecordsFromFirebase();
-            } else {
-                document.getElementById('loginError').classList.remove('hidden');
-            }
-        }
-
-        window.handleLogout = function() {
-            sessionStorage.removeItem('isLoggedIn');
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('loginModal').classList.remove('hidden');
-            document.getElementById('loginPassword').value = "";
-            document.getElementById('loginError').classList.add('hidden');
+        try {
+            app = initializeApp(currentConfig);
+            db = getFirestore(app);
+            initApp();
+        } catch (e) {
+            console.error("Firebase Initialization Error:", e);
         }
 
         window.openSettings = function() {
+            document.getElementById('firebaseConfigInput').value = JSON.stringify(currentConfig, null, 2);
             document.getElementById('settingsModal').classList.remove('hidden');
         }
 
         window.closeSettings = function() {
             document.getElementById('settingsModal').classList.add('hidden');
-            document.getElementById('settingsMsg').classList.add('hidden');
         }
 
-        window.updatePassword = async function() {
-            const cur = document.getElementById('currentPass').value;
-            const newP = document.getElementById('newPass').value;
-            const msg = document.getElementById('settingsMsg');
-            const hashedCur = await sha256(cur);
-
-            if(cur === "01717087424" || hashedCur === currentPasswordHash) {
-                if(newP.length >= 4) {
-                    currentPasswordHash = await sha256(newP);
-                    localStorage.setItem('app_password_hash', currentPasswordHash);
-                    msg.innerText = "পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!";
-                    msg.className = "text-xs text-center font-medium text-emerald-600";
-                    msg.classList.remove('hidden');
-                    setTimeout(closeSettings, 1500);
-                } else {
-                    msg.innerText = "নতুন পাসওয়ার্ড অন্তত ৪ ডিজিটের হতে হবে।";
-                    msg.className = "text-xs text-center font-medium text-rose-500";
-                    msg.classList.remove('hidden');
-                }
-            } else {
-                msg.innerText = "বর্তমান পাসওয়ার্ড ভুল!";
-                msg.className = "text-xs text-center font-medium text-rose-500";
-                msg.classList.remove('hidden');
+        window.saveFirebaseConfig = function() {
+            try {
+                let parsed = JSON.parse(document.getElementById('firebaseConfigInput').value);
+                localStorage.setItem('myJomiFirebaseConfig', JSON.stringify(parsed));
+                alert('কনফিগারেশন সফলভাবে সংরক্ষিত হয়েছে। পেজ রিফ্রেশ হচ্ছে...');
+                location.reload();
+            } catch (err)  {
+                alert('সঠিক JSON ফরম্যাট প্রদান করুন!');
             }
         }
 
-        // --- FIREBASE FIRESTORE OPERATIONS ---
+        async function initApp() {
+            await fetchRecords();
+        }
 
-        async function fetchRecordsFromFirebase() {
-            const statusBanner = document.getElementById('connectionStatus');
+        async function fetchRecords() {
             try {
                 const querySnapshot = await getDocs(collection(db, "land_records"));
-                records = [];
+                allData = [];
                 querySnapshot.forEach((docSnap) => {
-                    records.push({ id: docSnap.id, ...docSnap.data() });
+                    allData.push({ id: docSnap.id, ...docSnap.data() });
                 });
-                
-                statusBanner.className = "bg-emerald-600 text-white text-center py-1 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> ফায়ারবেস ক্লাউড ডাটাবেসের সাথে সংযুক্ত (${records.length} টি রেকর্ড)`;
-                setTimeout(() => { statusBanner.classList.add('hidden'); }, 4000);
-
-                loadRecordsToTable();
+                filteredData = [...allData];
+                updateTotalCount();
+                populateDropdowns();
+                renderTable();
             } catch (error) {
-                console.error("ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
-                statusBanner.className = "bg-rose-600 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ফায়ারবেস কানেকশন ত্রুটি: ${error.message}`;
+                console.error("Error fetching data:", error);
             }
         }
 
-        function loadRecordsToTable() {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = "";
+        function updateTotalCount() {
+            document.getElementById('totalCount').innerText = allData.length;
+        }
 
-            if(records.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">কোনো রেকর্ড পাওয়া যায়নি। এক্সেল আপলোড করুন অথবা নতুন এন্ট্রি দিন।</td></tr>`;
-                updateCounter(0);
+        function populateDropdowns() {
+            let divs = [...new Set(allData.map(item => item.bibhag))].filter(Boolean);
+            let dists = [...new Set(allData.map(item => item.jela))].filter(Boolean);
+            let upazilas = [...new Set(allData.map(item => item.upazila))].filter(Boolean);
+            let mouzas = [...new Set(allData.map(item => item.mouza))].filter(Boolean);
+
+            fillSelect('filterDiv', divs);
+            fillSelect('filterDist', dists);
+            fillSelect('filterUpazila', upazilas);
+            fillSelect('filterMouza', mouzas);
+        }
+
+        function fillSelect(elementId, items) {
+            let select = document.getElementById(elementId);
+            let currentVal = select.value;
+            select.innerHTML = `<option value="">সকল ${elementId === 'filterDiv' ? 'বিভাগ' : elementId === 'filterDist' ? 'জেলা' : elementId === 'filterUpazila' ? 'উপজেলা' : 'মৌজা'}</option>`;
+            items.sort().forEach(item => {
+                let opt = document.createElement('option');
+                opt.value = item;
+                opt.innerText = item;
+                if(item === currentVal) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        window.applyFilters = function() {
+            let divVal = document.getElementById('filterDiv').value;
+            let distVal = document.getElementById('filterDist').value;
+            let upazilaVal = document.getElementById('filterUpazila').value;
+            let mouzaVal = document.getElementById('filterMouza').value;
+            let dagVal = document.getElementById('searchDag').value.toLowerCase().trim();
+            let khatianVal = document.getElementById('searchKhatian').value.toLowerCase().trim();
+
+            filteredData = allData.filter(item => {
+                let matchDiv = !divVal || item.bibhag === divVal;
+                let matchDist = !distVal || item.jela === distVal;
+                let matchUpazila = !upazilaVal || item.upazila === upazilaVal;
+                let matchMouza = !mouzaVal || item.mouza === mouzaVal;
+                let matchDag = !dagVal || String(item.dagNo || '').toLowerCase().includes(dagVal);
+                let matchKhatian = !khatianVal || String(item.khatianNo || '').toLowerCase().includes(khatianVal);
+
+                return matchDiv && matchDist && matchUpazila && matchMouza && matchDag && matchKhatian;
+            });
+
+            renderTable();
+        }
+
+        function renderTable() {
+            let tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400">কোনো রেকর্ড পাওয়া যায়নি।</td></tr>`;
                 return;
             }
 
-            records.forEach(rec => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition data-row";
-                tr.setAttribute('data-id', rec.id);
-                tr.setAttribute('data-division', rec.division || "");
-                tr.setAttribute('data-district', rec.district || "");
-                tr.setAttribute('data-upazila', rec.upazila || "");
-                tr.setAttribute('data-mouza', rec.mouza || "");
-                tr.setAttribute('data-owner', rec.owner || "");
-                tr.setAttribute('data-dag', rec.dag || "");
-
-                const statusBadge = rec.status === "OK" 
-                    ? `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold text-[11px] shadow-sm">OK</span>`
-                    : `<div id="statusContainer-${rec.id}" class="inline-block"><button onclick="toggleOkNok('${rec.id}')" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button></div>`;
-
+            filteredData.forEach(item => {
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
                 tr.innerHTML = `
-                    <td class="p-3.5 font-medium cell-div">${rec.division || "-"}</td>
-                    <td class="p-3.5 cell-dist">${rec.district || "-"}</td>
-                    <td class="p-3.5 cell-upa">${rec.upazila || "-"}</td>
-                    <td class="p-3.5 cell-mouza">${rec.mouza || "-"}</td>
-                    <td class="p-3.5 cell-jl">${rec.jl || "-"}</td>
-                    <td class="p-3.5 cell-khatian">${rec.khatian || "-"}</td>
-                    <td class="p-3.5 font-semibold text-slate-800 cell-owner">${rec.owner || "-"}</td>
-                    <td class="p-3.5 font-semibold text-slate-800 cell-dag">${rec.dag || "-"}</td>
-                    <td class="p-3.5 cell-totalacre">${rec.totalAcre || "-"}</td>
-                    <td class="p-3.5 text-center">${statusBadge}</td>
-                    <td class="p-3.5 text-center">
-                        <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="viewRow('${rec.id}')" class="bg-sky-50 text-sky-600 hover:bg-sky-100 p-2 rounded-lg transition" title="ভিউ"><i class="fa-solid fa-eye"></i></button>
-                            <button onclick="editRow('${rec.id}')" class="bg-amber-50 text-amber-600 hover:bg-amber-100 p-2 rounded-lg transition" title="এডিট"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteRecord('${rec.id}')" class="bg-rose-50 text-rose-600 hover:bg-rose-100 p-2 rounded-lg transition" title="ডিলিট"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </td>
+                    <td class="p-3">${item.bibhag || ''}</td>
+                    <td class="p-3">${item.jela || ''}</td>
+                    <td class="p-3">${item.upazila || ''}</td>
+                    <td class="p-3">${item.mouza || ''}</td>
+                    <td class="p-3">${item.jlNo || ''}</td>
+                    <td class="p-3 font-semibold text-blue-600">${item.khatianNo || ''}</td>
+                    <td class="p-3">${item.ownerName || ''}</td>
+                    <td class="p-3 font-semibold">${item.dagNo || ''}</td>
+                    <td class="p-3 text-right font-medium">${item.totalLand || ''}</td>
                 `;
-                tableBody.appendChild(tr);
+                tbody.appendChild(tr);
             });
-
-            initTableFilters();
         }
 
-        window.toggleOkNok = function(id) {
-            const container = document.getElementById(`statusContainer-${id}`);
-            container.innerHTML = `
-                <div class="flex items-center gap-1">
-                    <input type="text" id="secretCodeInput-${id}" placeholder="কোড দিন" class="w-20 px-2 py-1 text-xs border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
-                    <button onclick="saveCodeInline('${id}')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">সেভ</button>
-                </div>
-            `;
-        }
-
-        window.saveCodeInline = async function(id) {
-            const codeInput = document.getElementById(`secretCodeInput-${id}`).value.trim();
-            if(!codeInput) {
-                alert("দয়া করে কোডটি লিখুন!");
-                return;
-            }
-            try {
-                const docRef = doc(db, "land_records", id);
-                await updateDoc(docRef, { code: codeInput, status: "OK" });
-                
-                const rec = records.find(r => r.id === id);
-                if(rec) { rec.code = codeInput; rec.status = "OK"; }
-                
-                loadRecordsToTable();
-                alert("কোড ও স্ট্যাটাস সফলভাবে ক্লাউডে সংরক্ষিত হয়েছে!");
-            } catch (error) {
-                console.error("Error updating status: ", error);
-            }
-        }
-
-        window.viewRow = function(id) {
-            const rec = records.find(r => r.id === id);
-            if(!rec) return;
-
-            document.getElementById('modalDiv').innerText = rec.division || "-";
-            document.getElementById('modalDist').innerText = rec.district || "-";
-            document.getElementById('modalUpa').innerText = rec.upazila || "-";
-            document.getElementById('modalMouza').innerText = rec.mouza || "-";
-            document.getElementById('modalJl').innerText = rec.jl || "-";
-            document.getElementById('modalKhatian').innerText = rec.khatian || "-";
-            document.getElementById('modalOwner').innerText = rec.owner || "-";
-            document.getElementById('modalDag').innerText = rec.dag || "-";
-            document.getElementById('modalTotalAcre').innerText = rec.totalAcre || "-";
-
-            const linksContainer = document.getElementById('modalLinksContainer');
-            if(!rec.code) {
-                linksContainer.innerHTML = `<span class="text-rose-500 text-xs font-medium italic"><i class="fa-solid fa-triangle-exclamation mr-1"></i>এই রেকর্ডে এখনও কোনো কোড যুক্ত করা হয়নি (NOK অবস্থায় আছে)।</span>`;
-            } else {
-                linksContainer.innerHTML = `
-                    <a href="https://example.com/pdf/application?code=${rec.code}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-blue-600"></i> আবেদন পত্র</a>
-                    <a href="https://example.com/pdf/khatian?code=${rec.code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী খতিয়ান</a>
-                    <a href="https://example.com/pdf/dc?code=${rec.code}" target="_blank" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-amber-600"></i> ডিসিয়ার কপি</a>
-                `;
-            }
-            document.getElementById('viewModal').classList.remove('hidden');
-        }
-
-        window.closeViewModal = function() {
-            document.getElementById('viewModal').classList.add('hidden');
-        }
-
-        window.editRow = function(id) {
-            const rec = records.find(r => r.id === id);
-            if(!rec) return;
-
-            document.getElementById('editDocId').value = rec.id;
-            document.getElementById('editDiv').value = rec.division || "";
-            document.getElementById('editDist').value = rec.district || "";
-            document.getElementById('editUpa').value = rec.upazila || "";
-            document.getElementById('editMouza').value = rec.mouza || "";
-            document.getElementById('editJl').value = rec.jl || "";
-            document.getElementById('editKhatian').value = rec.khatian || "";
-            document.getElementById('editOwner').value = rec.owner || "";
-            document.getElementById('editDag').value = rec.dag || "";
-            document.getElementById('editTotalAcre').value = rec.totalAcre || "";
-            document.getElementById('editCode').value = rec.code || "";
-            
-            updateUrlPreview();
-            document.getElementById('editModal').classList.remove('hidden');
-        }
-
-        window.closeEditModal = function() {
-            document.getElementById('editModal').classList.add('hidden');
-        }
-
-        window.updateUrlPreview = function() {
-            const code = document.getElementById('editCode').value.trim();
-            const container = document.getElementById('urlPreviewContainer');
-            if(code) {
-                container.classList.remove('hidden');
-                document.getElementById('previewUrlApp').innerText = `https://example.com/pdf/application?code=${code}`;
-                document.getElementById('previewUrlKhat').innerText = `https://example.com/pdf/khatian?code=${code}`;
-                document.getElementById('previewUrlDc').innerText = `https://example.com/pdf/dc?code=${code}`;
-            } else {
-                container.classList.add('hidden');
-            }
-        }
-
-        window.saveEditedRow = async function() {
-            const id = document.getElementById('editDocId').value;
-            const updatedData = {
-                division: document.getElementById('editDiv').value,
-                district: document.getElementById('editDist').value,
-                upazila: document.getElementById('editUpa').value,
-                mouza: document.getElementById('editMouza').value,
-                jl: document.getElementById('editJl').value,
-                khatian: document.getElementById('editKhatian').value,
-                owner: document.getElementById('editOwner').value,
-                dag: document.getElementById('editDag').value,
-                totalAcre: document.getElementById('editTotalAcre').value,
-                code: document.getElementById('editCode').value.trim(),
-                status: document.getElementById('editCode').value.trim() ? "OK" : "NOK"
-            };
-
-            try {
-                const docRef = doc(db, "land_records", id);
-                await updateDoc(docRef, updatedData);
-                
-                await fetchRecordsFromFirebase();
-                closeEditModal();
-                alert("তথ্য সফলভাবে ক্লাউডে আপডেট করা হয়েছে!");
-            } catch (error) {
-                console.error("Error updating document: ", error);
-            }
-        }
-
-        window.deleteRecord = async function(id) {
-            if(confirm("আপনি কি নিশ্চিতভাবে এই রেকর্ডটি ফায়ারবেস থেকে ডিলিট করতে চান?")) {
-                try {
-                    await deleteDoc(doc(db, "land_records", id));
-                    await fetchRecordsFromFirebase();
-                    alert("রেকর্ডটি সফলভাবে মুছে ফেলা হয়েছে!");
-                } catch (error) {
-                    console.error("Error deleting document: ", error);
-                }
-            }
-        }
-
-        window.deleteRecordFromEdit = function() {
-            const id = document.getElementById('editDocId').value;
-            closeEditModal();
-            deleteRecord(id);
-        }
-
-        // --- FILTERS & EXCEL ---
-
-        function initTableFilters() {
-            const rows = document.querySelectorAll('.data-row');
-            const divisions = new Set();
-            const districts = new Set();
-            const upazilas = new Set();
-            const mouzas = new Set();
-
-            rows.forEach(row => {
-                if(row.getAttribute('data-division')) divisions.add(row.getAttribute('data-division'));
-                if(row.getAttribute('data-district')) districts.add(row.getAttribute('data-district'));
-                if(row.getAttribute('data-upazila')) upazilas.add(row.getAttribute('data-upazila'));
-                if(row.getAttribute('data-mouza')) mouzas.add(row.getAttribute('data-mouza'));
-            });
-
-            populateDropdown('filterDivision', divisions, 'সকল বিভাগ');
-            populateDropdown('filterDistrict', districts, 'সকল জেলা');
-            populateDropdown('filterUpazila', upazilas, 'সকল উপজেলা');
-            populateDropdown('filterMouza', mouzas, 'সকল মৌজা');
-
-            updateCounter(rows.length);
-        }
-
-        function populateDropdown(elementId, items, defaultText) {
-            const select = document.getElementById(elementId);
-            const currentVal = select.value;
-            select.innerHTML = `<option value="">${defaultText}</option>`;
-            items.forEach(item => {
-                select.innerHTML += `<option value="${item}">${item}</option>`;
-            });
-            select.value = currentVal;
-        }
-
-        window.filterTable = function() {
-            const selectedDiv = document.getElementById('filterDivision').value;
-            const selectedDist = document.getElementById('filterDistrict').value;
-            const selectedUpa = document.getElementById('filterUpazila').value;
-            const selectedMouza = document.getElementById('filterMouza').value;
-            const searchOwner = document.getElementById('filterOwner').value.toLowerCase();
-            const searchDag = document.getElementById('filterDag').value.toLowerCase();
-
-            const rows = document.querySelectorAll('.data-row');
-            let visibleCount = 0;
-
-            rows.forEach(row => {
-                const div = row.getAttribute('data-division');
-                const dist = row.getAttribute('data-district');
-                const upa = row.getAttribute('data-upazila');
-                const mouza = row.getAttribute('data-mouza');
-                const owner = row.getAttribute('data-owner').toLowerCase();
-                const dag = row.getAttribute('data-dag').toLowerCase();
-
-                let match = true;
-                if(selectedDiv && div !== selectedDiv) match = false;
-                if(selectedDist && dist !== selectedDist) match = false;
-                if(selectedUpa && upa !== selectedUpa) match = false;
-                if(selectedMouza && mouza !== selectedMouza) match = false;
-                if(searchOwner && !owner.includes(searchOwner)) match = false;
-                if(searchDag && !dag.includes(searchDag)) match = false;
-
-                if(match) {
-                    row.style.display = "";
-                    visibleCount++;
-                } else {
-                    row.style.display = "none";
-                }
-            });
-
-            updateCounter(visibleCount);
-        }
-
-        function updateCounter(count) {
-            document.getElementById('counterVal').innerText = count;
-        }
-
-        window.downloadSampleExcel = function() {
-            const sampleData = [
-                { "বিভাগ": "ঢাকা", "জেলা": "ঢাকা", "উপজেলা": "সাভার", "মৌজা": "AMINABAD", "জেএল নম্বর": "১২", "খতিয়ান নম্বর": "৪৫/১", "মালিকের নাম": "আব্দুর রহমান", "দাগ নম্বর": "১০৮", "মোট জমি (একর)": "০.০২" }
-            ];
-            const worksheet = XLSX.utils.json_to_sheet(sampleData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Sample");
-            XLSX.writeFile(workbook, "Land_Record_Sample.xlsx");
-        }
-
-        // --- OPTIMIZED BATCH EXCEL UPLOAD FOR LIGHTNING FAST PERFORMANCE ---
-        window.uploadExcel = function(event) {
-            const file = event.target.files[0];
+        // Handle Excel Upload with Duplicate Check
+        window.handleExcelUpload = async function(event) {
+            let file = event.target.files[0];
             if (!file) return;
 
-            const statusBanner = document.getElementById('connectionStatus');
-            statusBanner.className = "bg-blue-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> এক্সেল ফাইল প্রসেস ও ব্যাচ আপলোড করা হচ্ছে...`;
-            statusBanner.classList.remove('hidden');
-
-            const reader = new FileReader();
+            let reader = new FileReader();
             reader.onload = async function(e) {
                 try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const rawJsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                    let data = new Uint8Array(e.target.result);
+                    let workbook = XLSX.read(data, { type: 'array' });
+                    let firstSheetName = workbook.SheetNames[0];
+                    let worksheet = workbook.Sheets[firstSheetName];
+                    let jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-                    if(!rawJsonData || rawJsonData.length === 0) {
-                        alert("এক্সেল ফাইলে কোনো ডেটা পাওয়া যায়নি!");
-                        statusBanner.classList.add('hidden');
+                    if (jsonData.length === 0) {
+                        alert('এক্সেল ফাইলে কোনো ডেটা পাওয়া যায়নি!');
                         return;
                     }
 
-                    // Firestore batch supports up to 500 operations per batch
                     let batch = writeBatch(db);
-                    let operationCounter = 0;
-                    let totalUploaded = 0;
+                    let count = 0;
+                    let duplicateCount = 0;
 
-                    for (let rawItem of rawJsonData) {
-                        const item = {};
-                        Object.keys(rawItem).forEach(key => {
-                            const cleanKey = key.trim();
-                            item[cleanKey] = rawItem[key];
-                        });
-
-                        const newRec = {
-                            division: String(item["বিভাগ"] || item["Division"] || "-"),
-                            district: String(item["জেলা"] || item["District"] || "-"),
-                            upazila: String(item["উপজেলা"] || item["Upazila"] || "-"),
-                            mouza: String(item["মৌজা"] || item["Mouza"] || "-"),
-                            jl: String(item["জেএল নম্বর"] || item["JL"] || "-"),
-                            khatian: String(item["খতিয়ান নম্বর"] || item["Khatian"] || "-"),
-                            owner: String(item["মালিকের নাম"] || item["Owner"] || "-"),
-                            dag: String(item["দাগ নম্বর"] || item["Dag"] || "-"),
-                            totalAcre: String(item["মোট জমি (একর)"] || item["Acre"] || "-"),
-                            code: "",
-                            status: "NOK"
+                    for (let row of jsonData) {
+                        let record = {
+                            bibhag: String(row['বিভাগ'] || row['bibhag'] || '').trim(),
+                            jela: String(row['জেলা'] || row['jela'] || '').trim(),
+                            upazila: String(row['উপজেলা'] || row['upazila'] || '').trim(),
+                            mouza: String(row['মৌজা'] || row['mouza'] || '').trim(),
+                            jlNo: String(row['জেএল নম্বর'] || row['jlNo'] || '').trim(),
+                            khatianNo: String(row['খতিয়ান নম্বর'] || row['khatianNo'] || '').trim(),
+                            ownerName: String(row['মালিকের নাম'] || row['ownerName'] || '').trim(),
+                            dagNo: String(row['দাগ নম্বর'] || row['dagNo'] || '').trim(),
+                            totalLand: String(row['মোট জমি (একর)'] || row['totalLand'] || '').trim()
                         };
 
-                        const newDocRef = doc(collection(db, "land_records"));
-                        batch.set(newDocRef, newRec);
-                        operationCounter++;
-                        totalUploaded++;
+                        // Check for duplicate based on bibhag, jela, upazila, mouza, khatianNo, dagNo, ownerName
+                        let isDuplicate = allData.some(existing => 
+                            existing.bibhag === record.bibhag &&
+                            existing.jela === record.jela &&
+                            existing.upazila === record.upazila &&
+                            existing.mouza === record.mouza &&
+                            existing.khatianNo === record.khatianNo &&
+                            existing.dagNo === record.dagNo &&
+                            existing.ownerName === record.ownerName
+                        );
 
-                        if (operationCounter >= 400) {
+                        if (isDuplicate) {
+                            duplicateCount++;
+                            continue; // Skip duplicate record
+                        }
+
+                        let newDocRef = doc(collection(db, "land_records"));
+                        batch.set(newDocRef, record);
+                        count++;
+
+                        // Firestore batch limit is 500
+                        if (count >= 450) {
                             await batch.commit();
                             batch = writeBatch(db);
-                            operationCounter = 0;
+                            count = 0;
                         }
                     }
 
-                    if (operationCounter > 0) {
+                    if (count > 0) {
                         await batch.commit();
                     }
 
-                    statusBanner.className = "bg-emerald-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> সফলভাবে ${totalUploaded} টি রেকর্ড ফায়ারবেসে আপলোড করা হয়েছে!`;
-                    setTimeout(() => { statusBanner.classList.add('hidden'); }, 4000);
+                    alert(`সফলভাবে আপলোড সম্পন্ন হয়েছে!\nনতুন যুক্ত হয়েছে: ${count - duplicateCount > 0 ? (jsonData.length - duplicateCount) : count} টি রেকর্ড।\nডুপ্লিকেট হওয়ায় বাদ দেওয়া হয়েছে: ${duplicateCount} টি রেকর্ড।`);
+                    document.getElementById('excelFile').value = '';
+                    await fetchRecords();
 
-                    await fetchRecordsFromFirebase();
                 } catch (err) {
-                    console.error("Excel Batch Upload Exception: ", err);
-                    statusBanner.className = "bg-rose-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                    statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> আপলোড ত্রুটি: ${err.message}`;
-                    alert("এক্সেল আপলোড করতে সমস্যা হয়েছে: " + err.message);
-                } finally {
-                    event.target.value = "";
+                    console.error("Upload error:", err);
+                    alert('এক্সেল ফাইল প্রসেস করতে সমস্যা হয়েছে!');
                 }
             };
-            
-            reader.onerror = function(err) {
-                console.error("FileReader error:", err);
-                alert("ফাইল রিড করা সম্ভব হয়নি!");
-                statusBanner.classList.add('hidden');
-            };
-
             reader.readAsArrayBuffer(file);
         }
 
-        window.downloadFilteredExcel = function() {
-            const rows = document.querySelectorAll('.data-row');
-            const exportData = [];
+        window.downloadTemplate = function(e) {
+            e.preventDefault();
+            let templateData = [{
+                "বিভাগ": "ঢাকা",
+                "জেলা": "ঢাকা",
+                "উপজেলা": "সাভার",
+                "মৌজা": "امین بازار",
+                "জেএল নম্বর": "১২",
+                "খতিয়ান নম্বর": "৪৫",
+                "মালিকের নাম": "রহিম উদ্দিন",
+                "দাগ নম্বর": "১০২",
+                "মোট জমি (একর)": "১.৫"
+            }];
+            let ws = XLSX.utils.json_to_sheet(templateData);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Template");
+            XLSX.writeFile(wb, "Land_Record_Template.xlsx");
+        }
 
-            rows.forEach(row => {
-                if (row.style.display !== "none") {
-                    exportData.push({
-                        "বিভাগ": row.querySelector('.cell-div').innerText,
-                        "জেলা": row.querySelector('.cell-dist').innerText,
-                        "উপজেলা": row.querySelector('.cell-upa').innerText,
-                        "মৌজা": row.querySelector('.cell-mouza').innerText,
-                        "জেএল নম্বর": row.querySelector('.cell-jl').innerText,
-                        "খতিয়ান নম্বর": row.querySelector('.cell-khatian').innerText,
-                        "মালিকের নাম": row.querySelector('.cell-owner').innerText,
-                        "দাগ নম্বর": row.querySelector('.cell-dag').innerText,
-                        "মোট জমি (একর)": row.querySelector('.cell-totalacre').innerText
-                    });
-                }
-            });
-
-            if (exportData.length === 0) {
-                alert("ডাউনলোড করার মত কোনো ডেটা পাওয়া যায়নি!");
+        window.exportFilteredData = function() {
+            if (filteredData.length === 0) {
+                alert('ডাউনলোড করার মতো কোনো ডেটা নেই!');
                 return;
             }
-
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered_Records");
-            XLSX.writeFile(workbook, "Filtered_Land_Records.xlsx");
+            let exportList = filteredData.map(item => ({
+                "বিভাগ": item.bibhag,
+                "জেলা": item.jela,
+                "উপজেলা": item.upazila,
+                "মৌজা": item.mouza,
+                "জেএল নম্বর": item.jlNo,
+                "খতিয়ান নম্বর": item.khatianNo,
+                "মালিকের নাম": item.ownerName,
+                "দাগ নম্বর": item.dagNo,
+                "মোট জমি (একর)": item.totalLand
+            }));
+            let ws = XLSX.utils.json_to_sheet(exportList);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Filtered_Records");
+            XLSX.writeFile(wb, "Filtered_Land_Records.xlsx");
         }
     </script>
 </body>
