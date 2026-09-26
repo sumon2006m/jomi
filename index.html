@@ -66,6 +66,25 @@
         </div>
     </div>
 
+    <!-- Password Confirmation Modal (For Clear DB & Delete) -->
+    <div id="passwordConfirmModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100 text-center">
+            <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl shadow-inner">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-1">পাসওয়ার্ড কনফার্মেশন</h3>
+            <p id="confirmModalText" class="text-xs text-slate-500 mb-4">নিরাপত্তার জন্য আপনার পাসওয়ার্ড প্রদান করুন</p>
+            
+            <input type="password" id="actionConfirmPassword" placeholder="পাসওয়ার্ড লিখুন..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-rose-500 focus:outline-none mb-4 text-center">
+            
+            <div class="flex gap-2">
+                <button onclick="closePasswordConfirmModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-2.5 rounded-xl text-xs transition">বাতিল</button>
+                <button id="confirmActionBtn" class="w-1/2 bg-rose-600 hover:bg-rose-700 text-white font-medium py-2.5 rounded-xl text-xs shadow-lg shadow-rose-600/30 transition">নিশ্চিত করুন</button>
+            </div>
+            <p id="confirmErrorMsg" class="text-rose-500 text-[11px] mt-2 hidden font-medium">ভুল পাসওয়ার্ড দেওয়া হয়েছে!</p>
+        </div>
+    </div>
+
     <!-- View Details Popup Modal -->
     <div id="viewModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
         <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
@@ -193,6 +212,10 @@
                     <div id="totalCounter" class="bg-slate-800/80 border border-slate-700 px-5 py-2.5 rounded-2xl text-sm font-medium text-blue-400 shadow-inner flex items-center gap-2">
                         <i class="fa-solid fa-database"></i> মোট এন্ট্রি: <span id="counterVal" class="text-white font-bold text-base">০</span>
                     </div>
+                    <!-- Clear Database Button -->
+                    <button onclick="promptClearDatabase()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-rose-500/30 flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-triangle-exclamation"></i> ডাটাবেস ক্লিয়ার
+                    </button>
                     <button onclick="openSettings()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-slate-700 flex items-center gap-2 shadow">
                         <i class="fa-solid fa-gear"></i> সেটিংস
                     </button>
@@ -221,21 +244,21 @@
                 </div>
             </div>
 
-            <!-- Filters -->
+            <!-- Dependent Filters (বিভাগ, জেলা, উপজেলা, মৌজা নির্ভরশীল ফিল্টার) -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-9 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ</label>
-                    <input type="text" id="filterDivision" list="listDivision" placeholder="বিভাগ লিখুন বা বেছে নিন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="filterDivision" list="listDivision" placeholder="বিভাগ লিখুন..." oninput="onDivisionChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <datalist id="listDivision"></datalist>
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেলা</label>
-                    <input type="text" id="filterDistrict" list="listDistrict" placeholder="জেলা লিখুন বা বেছে নিন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="filterDistrict" list="listDistrict" placeholder="জেলা লিখুন..." oninput="onDistrictChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <datalist id="listDistrict"></datalist>
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">উপজেলা</label>
-                    <input type="text" id="filterUpazila" list="listUpazila" placeholder="উপজেলা লিখুন বা বেছে নিন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="filterUpazila" list="listUpazila" placeholder="উপজেলা লিখুন..." oninput="onUpazilaChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     <datalist id="listUpazila"></datalist>
                 </div>
                 <div>
@@ -264,7 +287,7 @@
                 </div>
             </div>
 
-            <!-- Table Controls -->
+            <!-- Table Controls (Rows Per Page & Counter Info) -->
             <div class="bg-white px-5 py-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4 text-xs">
                 <div class="flex items-center gap-2">
                     <span class="font-semibold text-slate-600">প্রতি পেজে দেখাও:</span>
@@ -307,8 +330,10 @@
                 </div>
             </div>
 
-            <!-- Pagination Controls -->
-            <div class="flex justify-center items-center gap-2 py-2" id="paginationControls"></div>
+            <!-- Pagination Controls (Footer) -->
+            <div class="flex justify-center items-center gap-2 py-2" id="paginationControls">
+                <!-- Pagination buttons generated dynamically -->
+            </div>
         </main>
     </div>
 
@@ -335,6 +360,7 @@
         let currentPage = 1;
         let rowsPerPage = 10;
         
+        let pendingActionCallback = null;
         const DEFAULT_PASSWORD = "01717087424";
 
         window.onload = async function() {
@@ -433,6 +459,73 @@
             }
         }
 
+        // --- Password Confirmation Modal Handler Functions ---
+        function openPasswordConfirmModal(titleText, callback) {
+            document.getElementById('confirmModalText').innerText = titleText;
+            document.getElementById('actionConfirmPassword').value = "";
+            document.getElementById('confirmErrorMsg').classList.add('hidden');
+            pendingActionCallback = callback;
+            document.getElementById('passwordConfirmModal').classList.remove('hidden');
+        }
+
+        window.closePasswordConfirmModal = function() {
+            document.getElementById('passwordConfirmModal').classList.add('hidden');
+            pendingActionCallback = null;
+        }
+
+        document.getElementById('confirmActionBtn').onclick = async function() {
+            const enteredPass = document.getElementById('actionConfirmPassword').value.trim();
+            try {
+                const passDocRef = doc(db, "settings", "app_auth");
+                const docSnap = await getDoc(passDocRef);
+                const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
+
+                if (enteredPass === cloudPass) {
+                    closePasswordConfirmModal();
+                    if (pendingActionCallback) pendingActionCallback();
+                } else {
+                    document.getElementById('confirmErrorMsg').classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error("পাসওয়ার্ড কনফার্ম করতে সমস্যা:", err);
+                document.getElementById('confirmErrorMsg').classList.remove('hidden');
+            }
+        };
+
+        // --- Clear Database Feature ---
+        window.promptClearDatabase = function() {
+            openPasswordConfirmModal("ডাটাবেসের সমস্ত ডেটা চিরতরে মুছে ফেলতে পাসওয়ার্ড দিন", async () => {
+                const statusBanner = document.getElementById('connectionStatus');
+                statusBanner.className = "bg-rose-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ডাটাবেস ক্লিয়ার করা হচ্ছে...`;
+                statusBanner.classList.remove('hidden');
+
+                try {
+                    let batch = writeBatch(db);
+                    let count = 0;
+                    for (let rec of records) {
+                        const docRef = doc(db, "land_records", rec.id);
+                        batch.delete(docRef);
+                        count++;
+                        if (count >= 400) {
+                            await batch.commit();
+                            batch = writeBatch(db);
+                            count = 0;
+                        }
+                    }
+                    if (count > 0) {
+                        await batch.commit();
+                    }
+
+                    alert("সফলভাবে ডাটাবেস সম্পূর্ণ ক্লিয়ার করা হয়েছে!");
+                    await fetchRecordsFromFirebase();
+                } catch (err) {
+                    console.error("ডাটাবেস ক্লিয়ার করতে ত্রুটি:", err);
+                    alert("ডাটাবেস ক্লিয়ার করতে সমস্যা হয়েছে: " + err.message);
+                }
+            });
+        };
+
         async function fetchRecordsFromFirebase() {
             const statusBanner = document.getElementById('connectionStatus');
             try {
@@ -454,25 +547,78 @@
             }
         }
 
+        // --- Dependent Dropdowns / Filters Setup ---
         function initTableFiltersAndData() {
-            const divisions = new Set();
-            const districts = new Set();
-            const upazilas = new Set();
-            const mouzas = new Set();
-
-            records.forEach(rec => {
-                if(rec.division) divisions.add(rec.division);
-                if(rec.district) districts.add(rec.district);
-                if(rec.upazila) upazilas.add(rec.upazila);
-                if(rec.mouza) mouzas.add(rec.mouza);
-            });
-
-            populateDatalist('listDivision', divisions);
-            populateDatalist('listDistrict', districts);
-            populateDatalist('listUpazila', upazilas);
-            populateDatalist('listMouza', mouzas);
-
+            updateDivisionOptions();
             filterTable();
+        }
+
+        function updateDivisionOptions() {
+            const divisions = new Set();
+            records.forEach(rec => { if(rec.division) divisions.add(rec.division); });
+            populateDatalist('listDivision', divisions);
+            updateDistrictOptions();
+        }
+
+        window.onDivisionChange = function() {
+            updateDistrictOptions();
+            filterTable();
+        }
+
+        function updateDistrictOptions() {
+            const selectedDiv = document.getElementById('filterDivision').value.toLowerCase().trim();
+            const districts = new Set();
+            records.forEach(rec => {
+                const div = (rec.division || "").toLowerCase();
+                if(!selectedDiv || div.includes(selectedDiv)) {
+                    if(rec.district) districts.add(rec.district);
+                }
+            });
+            populateDatalist('listDistrict', districts);
+            updateUpazilaOptions();
+        }
+
+        window.onDistrictChange = function() {
+            updateUpazilaOptions();
+            filterTable();
+        }
+
+        function updateUpazilaOptions() {
+            const selectedDiv = document.getElementById('filterDivision').value.toLowerCase().trim();
+            const selectedDist = document.getElementById('filterDistrict').value.toLowerCase().trim();
+            const upazilas = new Set();
+            records.forEach(rec => {
+                const div = (rec.division || "").toLowerCase();
+                const dist = (rec.district || "").toLowerCase();
+                if((!selectedDiv || div.includes(selectedDiv)) && (!selectedDist || dist.includes(selectedDist))) {
+                    if(rec.upazila) upazilas.add(rec.upazila);
+                }
+            });
+            populateDatalist('listUpazila', upazilas);
+            updateMouzaOptions();
+        }
+
+        window.onUpazilaChange = function() {
+            updateMouzaOptions();
+            filterTable();
+        }
+
+        function updateMouzaOptions() {
+            const selectedDiv = document.getElementById('filterDivision').value.toLowerCase().trim();
+            const selectedDist = document.getElementById('filterDistrict').value.toLowerCase().trim();
+            const selectedUpa = document.getElementById('filterUpazila').value.toLowerCase().trim();
+            const mouzas = new Set();
+            records.forEach(rec => {
+                const div = (rec.division || "").toLowerCase();
+                const dist = (rec.district || "").toLowerCase();
+                const upa = (rec.upazila || "").toLowerCase();
+                if((!selectedDiv || div.includes(selectedDiv)) && 
+                   (!selectedDist || dist.includes(selectedDist)) && 
+                   (!selectedUpa || upa.includes(selectedUpa))) {
+                    if(rec.mouza) mouzas.add(rec.mouza);
+                }
+            });
+            populateDatalist('listMouza', mouzas);
         }
 
         function populateDatalist(elementId, items) {
@@ -514,10 +660,10 @@
                 if(selectedDist && !dist.includes(selectedDist)) return false;
                 if(selectedUpa && !upa.includes(selectedUpa)) return false;
                 if(selectedMouza && !mouza.includes(selectedMouza)) return false;
-                if(searchJl && !jl.includes(searchJl) && !String(rec.jl || "").toLowerCase().includes(document.getElementById('filterJl').value.toLowerCase().trim())) return false;
-                if(searchKhatian && !khatian.includes(searchKhatian) && !String(rec.khatian || "").toLowerCase().includes(document.getElementById('filterKhatianSearch').value.toLowerCase().trim())) return false;
+                if(searchJl && !jl.includes(searchJl)) return false;
+                if(searchKhatian && !khatian.includes(searchKhatian)) return false;
                 if(searchOwner && !owner.includes(searchOwner)) return false;
-                if(searchDag && !dag.includes(searchDag) && !String(rec.dag || "").toLowerCase().includes(document.getElementById('filterDag').value.toLowerCase().trim())) return false;
+                if(searchDag && !dag.includes(searchDag)) return false;
 
                 return true;
             });
@@ -535,6 +681,7 @@
             document.getElementById('filterKhatianSearch').value = "";
             document.getElementById('filterOwner').value = "";
             document.getElementById('filterDag').value = "";
+            updateDivisionOptions();
             filterTable();
         }
 
@@ -754,16 +901,18 @@
             }
         }
 
-        window.deleteRecord = async function(id) {
-            if(confirm("আপনি কি নিশ্চিতভাবে এই রেকর্ডটি ফায়ারবেস থেকে ডিলিট করতে চান?")) {
+        // --- Delete Record With Password Confirmation ---
+        window.deleteRecord = function(id) {
+            openPasswordConfirmModal("এই রেকর্ডটি ফায়ারবেস থেকে মুছে ফেলতে পাসওয়ার্ড দিন", async () => {
                 try {
                     await deleteDoc(doc(db, "land_records", id));
                     await fetchRecordsFromFirebase();
                     alert("রেকর্ডটি সফলভাবে মুছে ফেলা হয়েছে!");
                 } catch (error) {
                     console.error("Error deleting document: ", error);
+                    alert("রেকর্ড ডিলিট করতে সমস্যা হয়েছে: " + error.message);
                 }
-            }
+            });
         }
 
         window.deleteRecordFromEdit = function() {
