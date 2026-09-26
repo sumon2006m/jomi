@@ -18,6 +18,11 @@
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen text-gray-800">
 
+    <!-- Connection Status Banner (Top Floating) -->
+    <div id="connectionStatus" class="bg-amber-500 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2 transition-all">
+        <i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...
+    </div>
+
     <!-- Login Modal -->
     <div id="loginModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
@@ -284,7 +289,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // আপনার দেওয়া ফায়ারবেস কনফিগারেশন
         const firebaseConfig = {
             apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
             authDomain: "myjomi-220c0.firebaseapp.com",
@@ -295,14 +299,12 @@
             measurementId: "G-ZNBZDP5VPR"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         let records = [];
         let currentPasswordHash = localStorage.getItem('app_password_hash') || "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // Default sha256 for '1234'
 
-        // Check Session on Page Load
         window.onload = function() {
             if(sessionStorage.getItem('isLoggedIn') === 'true') {
                 document.getElementById('loginModal').classList.add('hidden');
@@ -378,15 +380,24 @@
         // --- FIREBASE FIRESTORE OPERATIONS ---
 
         async function fetchRecordsFromFirebase() {
+            const statusBanner = document.getElementById('connectionStatus');
             try {
                 const querySnapshot = await getDocs(collection(db, "land_records"));
                 records = [];
                 querySnapshot.forEach((docSnap) => {
                     records.push({ id: docSnap.id, ...docSnap.data() });
                 });
+                
+                // সফলভাবে কানেক্ট হলে স্ট্যাটাস বার সবুজ দেখাবে
+                statusBanner.className = "bg-emerald-600 text-white text-center py-1 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> ফায়ারবেস ক্লাউড ডাটাবেসের সাথে সফলভাবে সংযুক্ত রয়েছে (${records.length} টি রেকর্ড পাওয়া গেছে)`;
+                setTimeout(() => { statusBanner.classList.add('hidden'); }, 4000);
+
                 loadRecordsToTable();
             } catch (error) {
                 console.error("ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
+                statusBanner.className = "bg-rose-600 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
+                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ফায়ারবেস কানেকশন ত্রুটি: ${error.message}`;
             }
         }
 
@@ -676,32 +687,46 @@
 
             const reader = new FileReader();
             reader.onload = async function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-                for (let item of jsonData) {
-                    const newRec = {
-                        division: item["বিভাগ"] || "-",
-                        district: item["জেলা"] || "-",
-                        upazila: item["উপজেলা"] || "-",
-                        mouza: item["মৌজা"] || "-",
-                        jl: item["জেএল নম্বর"] || "-",
-                        khatian: item["খতিয়ান নম্বর"] || "-",
-                        owner: item["মালিকের নাম"] || "-",
-                        dag: item["দাগ নম্বর"] || "-",
-                        totalAcre: item["মোট জমি (একর)"] || "-",
-                        code: "",
-                        status: "NOK"
-                    };
-                    await addDoc(collection(db, "land_records"), newRec);
+                    if(jsonData.length === 0) {
+                        alert("এক্সেল ফাইলে কোনো ডেটা পাওয়া যায়নি!");
+                        return;
+                    }
+
+                    // Uploading with indicator alert
+                    let uploadCount = 0;
+                    for (let item of jsonData) {
+                        const newRec = {
+                            division: String(item["বিভাগ"] || "-"),
+                            district: String(item["জেলা"] || "-"),
+                            upazila: String(item["উপজেলা"] || "-"),
+                            mouza: String(item["মৌজা"] || "-"),
+                            jl: String(item["জেএল নম্বর"] || "-"),
+                            khatian: String(item["খতিয়ান নম্বর"] || "-"),
+                            owner: String(item["মালিকের নাম"] || "-"),
+                            dag: String(item["দাগ নম্বর"] || "-"),
+                            totalAcre: String(item["মোট জমি (একর)"] || "-"),
+                            code: "",
+                            status: "NOK"
+                        };
+                        await addDoc(collection(db, "land_records"), newRec);
+                        uploadCount++;
+                    }
+
+                    await fetchRecordsFromFirebase();
+                    alert(`সফলভাবে ${uploadCount} টি রেকর্ড ফায়ারবেস ক্লাউডে আপলোড করা হয়েছে!`);
+                } catch (err) {
+                    console.error("Excel Upload Error: ", err);
+                    alert("এক্সেল আপলোড করতে সমস্যা হয়েছে: " + err.message);
+                } finally {
+                    event.target.value = "";
                 }
-
-                await fetchRecordsFromFirebase();
-                alert(`${jsonData.length} টি নতুন রেকর্ড সফলভাবে ফায়ারবেসে আপলোড করা হয়েছে!`);
-                event.target.value = "";
             };
             reader.readAsArrayBuffer(file);
         }
