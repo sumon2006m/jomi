@@ -20,7 +20,7 @@
 
     <!-- Connection Status Banner (Top Floating) -->
     <div id="connectionStatus" class="bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2 transition-all">
-        <i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...[cite: 12]
+        <i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...
     </div>
 
     <!-- Login Modal -->
@@ -263,7 +263,7 @@
             <!-- Table Controls (Rows Per Page & Counter Info) -->
             <div class="bg-white px-5 py-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4 text-xs">
                 <div class="flex items-center gap-2">
-                    <span class="font-semibold text-slate-600">প্রতি পেজে দেখਾও:</span>
+                    <span class="font-semibold text-slate-600">প্রতি পেজে দেখাও:</span>
                     <select id="rowsPerPageSelect" onchange="changeRowsPerPage()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <option value="5">৫</option>
                         <option value="10" selected>১০</option>
@@ -313,7 +313,7 @@
     <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
@@ -332,9 +332,12 @@
         let filteredRecords = []; // Stores filtered items for pagination & searching
         let currentPage = 1;
         let rowsPerPage = 10;
-        let currentPasswordHash = localStorage.getItem('app_password_hash') || "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
+        
+        // ডিফল্ট পাসওয়ার্ড হিসেবে প্রথমবার নিচের SHA-256 হ্যাশটি ফায়ারবেসে সেভ হবে যদি ডাটাবেসে কিছু না থাকে (পাসওয়ার্ড: 01717087424)
+        const DEFAULT_PASSWORD_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
 
-        window.onload = function() {
+        window.onload = async function() {
+            await ensureCloudPasswordExists();
             if(sessionStorage.getItem('isLoggedIn') === 'true') {
                 document.getElementById('loginModal').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
@@ -349,16 +352,38 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
+        // ফায়ারবেসে পাসওয়ার্ড ডকুমেন্ট আছে কিনা চেক করা, না থাকলে ডিফল্ট সেট করা
+        async function ensureCloudPasswordExists() {
+            try {
+                const passDocRef = doc(db, "settings", "app_auth");
+                const docSnap = await getDoc(passDocRef);
+                if (!docSnap.exists()) {
+                    await setDoc(passDocRef, { passwordHash: DEFAULT_PASSWORD_HASH });
+                }
+            } catch (err) {
+                console.error("পাসওয়ার্ড ইনিশিয়ালাইজ করতে সমস্যা হয়েছে:", err);
+            }
+        }
+
         window.handleLogin = async function() {
             const pass = document.getElementById('loginPassword').value;
             const hashedInput = await sha256(pass);
             
-            if(pass === "01717087424" || hashedInput === currentPasswordHash) {
-                sessionStorage.setItem('isLoggedIn', 'true');
-                document.getElementById('loginModal').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                fetchRecordsFromFirebase();
-            } else {
+            try {
+                const passDocRef = doc(db, "settings", "app_auth");
+                const docSnap = await getDoc(passDocRef);
+                const cloudHash = docSnap.exists() ? docSnap.data().passwordHash : DEFAULT_PASSWORD_HASH;
+
+                if(hashedInput === cloudHash) {
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    document.getElementById('loginModal').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    fetchRecordsFromFirebase();
+                } else {
+                    document.getElementById('loginError').classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error("লগইন ভেরিফিকেশন ত্রুটি:", err);
                 document.getElementById('loginError').classList.remove('hidden');
             }
         }
@@ -378,6 +403,8 @@
         window.closeSettings = function() {
             document.getElementById('settingsModal').classList.add('hidden');
             document.getElementById('settingsMsg').classList.add('hidden');
+            document.getElementById('currentPass').value = "";
+            document.getElementById('newPass').value = "";
         }
 
         window.updatePassword = async function() {
@@ -386,21 +413,33 @@
             const msg = document.getElementById('settingsMsg');
             const hashedCur = await sha256(cur);
 
-            if(cur === "01717087424" || hashedCur === currentPasswordHash) {
-                if(newP.length >= 4) {
-                    currentPasswordHash = await sha256(newP);
-                    localStorage.setItem('app_password_hash', currentPasswordHash);
-                    msg.innerText = "পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!";
-                    msg.className = "text-xs text-center font-medium text-emerald-600";
-                    msg.classList.remove('hidden');
-                    setTimeout(closeSettings, 1500);
+            try {
+                const passDocRef = doc(db, "settings", "app_auth");
+                const docSnap = await getDoc(passDocRef);
+                const cloudHash = docSnap.exists() ? docSnap.data().passwordHash : DEFAULT_PASSWORD_HASH;
+
+                if(hashedCur === cloudHash) {
+                    if(newP.length >= 4) {
+                        const newHashed = await sha256(newP);
+                        await updateDoc(passDocRef, { passwordHash: newHashed });
+                        
+                        msg.innerText = "পাসওয়ার্ড সফলভাবে ক্লাউডে আপডেট হয়েছে!";
+                        msg.className = "text-xs text-center font-medium text-emerald-600";
+                        msg.classList.remove('hidden');
+                        setTimeout(closeSettings, 1500);
+                    } else {
+                        msg.innerText = "নতুন পাসওয়ার্ড অন্তত ৪ ডিজিটের হতে হবে।";
+                        msg.className = "text-xs text-center font-medium text-rose-500";
+                        msg.classList.remove('hidden');
+                    }
                 } else {
-                    msg.innerText = "নতুন পাসওয়ার্ড অন্তত ৪ ডিজিটের হতে হবে।";
+                    msg.innerText = "বর্তমান পাসওয়ার্ড ভুল!";
                     msg.className = "text-xs text-center font-medium text-rose-500";
                     msg.classList.remove('hidden');
                 }
-            } else {
-                msg.innerText = "বর্তমান পাসওয়ার্ড ভুল!";
+            } catch (err) {
+                console.error("পাসওয়ার্ড আপডেট ত্রুটি:", err);
+                msg.innerText = "সার্ভার ত্রুটি, পাসওয়ার্ড আপডেট করা যায়নি।";
                 msg.className = "text-xs text-center font-medium text-rose-500";
                 msg.classList.remove('hidden');
             }
@@ -686,7 +725,7 @@
         }
 
         window.saveEditedRow = async function() {
-            const id = document.getElementById('editDocId'.value);
+            const id = document.getElementById('editDocId').value;
             const updatedData = {
                 division: document.getElementById('editDiv').value,
                 district: document.getElementById('editDist').value,
