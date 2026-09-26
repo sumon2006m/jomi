@@ -20,7 +20,7 @@
 
     <!-- Connection Status Banner (Top Floating) -->
     <div id="connectionStatus" class="bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2 transition-all">
-        <i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...
+        <i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...[cite: 12]
     </div>
 
     <!-- Login Modal -->
@@ -260,6 +260,23 @@
                 </div>
             </div>
 
+            <!-- Table Controls (Rows Per Page & Counter Info) -->
+            <div class="bg-white px-5 py-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4 text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="font-semibold text-slate-600">প্রতি পেজে দেখਾও:</span>
+                    <select id="rowsPerPageSelect" onchange="changeRowsPerPage()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="5">৫</option>
+                        <option value="10" selected>১০</option>
+                        <option value="50">৫০</option>
+                        <option value="100">১০০</option>
+                        <option value="200">২০০</option>
+                    </select>
+                </div>
+                <div id="paginationInfo" class="text-slate-500 font-medium">
+                    দেখাচ্ছে ০ থেকে ০ টি, মোট: ০ টি
+                </div>
+            </div>
+
             <!-- Table -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
                 <div class="overflow-x-auto">
@@ -285,6 +302,11 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Pagination Controls (Footer) -->
+            <div class="flex justify-center items-center gap-2 py-2" id="paginationControls">
+                <!-- Pagination buttons generated dynamically -->
+            </div>
         </main>
     </div>
 
@@ -307,7 +329,10 @@
         const db = getFirestore(app);
 
         let records = [];
-        let currentPasswordHash = localStorage.getItem('app_password_hash') || "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // Default sha256 for '1234'
+        let filteredRecords = []; // Stores filtered items for pagination & searching
+        let currentPage = 1;
+        let rowsPerPage = 10;
+        let currentPasswordHash = localStorage.getItem('app_password_hash') || "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
 
         window.onload = function() {
             if(sessionStorage.getItem('isLoggedIn') === 'true') {
@@ -396,7 +421,7 @@
                 statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> ফায়ারবেস ক্লাউড ডাটাবেসের সাথে সংযুক্ত (${records.length} টি রেকর্ড)`;
                 setTimeout(() => { statusBanner.classList.add('hidden'); }, 4000);
 
-                loadRecordsToTable();
+                initTableFiltersAndData();
             } catch (error) {
                 console.error("ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
                 statusBanner.className = "bg-rose-600 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
@@ -404,27 +429,106 @@
             }
         }
 
-        function loadRecordsToTable() {
+        function initTableFiltersAndData() {
+            const divisions = new Set();
+            const districts = new Set();
+            const upazilas = new Set();
+            const mouzas = new Set();
+
+            records.forEach(rec => {
+                if(rec.division) divisions.add(rec.division);
+                if(rec.district) districts.add(rec.district);
+                if(rec.upazila) upazilas.add(rec.upazila);
+                if(rec.mouza) mouzas.add(rec.mouza);
+            });
+
+            populateDropdown('filterDivision', divisions, 'সকল বিভাগ');
+            populateDropdown('filterDistrict', districts, 'সকল জেলা');
+            populateDropdown('filterUpazila', upazilas, 'সকল উপজেলা');
+            populateDropdown('filterMouza', mouzas, 'সকল মৌজা');
+
+            filterTable(); // Apply initial filter (which includes all records)
+        }
+
+        function populateDropdown(elementId, items, defaultText) {
+            const select = document.getElementById(elementId);
+            const currentVal = select.value;
+            select.innerHTML = `<option value="">${defaultText}</option>`;
+            items.forEach(item => {
+                select.innerHTML += `<option value="${item}">${item}</option>`;
+            });
+            select.value = currentVal;
+        }
+
+        window.filterTable = function() {
+            const selectedDiv = document.getElementById('filterDivision').value;
+            const selectedDist = document.getElementById('filterDistrict').value;
+            const selectedUpa = document.getElementById('filterUpazila').value;
+            const selectedMouza = document.getElementById('filterMouza').value;
+            const searchOwner = document.getElementById('filterOwner').value.toLowerCase();
+            const searchKhatian = document.getElementById('filterKhatianSearch').value.toLowerCase();
+            const searchDag = document.getElementById('filterDag').value.toLowerCase();
+
+            filteredRecords = records.filter(rec => {
+                const div = rec.division || "";
+                const dist = rec.district || "";
+                const upa = rec.upazila || "";
+                const mouza = rec.mouza || "";
+                const owner = (rec.owner || "").toLowerCase();
+                const khatian = (rec.khatian || "").toLowerCase();
+                const dag = (rec.dag || "").toLowerCase();
+
+                if(selectedDiv && div !== selectedDiv) return false;
+                if(selectedDist && dist !== selectedDist) return false;
+                if(selectedUpa && upa !== selectedUpa) return false;
+                if(selectedMouza && mouza !== selectedMouza) return false;
+                if(searchOwner && !owner.includes(searchOwner)) return false;
+                if(searchKhatian && !khatian.includes(searchKhatian)) return false;
+                if(searchDag && !dag.includes(searchDag)) return false;
+
+                return true;
+            });
+
+            currentPage = 1; // Reset to page 1 on filter change
+            renderTablePage();
+        }
+
+        window.changeRowsPerPage = function() {
+            rowsPerPage = parseInt(document.getElementById('rowsPerPageSelect').value);
+            currentPage = 1;
+            renderTablePage();
+        }
+
+        window.changePage = function(page) {
+            currentPage = page;
+            renderTablePage();
+        }
+
+        function renderTablePage() {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = "";
 
-            if(records.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">কোনো রেকর্ড পাওয়া যায়নি। এক্সেল আপলোড করুন অথবা নতুন এন্ট্রি দিন।</td></tr>`;
-                updateCounter(0);
+            const totalFiltered = filteredRecords.length;
+            document.getElementById('counterVal').innerText = records.length; // Total global counter
+
+            if(totalFiltered === 0) {
+                tableBody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">কোনো রেকর্ড পাওয়া যায়নি।</td></tr>`;
+                document.getElementById('paginationInfo').innerText = `দেখাচ্ছে ০ থেকে ০ টি, মোট: ০ টি`;
+                document.getElementById('paginationControls').innerHTML = "";
                 return;
             }
 
-            records.forEach(rec => {
+            const totalPages = Math.ceil(totalFiltered / rowsPerPage);
+            if(currentPage > totalPages) currentPage = totalPages;
+            if(currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = Math.min(startIndex + rowsPerPage, totalFiltered);
+            const paginatedItems = filteredRecords.slice(startIndex, endIndex);
+
+            paginatedItems.forEach(rec => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition data-row";
-                tr.setAttribute('data-id', rec.id);
-                tr.setAttribute('data-division', rec.division || "");
-                tr.setAttribute('data-district', rec.district || "");
-                tr.setAttribute('data-upazila', rec.upazila || "");
-                tr.setAttribute('data-mouza', rec.mouza || "");
-                tr.setAttribute('data-owner', rec.owner || "");
-                tr.setAttribute('data-khatian', rec.khatian || "");
-                tr.setAttribute('data-dag', rec.dag || "");
 
                 const statusBadge = rec.status === "OK" 
                     ? `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold text-[11px] shadow-sm">OK</span>`
@@ -451,7 +555,36 @@
                 tableBody.appendChild(tr);
             });
 
-            initTableFilters();
+            // Update Counter & Pagination info
+            document.getElementById('paginationInfo').innerText = `দেখাচ্ছে ${startIndex + 1} থেকে ${endIndex} টি, ফিল্টারকৃত মোট: ${totalFiltered} টি`;
+
+            // Render Pagination Buttons
+            renderPaginationButtons(totalPages);
+        }
+
+        function renderPaginationButtons(totalPages) {
+            const container = document.getElementById('paginationControls');
+            container.innerHTML = "";
+
+            if(totalPages <= 1) return;
+
+            // Previous Button
+            const prevDisabled = currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-200";
+            container.innerHTML += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition ${prevDisabled}"><i class="fa-solid fa-chevron-left mr-1"></i> আগের</button>`;
+
+            // Page numbers
+            for(let i = 1; i <= totalPages; i++) {
+                if(i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    const activeClass = i === currentPage ? "bg-blue-600 text-white shadow-md shadow-blue-600/30" : "bg-slate-100 text-slate-700 hover:bg-slate-200";
+                    container.innerHTML += `<button onclick="changePage(${i})" class="w-8 h-8 rounded-lg text-xs font-bold transition ${activeClass}">${i}</button>`;
+                } else if(i === currentPage - 3 || i === currentPage + 3) {
+                    container.innerHTML += `<span class="px-1 text-slate-400">...</span>`;
+                }
+            }
+
+            // Next Button
+            const nextDisabled = currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-200";
+            container.innerHTML += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition ${nextDisabled}">পরবর্তী <i class="fa-solid fa-chevron-right ml-1"></i></button>`;
         }
 
         window.toggleOkNok = function(id) {
@@ -477,7 +610,7 @@
                 const rec = records.find(r => r.id === id);
                 if(rec) { rec.code = codeInput; rec.status = "OK"; }
                 
-                loadRecordsToTable();
+                filterTable();
                 alert("কোড ও স্ট্যাটাস সফলভাবে ক্লাউডে সংরক্ষিত হয়েছে!");
             } catch (error) {
                 console.error("Error updating status: ", error);
@@ -553,7 +686,7 @@
         }
 
         window.saveEditedRow = async function() {
-            const id = document.getElementById('editDocId').value;
+            const id = document.getElementById('editDocId'.value);
             const updatedData = {
                 division: document.getElementById('editDiv').value,
                 district: document.getElementById('editDist').value,
@@ -596,85 +729,6 @@
             const id = document.getElementById('editDocId').value;
             closeEditModal();
             deleteRecord(id);
-        }
-
-        // --- FILTERS & EXCEL ---
-
-        function initTableFilters() {
-            const rows = document.querySelectorAll('.data-row');
-            const divisions = new Set();
-            const districts = new Set();
-            const upazilas = new Set();
-            const mouzas = new Set();
-
-            rows.forEach(row => {
-                if(row.getAttribute('data-division')) divisions.add(row.getAttribute('data-division'));
-                if(row.getAttribute('data-district')) districts.add(row.getAttribute('data-district'));
-                if(row.getAttribute('data-upazila')) upazilas.add(row.getAttribute('data-upazila'));
-                if(row.getAttribute('data-mouza')) mouzas.add(row.getAttribute('data-mouza'));
-            });
-
-            populateDropdown('filterDivision', divisions, 'সকল বিভাগ');
-            populateDropdown('filterDistrict', districts, 'সকল জেলা');
-            populateDropdown('filterUpazila', upazilas, 'সকল উপজেলা');
-            populateDropdown('filterMouza', mouzas, 'সকল মৌজা');
-
-            updateCounter(rows.length);
-        }
-
-        function populateDropdown(elementId, items, defaultText) {
-            const select = document.getElementById(elementId);
-            const currentVal = select.value;
-            select.innerHTML = `<option value="">${defaultText}</option>`;
-            items.forEach(item => {
-                select.innerHTML += `<option value="${item}">${item}</option>`;
-            });
-            select.value = currentVal;
-        }
-
-        window.filterTable = function() {
-            const selectedDiv = document.getElementById('filterDivision').value;
-            const selectedDist = document.getElementById('filterDistrict').value;
-            const selectedUpa = document.getElementById('filterUpazila').value;
-            const selectedMouza = document.getElementById('filterMouza').value;
-            const searchOwner = document.getElementById('filterOwner').value.toLowerCase();
-            const searchKhatian = document.getElementById('filterKhatianSearch').value.toLowerCase();
-            const searchDag = document.getElementById('filterDag').value.toLowerCase();
-
-            const rows = document.querySelectorAll('.data-row');
-            let visibleCount = 0;
-
-            rows.forEach(row => {
-                const div = row.getAttribute('data-division');
-                const dist = row.getAttribute('data-district');
-                const upa = row.getAttribute('data-upazila');
-                const mouza = row.getAttribute('data-mouza');
-                const owner = row.getAttribute('data-owner').toLowerCase();
-                const khatian = row.getAttribute('data-khatian').toLowerCase();
-                const dag = row.getAttribute('data-dag').toLowerCase();
-
-                let match = true;
-                if(selectedDiv && div !== selectedDiv) match = false;
-                if(selectedDist && dist !== selectedDist) match = false;
-                if(selectedUpa && upa !== selectedUpa) match = false;
-                if(selectedMouza && mouza !== selectedMouza) match = false;
-                if(searchOwner && !owner.includes(searchOwner)) match = false;
-                if(searchKhatian && !khatian.includes(searchKhatian)) match = false;
-                if(searchDag && !dag.includes(searchDag)) match = false;
-
-                if(match) {
-                    row.style.display = "";
-                    visibleCount++;
-                } else {
-                    row.style.display = "none";
-                }
-            });
-
-            updateCounter(visibleCount);
-        }
-
-        function updateCounter(count) {
-            document.getElementById('counterVal').innerText = count;
         }
 
         window.downloadSampleExcel = function() {
@@ -734,7 +788,6 @@
                         const newDag = String(item["দাগ নম্বর"] || item["Dag"] || "-").trim();
                         const newTotalAcre = String(item["মোট জমি (একর)"] || item["Acre"] || "-").trim();
 
-                        // Check for duplicate against existing records (all fields check)
                         const isDuplicate = records.some(r => 
                             String(r.division || "").trim() === newDivision &&
                             String(r.district || "").trim() === newDistrict &&
@@ -809,24 +862,17 @@
         }
 
         window.downloadFilteredExcel = function() {
-            const rows = document.querySelectorAll('.data-row');
-            const exportData = [];
-
-            rows.forEach(row => {
-                if (row.style.display !== "none") {
-                    exportData.push({
-                        "বিভাগ": row.querySelector('.cell-div').innerText,
-                        "জেলা": row.querySelector('.cell-dist').innerText,
-                        "উপজেলা": row.querySelector('.cell-upa').innerText,
-                        "মৌজা": row.querySelector('.cell-mouza').innerText,
-                        "জেএল নম্বর": row.querySelector('.cell-jl').innerText,
-                        "খতিয়ান নম্বর": row.querySelector('.cell-khatian').innerText,
-                        "মালিকের নাম": row.querySelector('.cell-owner').innerText,
-                        "দাগ নম্বর": row.querySelector('.cell-dag').innerText,
-                        "মোট জমি (একর)": row.querySelector('.cell-totalacre').innerText
-                    });
-                }
-            });
+            const exportData = filteredRecords.map(rec => ({
+                "বিভাগ": rec.division || "-",
+                "জেলা": rec.district || "-",
+                "উপজেলা": rec.upazila || "-",
+                "মৌজা": rec.mouza || "-",
+                "জেএল নম্বর": rec.jl || "-",
+                "খতিয়ান নম্বর": rec.khatian || "-",
+                "মালিকের নাম": rec.owner || "-",
+                "দাগ নম্বর": rec.dag || "-",
+                "মোট জমি (একর)": rec.totalAcre || "-"
+            }));
 
             if (exportData.length === 0) {
                 alert("ডাউনলোড করার মত কোনো ডেটা পাওয়া যায়নি!");
