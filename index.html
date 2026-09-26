@@ -220,31 +220,27 @@
                 </div>
             </div>
 
-            <!-- Filters -->
+            <!-- Filters (Searchable Inputs with Datalist) -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ ফিল্টার</label>
-                    <select id="filterDivision" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল বিভাগ</option>
-                    </select>
+                    <input type="text" id="filterDivision" list="divisionList" placeholder="বিভাগ লিখুন বা বাছুন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="divisionList"></datalist>
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেলা ফিল্টার</label>
-                    <select id="filterDistrict" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল জেলা</option>
-                    </select>
+                    <input type="text" id="filterDistrict" list="districtList" placeholder="জেলা লিখুন বা বাছুন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="districtList"></datalist>
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">উপজেলা ফিল্টার</label>
-                    <select id="filterUpazila" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল উপজেলা</option>
-                    </select>
+                    <input type="text" id="filterUpazila" list="upazilaList" placeholder="উপজেলা লিখুন বা বাছুন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="upazilaList"></datalist>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মৌজা ফিল্টার</label>
-                    <select id="filterMouza" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="">সকল মৌজা</option>
-                    </select>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মৌজা বা জেএল নম্বর</label>
+                    <input type="text" id="filterMouza" list="mouzaList" placeholder="মৌজা বা জেএল লিখুন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="mouzaList"></datalist>
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মালিকের নাম সার্চ</label>
@@ -329,11 +325,10 @@
         const db = getFirestore(app);
 
         let records = [];
-        let filteredRecords = []; // Stores filtered items for pagination & searching
+        let filteredRecords = []; 
         let currentPage = 1;
         let rowsPerPage = 10;
         
-        // ডিফল্ট পাসওয়ার্ড হিসেবে প্রথমবার নিচের SHA-256 হ্যাশটি ফায়ারবেসে সেভ হবে যদি ডাটাবেসে কিছু না থাকে (পাসওয়ার্ড: 01717087424)
         const DEFAULT_PASSWORD_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
 
         window.onload = async function() {
@@ -352,7 +347,6 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // ফায়ারবেসে পাসওয়ার্ড ডকুমেন্ট আছে কিনা চেক করা, না থাকলে ডিফল্ট সেট করা
         async function ensureCloudPasswordExists() {
             try {
                 const passDocRef = doc(db, "settings", "app_auth");
@@ -445,6 +439,18 @@
             }
         }
 
+        // --- DIGIT NORMALIZER FOR BENGALI/ENGLISH NUMERALS ---
+        function normalizeDigits(str) {
+            if (!str) return "";
+            const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            const enDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            let res = String(str);
+            for (let i = 0; i < 10; i++) {
+                res = res.replace(new RegExp(bnDigits[i], 'g'), enDigits[i]);
+            }
+            return res.toLowerCase().trim();
+        }
+
         // --- FIREBASE FIRESTORE OPERATIONS ---
 
         async function fetchRecordsFromFirebase() {
@@ -481,54 +487,64 @@
                 if(rec.mouza) mouzas.add(rec.mouza);
             });
 
-            populateDropdown('filterDivision', divisions, 'সকল বিভাগ');
-            populateDropdown('filterDistrict', districts, 'সকল জেলা');
-            populateDropdown('filterUpazila', upazilas, 'সকল উপজেলা');
-            populateDropdown('filterMouza', mouzas, 'সকল মৌজা');
+            populateDatalist('divisionList', divisions);
+            populateDatalist('districtList', districts);
+            populateDatalist('upazilaList', upazilas);
+            populateDatalist('mouzaList', mouzas);
 
-            filterTable(); // Apply initial filter (which includes all records)
+            filterTable();
         }
 
-        function populateDropdown(elementId, items, defaultText) {
-            const select = document.getElementById(elementId);
-            const currentVal = select.value;
-            select.innerHTML = `<option value="">${defaultText}</option>`;
+        function populateDatalist(listId, items) {
+            const list = document.getElementById(listId);
+            list.innerHTML = "";
             items.forEach(item => {
-                select.innerHTML += `<option value="${item}">${item}</option>`;
+                list.innerHTML += `<option value="${item}">`;
             });
-            select.value = currentVal;
         }
 
         window.filterTable = function() {
-            const selectedDiv = document.getElementById('filterDivision').value;
-            const selectedDist = document.getElementById('filterDistrict').value;
-            const selectedUpa = document.getElementById('filterUpazila').value;
-            const selectedMouza = document.getElementById('filterMouza').value;
-            const searchOwner = document.getElementById('filterOwner').value.toLowerCase();
-            const searchKhatian = document.getElementById('filterKhatianSearch').value.toLowerCase();
-            const searchDag = document.getElementById('filterDag').value.toLowerCase();
+            const selectedDiv = document.getElementById('filterDivision').value.toLowerCase().trim();
+            const selectedDist = document.getElementById('filterDistrict').value.toLowerCase().trim();
+            const selectedUpa = document.getElementById('filterUpazila').value.toLowerCase().trim();
+            const searchMouzaInput = document.getElementById('filterMouza').value.toLowerCase().trim();
+            const searchOwner = document.getElementById('filterOwner').value.toLowerCase().trim();
+            const searchKhatian = document.getElementById('filterKhatianSearch').value.toLowerCase().trim();
+            const searchDag = document.getElementById('filterDag').value.toLowerCase().trim();
+
+            const normSearchKhatian = normalizeDigits(searchKhatian);
+            const normSearchDag = normalizeDigits(searchDag);
+            const normSearchMouza = normalizeDigits(searchMouzaInput);
 
             filteredRecords = records.filter(rec => {
-                const div = rec.division || "";
-                const dist = rec.district || "";
-                const upa = rec.upazila || "";
-                const mouza = rec.mouza || "";
+                const div = (rec.division || "").toLowerCase();
+                const dist = (rec.district || "").toLowerCase();
+                const upa = (rec.upazila || "").toLowerCase();
+                const mouza = (rec.mouza || "").toLowerCase();
+                const jl = normalizeDigits(rec.jl || "");
                 const owner = (rec.owner || "").toLowerCase();
-                const khatian = (rec.khatian || "").toLowerCase();
-                const dag = (rec.dag || "").toLowerCase();
+                const khatian = normalizeDigits(rec.khatian || "");
+                const dag = normalizeDigits(rec.dag || "");
 
-                if(selectedDiv && div !== selectedDiv) return false;
-                if(selectedDist && dist !== selectedDist) return false;
-                if(selectedUpa && upa !== selectedUpa) return false;
-                if(selectedMouza && mouza !== selectedMouza) return false;
+                if(selectedDiv && !div.includes(selectedDiv)) return false;
+                if(selectedDist && !dist.includes(selectedDist)) return false;
+                if(selectedUpa && !upa.includes(selectedUpa)) return false;
+
+                // Mouza or JL number filter (supports typing either Mouza name or JL number in Bengali/English)
+                if(searchMouzaInput) {
+                    const matchMouza = mouza.includes(searchMouzaInput);
+                    const matchJl = jl.includes(normSearchMouza);
+                    if(!matchMouza && !matchJl) return false;
+                }
+
                 if(searchOwner && !owner.includes(searchOwner)) return false;
-                if(searchKhatian && !khatian.includes(searchKhatian)) return false;
-                if(searchDag && !dag.includes(searchDag)) return false;
+                if(normSearchKhatian && !khatian.includes(normSearchKhatian)) return false;
+                if(normSearchDag && !dag.includes(normSearchDag)) return false;
 
                 return true;
             });
 
-            currentPage = 1; // Reset to page 1 on filter change
+            currentPage = 1; 
             renderTablePage();
         }
 
@@ -548,7 +564,7 @@
             tableBody.innerHTML = "";
 
             const totalFiltered = filteredRecords.length;
-            document.getElementById('counterVal').innerText = records.length; // Total global counter
+            document.getElementById('counterVal').innerText = records.length;
 
             if(totalFiltered === 0) {
                 tableBody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">কোনো রেকর্ড পাওয়া যায়নি।</td></tr>`;
@@ -594,10 +610,7 @@
                 tableBody.appendChild(tr);
             });
 
-            // Update Counter & Pagination info
             document.getElementById('paginationInfo').innerText = `দেখাচ্ছে ${startIndex + 1} থেকে ${endIndex} টি, ফিল্টারকৃত মোট: ${totalFiltered} টি`;
-
-            // Render Pagination Buttons
             renderPaginationButtons(totalPages);
         }
 
@@ -607,11 +620,9 @@
 
             if(totalPages <= 1) return;
 
-            // Previous Button
             const prevDisabled = currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-200";
             container.innerHTML += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition ${prevDisabled}"><i class="fa-solid fa-chevron-left mr-1"></i> আগের</button>`;
 
-            // Page numbers
             for(let i = 1; i <= totalPages; i++) {
                 if(i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
                     const activeClass = i === currentPage ? "bg-blue-600 text-white shadow-md shadow-blue-600/30" : "bg-slate-100 text-slate-700 hover:bg-slate-200";
@@ -621,7 +632,6 @@
                 }
             }
 
-            // Next Button
             const nextDisabled = currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-200";
             container.innerHTML += `<button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition ${nextDisabled}">পরবর্তী <i class="fa-solid fa-chevron-right ml-1"></i></button>`;
         }
@@ -780,7 +790,6 @@
             XLSX.writeFile(workbook, "Land_Record_Sample.xlsx");
         }
 
-        // --- OPTIMIZED BATCH EXCEL UPLOAD WITH DUPLICATE CHECK ---
         window.uploadExcel = function(event) {
             const file = event.target.files[0];
             if (!file) return;
