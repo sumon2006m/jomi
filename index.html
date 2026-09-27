@@ -615,6 +615,23 @@
                 return true;
             });
 
+            // জেএল নম্বর এবং খতিয়ান নম্বর অনুযায়ী A2Z ক্রমানুসারে সাজানো (Sorting)
+            filteredRecords.sort((a, b) => {
+                let jlA = String(a.jl || "").trim();
+                let jlB = String(b.jl || "").trim();
+                
+                // প্রথমে জেএল নম্বর তুলনা
+                let jlComp = jlA.localeCompare(jlB, undefined, { numeric: true, sensitivity: 'base' });
+                if (jlComp !== 0) {
+                    return jlComp;
+                }
+
+                // জেএল নম্বর একই হলে খতিয়ান নম্বর দিয়ে তুলনা
+                let khatA = String(a.khatian || "").trim();
+                let khatB = String(b.khatian || "").trim();
+                return khatA.localeCompare(khatB, undefined, { numeric: true, sensitivity: 'base' });
+            });
+
             currentPage = 1;
             renderTablePage();
         }
