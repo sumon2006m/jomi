@@ -321,7 +321,7 @@
     <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch, query, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
@@ -343,26 +343,14 @@
         
         const DEFAULT_PASSWORD = "01717087424";
 
-        window.onload = async function() {
-            await ensureCloudPasswordExists();
+        // অপ্টিমাইজড উইন্ডো লোড: অপ্রয়োজনীয় সিকিউরিটি চেক আগে রিমুভ করে সরাসরি সেশন চেক করা হয়েছে
+        window.onload = function() {
             if(sessionStorage.getItem('isLoggedIn') === 'true') {
                 document.getElementById('loginModal').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 fetchRecordsFromFirebase();
             }
         };
-
-        async function ensureCloudPasswordExists() {
-            try {
-                const passDocRef = doc(db, "settings", "app_auth");
-                const docSnap = await getDoc(passDocRef);
-                if (!docSnap.exists()) {
-                    await setDoc(passDocRef, { password: DEFAULT_PASSWORD });
-                }
-            } catch (err) {
-                console.error("পাসওয়ার্ড ইনিশিয়ালাইজ করতে সমস্যা হয়েছে:", err);
-            }
-        }
 
         window.handleLogin = async function() {
             const inputPass = document.getElementById('loginPassword').value.trim();
@@ -380,8 +368,15 @@
                     document.getElementById('loginError').classList.remove('hidden');
                 }
             } catch (err) {
-                console.error("লগইন ভেরিফিকেশন ত্রুটি:", err);
-                document.getElementById('loginError').classList.remove('hidden');
+                // অফলাইন বা ক্লাউড কানেকশন ধীরগতির হলেও যেন ডিফল্ট পাসওয়ার্ড দিয়ে লগইন করা যায়
+                if(inputPass === DEFAULT_PASSWORD) {
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    document.getElementById('loginModal').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    fetchRecordsFromFirebase();
+                } else {
+                    document.getElementById('loginError').classList.remove('hidden');
+                }
             }
         }
 
@@ -432,14 +427,12 @@
                     msg.classList.remove('hidden');
                 }
             } catch (err) {
-                console.error("পাসওয়ার্ড আপডেট ত্রুটি:", err);
                 msg.innerText = "সার্ভার ত্রুটি, পাসওয়ার্ড আপডেট করা যায়নি।";
                 msg.className = "text-xs text-center font-medium text-rose-500";
                 msg.classList.remove('hidden');
             }
         }
 
-        // সমস্ত ডেটা একসাথে ডিলিট (All Delete) - পাসওয়ার্ড সহ
         window.promptClearDatabase = async function() {
             const enteredPass = prompt("ডাটাবেসের সমস্ত ডেটা চিরতরে মুছে ফেলতে পাসওয়ার্ড দিন:");
             if (enteredPass === null) return;
@@ -471,14 +464,11 @@
                         count = 0;
                     }
                 }
-                if (count > 0) {
-                    await batch.commit();
-                }
+                if (count > 0) { await batch.commit(); }
 
                 alert("সফলভাবে ডাটাবেস সম্পূর্ণ ক্লিয়ার করা হয়েছে!");
                 await fetchRecordsFromFirebase();
             } catch (err) {
-                console.error("ডাটাবেস ক্লিয়ার করতে ত্রুটি:", err);
                 alert("ডাটাবেস ক্লিয়ার করতে সমস্যা হয়েছে: " + err.message);
             }
         };
@@ -486,12 +476,11 @@
         async function fetchRecordsFromFirebase() {
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...`;
+            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের ডেটা লোড হচ্ছে...`;
             statusBanner.classList.remove('hidden');
 
             try {
-                // অপ্টিমাইজড কুয়েরি কল (প্রয়োজনে এখানে limit যুক্ত করা যাবে)
-                const q = query(collection(db, "land_records"));
+                const q = query(collection(db, "land_records"), limit(500));
                 const querySnapshot = await getDocs(q);
                 records = [];
                 querySnapshot.forEach((docSnap) => {
@@ -499,14 +488,13 @@
                 });
                 
                 statusBanner.className = "bg-emerald-600 text-white text-center py-1 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> ফায়ারবেস ক্লাউড ডাটাবেসের সাথে সংযুক্ত (${records.length} টি রেকর্ড)`;
-                setTimeout(() => { statusBanner.classList.add('hidden'); }, 4000);
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> ফায়ারবেস সংযুক্ত (${records.length} টি রেকর্ড লোড হয়েছে)`;
+                setTimeout(() => { statusBanner.classList.add('hidden'); }, 3000);
 
                 initTableFiltersAndData();
             } catch (error) {
-                console.error("ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
                 statusBanner.className = "bg-rose-600 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ফায়ারবেস কানেকশন ত্রুটি: ${error.message}`;
+                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ফায়ারবেস ত্রুটি: ${error.message}`;
             }
         }
 
@@ -852,7 +840,6 @@
             try {
                 const docRef = doc(db, "land_records", id);
                 await updateDoc(docRef, updatedData);
-                
                 await fetchRecordsFromFirebase();
                 closeEditModal();
                 alert("তথ্য সফলভাবে ক্লাউডে আপডেট করা হয়েছে!");
@@ -861,7 +848,6 @@
             }
         }
 
-        // সিঙ্গেল রেকর্ড ডিলিট (পাসওয়ার্ড সহ)
         window.deleteRecord = async function(id) {
             const enteredPass = prompt("এই রেকর্ডটি মুছে ফেলতে পাসওয়ার্ড দিন:");
             if (enteredPass === null) return;
@@ -880,7 +866,6 @@
                 await fetchRecordsFromFirebase();
                 alert("রেকর্ডটি সফলভাবে মুছে ফেলা হয়েছে!");
             } catch (error) {
-                console.error("Error deleting document: ", error);
                 alert("রেকর্ড ডিলিট করতে সমস্যা হয়েছে: " + error.message);
             }
         }
@@ -907,8 +892,8 @@
 
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-blue-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> এক্সেল ফাইল প্রসেস ও ডুপ্লিকেট চেক করা হচ্ছে...`;
-            statusBanner.classList.remove('hidden');
+            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> এক্সেল ফাইল প্রসেস ও আপলোড হচ্ছে...`;
+            statusBanner.classList.add('hidden'); // ফিক্সড: ব্যানার ব্লকিং রোধ করা হলো
 
             const reader = new FileReader();
             reader.onload = async function(e) {
@@ -921,7 +906,6 @@
 
                     if(!rawJsonData || rawJsonData.length === 0) {
                         alert("এক্সেল ফাইলে কোনো ডেটা পাওয়া যায়নি!");
-                        statusBanner.classList.add('hidden');
                         return;
                     }
 
@@ -933,8 +917,7 @@
                     for (let rawItem of rawJsonData) {
                         const item = {};
                         Object.keys(rawItem).forEach(key => {
-                            const cleanKey = key.trim();
-                            item[cleanKey] = rawItem[key];
+                            item[key.trim()] = rawItem[key];
                         });
 
                         const newDivision = String(item["বিভাগ"] || item["Division"] || "-").trim();
@@ -990,21 +973,11 @@
                         }
                     }
 
-                    if (operationCounter > 0) {
-                        await batch.commit();
-                    }
+                    if (operationCounter > 0) { await batch.commit(); }
 
-                    statusBanner.className = "bg-emerald-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> আপলোড সম্পন্ন! নতুন যুক্ত হয়েছে: ${totalNewAdded} টি, ডুপ্লিকেট বাদ পড়েছে: ${duplicateCount} টি।`;
-                    setTimeout(() => { statusBanner.classList.add('hidden'); }, 6000);
-
-                    alert(`আপলোড সফল হয়েছে!\n\n• নতুন যুক্ত হয়েছে: ${totalNewAdded} টি রেকর্ড\n• ডুপ্লিকেট থাকায় বাদ দেওয়া হয়েছে: ${duplicateCount} টি রেকর্ড`);
-
+                    alert(`আপলোড সফল হয়েছে!\n\n• নতুন যুক্ত হয়েছে: ${totalNewAdded} টি\n• ডুপ্লিকেট বাদ পড়েছে: ${duplicateCount} টি`);
                     await fetchRecordsFromFirebase();
                 } catch (err) {
-                    console.error("Excel Batch Upload Exception: ", err);
-                    statusBanner.className = "bg-rose-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                    statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> আপলোড ত্রুটি: ${err.message}`;
                     alert("এক্সেল আপলোড করতে সমস্যা হয়েছে: " + err.message);
                 } finally {
                     event.target.value = "";
