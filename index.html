@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম - সুপার ফাস্ট ফায়ারবেস এডিশন</title>
+    <title>ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম - ফায়ারবেস ক্লাউড এডিশন</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -193,6 +193,7 @@
                     <div id="totalCounter" class="bg-slate-800/80 border border-slate-700 px-5 py-2.5 rounded-2xl text-sm font-medium text-blue-400 shadow-inner flex items-center gap-2">
                         <i class="fa-solid fa-database"></i> মোট এন্ট্রি: <span id="counterVal" class="text-white font-bold text-base">০</span>
                     </div>
+                    <!-- Clear Database Button -->
                     <button onclick="promptClearDatabase()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-rose-500/30 flex items-center gap-2 shadow">
                         <i class="fa-solid fa-triangle-exclamation"></i> ডাটাবেস ক্লিয়ার
                     </button>
@@ -224,7 +225,7 @@
                 </div>
             </div>
 
-            <!-- Dependent Filters -->
+            <!-- Dependent Filters (বিভাগ, জেলা, উপজেলা, মৌজা নির্ভরশীল ফিল্টার) -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-9 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ</label>
@@ -267,15 +268,16 @@
                 </div>
             </div>
 
-            <!-- Table Controls -->
+            <!-- Table Controls (Rows Per Page & Counter Info) -->
             <div class="bg-white px-5 py-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4 text-xs">
                 <div class="flex items-center gap-2">
                     <span class="font-semibold text-slate-600">প্রতি পেজে দেখাও:</span>
                     <select id="rowsPerPageSelect" onchange="changeRowsPerPage()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="5">৫</option>
                         <option value="10" selected>১০</option>
-                        <option value="25">২৫</option>
                         <option value="50">৫০</option>
                         <option value="100">১০০</option>
+                        <option value="200">২০০</option>
                     </select>
                 </div>
                 <div id="paginationInfo" class="text-slate-500 font-medium">
@@ -310,14 +312,16 @@
             </div>
 
             <!-- Pagination Controls (Footer) -->
-            <div class="flex justify-center items-center gap-2 py-2" id="paginationControls"></div>
+            <div class="flex justify-center items-center gap-2 py-2" id="paginationControls">
+                <!-- Pagination buttons generated dynamically -->
+            </div>
         </main>
     </div>
 
     <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch, query, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
@@ -376,6 +380,7 @@
                     document.getElementById('loginError').classList.remove('hidden');
                 }
             } catch (err) {
+                console.error("লগইন ভেরিফিকেশন ত্রুটি:", err);
                 document.getElementById('loginError').classList.remove('hidden');
             }
         }
@@ -427,12 +432,14 @@
                     msg.classList.remove('hidden');
                 }
             } catch (err) {
+                console.error("পাসওয়ার্ড আপডেট ত্রুটি:", err);
                 msg.innerText = "সার্ভার ত্রুটি, পাসওয়ার্ড আপডেট করা যায়নি।";
                 msg.className = "text-xs text-center font-medium text-rose-500";
                 msg.classList.remove('hidden');
             }
         }
 
+        // সমস্ত ডেটা একসাথে ডিলিট (All Delete) - পাসওয়ার্ড সহ
         window.promptClearDatabase = async function() {
             const enteredPass = prompt("ডাটাবেসের সমস্ত ডেটা চিরতরে মুছে ফেলতে পাসওয়ার্ড দিন:");
             if (enteredPass === null) return;
@@ -464,11 +471,14 @@
                         count = 0;
                     }
                 }
-                if (count > 0) { await batch.commit(); }
+                if (count > 0) {
+                    await batch.commit();
+                }
 
                 alert("সফলভাবে ডাটাবেস সম্পূর্ণ ক্লিয়ার করা হয়েছে!");
                 await fetchRecordsFromFirebase();
             } catch (err) {
+                console.error("ডাটাবেস ক্লিয়ার করতে ত্রুটি:", err);
                 alert("ডাটাবেস ক্লিয়ার করতে সমস্যা হয়েছে: " + err.message);
             }
         };
@@ -476,12 +486,12 @@
         async function fetchRecordsFromFirebase() {
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের ডেটা লোড হচ্ছে...`;
+            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...`;
             statusBanner.classList.remove('hidden');
 
             try {
-                // সর্বোচ্চ ৫০০ রেকর্ড একবারে এনে দ্রুত ব্রাউজারে ক্যাশ করে ফেলা হলো (স্লো হওয়া ঠেকাতে)
-                const q = query(collection(db, "land_records"), limit(500));
+                // অপ্টিমাইজড কুয়েরি কল (প্রয়োজনে এখানে limit যুক্ত করা যাবে)
+                const q = query(collection(db, "land_records"));
                 const querySnapshot = await getDocs(q);
                 records = [];
                 querySnapshot.forEach((docSnap) => {
@@ -489,13 +499,14 @@
                 });
                 
                 statusBanner.className = "bg-emerald-600 text-white text-center py-1 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> ফায়ারবেস সংযুক্ত (${records.length} টি রেকর্ড লোড হয়েছে)`;
-                setTimeout(() => { statusBanner.classList.add('hidden'); }, 3000);
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> ফায়ারবেস ক্লাউড ডাটাবেসের সাথে সংযুক্ত (${records.length} টি রেকর্ড)`;
+                setTimeout(() => { statusBanner.classList.add('hidden'); }, 4000);
 
                 initTableFiltersAndData();
             } catch (error) {
+                console.error("ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
                 statusBanner.className = "bg-rose-600 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ফায়ারবেস ত্রুটি: ${error.message}`;
+                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ফায়ারবেস কানেকশন ত্রুটি: ${error.message}`;
             }
         }
 
@@ -841,6 +852,7 @@
             try {
                 const docRef = doc(db, "land_records", id);
                 await updateDoc(docRef, updatedData);
+                
                 await fetchRecordsFromFirebase();
                 closeEditModal();
                 alert("তথ্য সফলভাবে ক্লাউডে আপডেট করা হয়েছে!");
@@ -849,6 +861,7 @@
             }
         }
 
+        // সিঙ্গেল রেকর্ড ডিলিট (পাসওয়ার্ড সহ)
         window.deleteRecord = async function(id) {
             const enteredPass = prompt("এই রেকর্ডটি মুছে ফেলতে পাসওয়ার্ড দিন:");
             if (enteredPass === null) return;
@@ -867,6 +880,7 @@
                 await fetchRecordsFromFirebase();
                 alert("রেকর্ডটি সফলভাবে মুছে ফেলা হয়েছে!");
             } catch (error) {
+                console.error("Error deleting document: ", error);
                 alert("রেকর্ড ডিলিট করতে সমস্যা হয়েছে: " + error.message);
             }
         }
@@ -893,7 +907,7 @@
 
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-blue-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> এক্সেল ফাইল প্রসেস ও আপলোড হচ্ছে...`;
+            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> এক্সেল ফাইল প্রসেস ও ডুপ্লিকেট চেক করা হচ্ছে...`;
             statusBanner.classList.remove('hidden');
 
             const reader = new FileReader();
@@ -919,7 +933,8 @@
                     for (let rawItem of rawJsonData) {
                         const item = {};
                         Object.keys(rawItem).forEach(key => {
-                            item[key.trim()] = rawItem[key];
+                            const cleanKey = key.trim();
+                            item[cleanKey] = rawItem[key];
                         });
 
                         const newDivision = String(item["বিভাগ"] || item["Division"] || "-").trim();
@@ -975,17 +990,21 @@
                         }
                     }
 
-                    if (operationCounter > 0) { await batch.commit(); }
+                    if (operationCounter > 0) {
+                        await batch.commit();
+                    }
 
                     statusBanner.className = "bg-emerald-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> আপলোড সম্পন্ন! নতুন: ${totalNewAdded} টি, ডুপ্লিকেট বাদ: ${duplicateCount} টি।`;
+                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> আপলোড সম্পন্ন! নতুন যুক্ত হয়েছে: ${totalNewAdded} টি, ডুপ্লিকেট বাদ পড়েছে: ${duplicateCount} টি।`;
                     setTimeout(() => { statusBanner.classList.add('hidden'); }, 6000);
 
-                    alert(`আপলোড সফল হয়েছে!\n\n• নতুন যুক্ত হয়েছে: ${totalNewAdded} টি\n• ডুপ্লিকেট বাদ পড়েছে: ${duplicateCount} টি`);
+                    alert(`আপলোড সফল হয়েছে!\n\n• নতুন যুক্ত হয়েছে: ${totalNewAdded} টি রেকর্ড\n• ডুপ্লিকেট থাকায় বাদ দেওয়া হয়েছে: ${duplicateCount} টি রেকর্ড`);
+
                     await fetchRecordsFromFirebase();
                 } catch (err) {
+                    console.error("Excel Batch Upload Exception: ", err);
                     statusBanner.className = "bg-rose-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                    statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ত্রুটি: ${err.message}`;
+                    statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> আপলোড ত্রুটি: ${err.message}`;
                     alert("এক্সেল আপলোড করতে সমস্যা হয়েছে: " + err.message);
                 } finally {
                     event.target.value = "";
