@@ -461,7 +461,7 @@
                 const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
 
                 if (enteredPass !== cloudPass) {
-                    alert("ভুল পাসওয়ার্ড! ডাটা ডিলিট করা হয়নি।");
+                    alert("ভুল পাসওয়ার্ড! ডেটা ডিলিট করা হয়নি।");
                     return;
                 }
 
@@ -516,7 +516,7 @@
             }
         }
 
-        // MySQL থেকে বাংলা/ইংরেজি খতিয়ান নম্বর সঠিকভাবে মিলিয়ে সিঙ্ক করার উন্নত ফাংশন
+        // MySQL থেকে ডেটা ফেচিং এবং ফায়ারবেসের সাথে সিঙ্ক করার ফ্লেক্সিবল ও উন্নত ফাংশন
         window.syncFirebaseWithMySQL = async function() {
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
@@ -539,6 +539,12 @@
                     console.error("MySQL fetch error: ", e);
                 }
 
+                if (!mysqlRecords || mysqlRecords.length === 0) {
+                    alert("MySQL সার্ভার থেকে কোনো ডেটা পাওয়া যায়নি!");
+                    statusBanner.classList.add('hidden');
+                    return;
+                }
+
                 let updatedCount = 0;
                 let batch = writeBatch(db);
                 let batchOpCount = 0;
@@ -549,23 +555,23 @@
                     const fbMouza = String(fb.mouza || "").trim().toLowerCase();
                     const fbKhatianEng = convertToEnglishDigits(fb.khatian);
 
+                    // MySQL ডেটার সাথে নিখুঁত মেলবন্ধন (district, upazila, mouza এবং khatian)
                     const matchedSql = mysqlRecords.find(sql => {
                         const sqlDist = String(sql.district || "").trim().toLowerCase();
                         const sqlUpa = String(sql.upazila || "").trim().toLowerCase();
                         const sqlMouza = String(sql.mouza || "").trim().toLowerCase();
-                        // MySQL-এর খতিয়ান নম্বর বাংলা বা ইংরেজি যাই হোক না কেন তা ইংরেজিতে কনভার্ট করে তুলনা করা হচ্ছে
                         const sqlKhatianEng = convertToEnglishDigits(sql.khatian);
 
-                        return sqlDist === fbDist &&
-                               sqlUpa === fbUpa &&
-                               sqlMouza === fbMouza &&
+                        return (sqlDist === fbDist || !sqlDist || !fbDist) &&
+                               (sqlUpa === fbUpa || !sqlUpa || !fbUpa) &&
+                               (sqlMouza === fbMouza || !sqlMouza || !fbMouza) &&
                                sqlKhatianEng === fbKhatianEng;
                     });
 
                     if (matchedSql) {
-                        const newAppNo = matchedSql.app_no || "-";
-                        const newDate = matchedSql.app_date || "-";
-                        const newCaseNo = matchedSql.case_no || "-";
+                        const newAppNo = matchedSql.app_no || matchedSql.applicationNo || "-";
+                        const newDate = matchedSql.app_date || matchedSql.date || "-";
+                        const newCaseNo = matchedSql.case_no || matchedSql.caseNo || "-";
                         const newCode = matchedSql.code || fb.code || "";
                         const newStatus = newCode ? "OK" : (fb.status || "NOK");
 
@@ -612,7 +618,7 @@
                 statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> সিঙ্ক সফল!`;
                 setTimeout(() => { statusBanner.classList.add('hidden'); }, 3000);
 
-                alert(`সাকসেস মেসেজ!\n\nমোট ${updatedCount} টি নতুন ডেটা MySQL থেকে ফায়ারবেইজ ডাটাবেইজে সফলভাবে আপডেট করা হয়েছে।`);
+                alert(`সাকসেস মেসেজ!\n\nমোট ${updatedCount} টি ডেটা MySQL থেকে ফায়ারবেইজ ডাটাবেইজে সফলভাবে আপডেট করা হয়েছে।`);
 
                 initTableFiltersAndData();
             } catch (error) {
