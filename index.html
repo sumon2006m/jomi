@@ -549,7 +549,7 @@
             downloadAnchor.remove();
         }
 
-        // সরাসরি JSON ফাইল আপলোড করে ফায়ারবেসের সাথে ডেটা সিঙ্ক ও আপডেট করার ফাংশন
+        // সরাসরি JSON ফাইল আপলোড করে ফায়ারবেসের সাথে ডেটা সিঙ্ক ও আপডেট করার ফাংশন (অনুমতি সহ)
         window.syncFirebaseWithJson = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -563,9 +563,13 @@
             reader.onload = async function(e) {
                 try {
                     const jsonContent = e.target.result;
-                    const jsonRecords = JSON.parse(jsonContent);
+                    let jsonRecords = JSON.parse(jsonContent);
 
-                    if (!jsonRecords || !Array.isArray(jsonRecords) || jsonRecords.length === 0) {
+                    if (!Array.isArray(jsonRecords)) {
+                        jsonRecords = [jsonRecords];
+                    }
+
+                    if (!jsonRecords || jsonRecords.length === 0) {
                         alert("JSON ফাইল থেকে কোনো বৈধ ডেটা পাওয়া যায়নি!");
                         statusBanner.classList.add('hidden');
                         event.target.value = "";
@@ -579,11 +583,9 @@
                         firebaseRecords.push({ id: docSnap.id, ...docSnap.data() });
                     });
 
-                    let updatedCount = 0;
-                    let batch = writeBatch(db);
-                    let batchOpCount = 0;
+                    let matchedListForUpdate = [];
 
-                    records = await Promise.all(firebaseRecords.map(async (fb) => {
+                    firebaseRecords.forEach((fb) => {
                         const fbDist = String(fb.district || "").trim().toLowerCase();
                         const fbUpa = String(fb.upazila || "").trim().toLowerCase();
                         const fbMouza = String(fb.mouza || "").trim().toLowerCase();
@@ -595,65 +597,99 @@
                             const sqlMouza = String(sql.mouza || sql["মৌজা"] || "").trim().toLowerCase();
                             const sqlKhatianEng = convertToEnglishDigits(sql.khatian || sql["খতিয়ান নম্বর"] || "");
 
-                            return (sqlDist === fbDist || !sqlDist || !fbDist) &&
-                                   (sqlUpa === fbUpa || !sqlUpa || !fbUpa) &&
-                                   (sqlMouza === fbMouza || !sqlMouza || !fbMouza) &&
-                                   sqlKhatianEng === fbKhatianEng;
+                            return (sqlDist === fbDist) &&
+                                   (sqlUpa === fbUpa) &&
+                                   (sqlMouza === fbMouza) &&
+                                   (sqlKhatianEng === fbKhatianEng);
                         });
 
                         if (matchedJson) {
-                            const newAppNo = matchedJson.app_no || matchedJson.applicationNo || matchedJson["আবেদন নম্বর"] || "-";
-                            const newDate = matchedJson.app_date || matchedJson.date || matchedJson["তারিখ"] || "-";
-                            const newCaseNo = matchedJson.case_no || matchedJson.caseNo || matchedJson["মামলা নং"] || "-";
-                            const newCode = matchedJson.code || matchedJson["কোড"] || fb.code || "";
-                            const newStatus = newCode ? "OK" : (fb.status || "NOK");
+                            const newAppNo = String(matchedJson.appNo || matchedJson.app_no || matchedJson["আবেদন নম্বর"] || "-").trim();
+                            const newDate = String(matchedJson.appDate || matchedJson.app_date || matchedJson["তারিখ"] || "-").trim();
+                            const newCaseNo = String(matchedJson.caseNo || matchedJson.case_no || matchedJson["মামলা নং"] || "-").trim();
+                            const newCode = String(matchedJson.id || matchedJson.code || matchedJson["কোড"] || fb.code || "").trim();
 
-                            if (fb.applicationNo !== newAppNo || fb.date !== newDate || fb.caseNo !== newCaseNo || fb.code !== newCode) {
-                                const docRef = doc(db, "land_records", fb.id);
-                                batch.update(docRef, {
-                                    applicationNo: newAppNo,
-                                    date: newDate,
-                                    caseNo: newCaseNo,
-                                    code: newCode,
-                                    status: newStatus
+                            if (String(fb.applicationNo || "").trim() !== newAppNo || 
+                                String(fb.date || "").trim() !== newDate || 
+                                String(fb.caseNo || "").trim() !== newCaseNo) {
+                                
+                                matchedListForUpdate.push({
+                                    id: fb.id,
+                                    khatian: fb.khatian,
+                                    mouza: fb.mouza,
+                                    oldAppNo: fb.applicationNo,
+                                    newAppNo: newAppNo,
+                                    oldDate: fb.date,
+                                    newDate: newDate,
+                                    newCaseNo: newCaseNo,
+                                    newCode: newCode,
+                                    status: newCode ? "OK" : (fb.status || "NOK")
                                 });
-                                updatedCount++;
-                                batchOpCount++;
-
-                                if (batchOpCount >= 400) {
-                                    await batch.commit();
-                                    batch = writeBatch(db);
-                                    batchOpCount = 0;
-                                }
                             }
-
-                            return {
-                                ...fb,
-                                applicationNo: newAppNo,
-                                date: newDate,
-                                caseNo: newCaseNo,
-                                code: newCode,
-                                status: newStatus
-                            };
-                        } else {
-                            return {
-                                ...fb,
-                                status: fb.code ? "OK" : "NOK"
-                            };
                         }
-                    }));
+                    });
+
+                    statusBanner.classList.add('hidden');
+
+                    if (matchedListForUpdate.length === 0) {
+                        alert("ফায়ারবেজ ডেটাবেজের সাথে JSON ফাইলের সকল ডেটা ইতিমধ্যে মিলে আছে, নতুন করে আপডেট করার কিছু নেই।");
+                        event.target.value = "";
+                        return;
+                    }
+
+                    let confirmMsg = `ফায়ারবেজ ডেটাবেজের সাথে মিল পাওয়া গেছে এমন ${matchedListForUpdate.length} টি রেকর্ডে কিছু তথ্য অমিল রয়েছে যা আপডেট করা যাবে:\n\n`;
+                    matchedListForUpdate.slice(0, 5).forEach((item, index) => {
+                        confirmMsg += `${index + 1}. মৌজা: ${item.mouza}, খতিয়ান: ${item.khatian} (আবেদন নং: ${item.oldAppNo} ➔ ${item.newAppNo})\n`;
+                    });
+                    if(matchedListForUpdate.length > 5) {
+                        confirmMsg += `...এবং আরও ${matchedListForUpdate.length - 5} টি রেকর্ড।\n`;
+                    }
+                    confirmMsg += `\আপনি কি এই অমিল ডেটাগুলো ফায়ারবেসে আপডেট করতে চান?`;
+
+                    if (!confirm(confirmMsg)) {
+                        alert("আপডেট বাতিল করা হয়েছে।");
+                        event.target.value = "";
+                        return;
+                    }
+
+                    statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
+                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> অনুমোদিত ডেটা আপডেট করা হচ্ছে...`;
+                    statusBanner.classList.remove('hidden');
+
+                    let batch = writeBatch(db);
+                    let batchOpCount = 0;
+                    let updatedCount = 0;
+
+                    for (let item of matchedListForUpdate) {
+                        const docRef = doc(db, "land_records", item.id);
+                        batch.update(docRef, {
+                            applicationNo: item.newAppNo,
+                            date: item.newDate,
+                            caseNo: item.newCaseNo,
+                            code: item.newCode,
+                            status: item.status
+                        });
+                        updatedCount++;
+                        batchOpCount++;
+
+                        if (batchOpCount >= 400) {
+                            await batch.commit();
+                            batch = writeBatch(db);
+                            batchOpCount = 0;
+                        }
+                    }
 
                     if (batchOpCount > 0) {
                         await batch.commit();
                     }
-                    
+
                     statusBanner.className = "bg-emerald-600 text-white text-center py-1 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> JSON সিঙ্ক সফল!`;
+                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> সফলভাবে আপডেট সম্পন্ন হয়েছে!`;
                     setTimeout(() => { statusBanner.classList.add('hidden'); }, 3000);
 
-                    alert(`সাকসেস মেসেজ!\n\nমোট ${updatedCount} টি ডেটা JSON ফাইল থেকে ফায়ারবেস ডাটাবেজে সফলভাবে আপডেট করা হয়েছে।`);
+                    alert(`সফলভাবে ${updatedCount} টি রেকর্ড আপডেট করা হয়েছে!`);
+                    await loadRecordsFastFromFirebase();
 
-                    initTableFiltersAndData();
                 } catch (err) {
                     statusBanner.className = "bg-rose-600 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
                     statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ত্রুটি: ${err.message}`;
