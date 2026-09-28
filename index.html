@@ -20,7 +20,7 @@
 
     <!-- Connection Status Banner (Top Floating) -->
     <div id="connectionStatus" class="bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2 transition-all">
-        <i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...[cite: 15]
+        <i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...
     </div>
 
     <!-- Login Modal -->
@@ -28,18 +28,18 @@
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
             <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner">
-                    <i class="fa-solid fa-fire text-amber-500"></i>[cite: 15]
+                    <i class="fa-solid fa-fire text-amber-500"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-slate-800">ফায়ারবেস সিস্টেম লগইন</h2>
-                <p class="text-xs text-slate-500 mt-1">নিরাপদ ক্লাউড অ্যাক্সেসের জন্য পাসওয়ার্ড দিন[cite: 15]</p>
+                <p class="text-xs text-slate-500 mt-1">নিরাপদ ক্লাউড অ্যাক্সেসের জন্য পাসওয়ার্ড দিন</p>
             </div>
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">পাসওয়ার্ড</label>
-                    <input type="password" id="loginPassword" placeholder="পাসওয়ার্ড লিখুন..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm">[cite: 15]
+                    <input type="password" id="loginPassword" placeholder="পাসওয়ার্ড লিখুন..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm">
                 </div>
-                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl shadow-lg shadow-blue-600/30 transition duration-200">প্রবেশ করুন</button>[cite: 15]
-                <p id="loginError" class="text-rose-500 text-xs text-center font-medium hidden">পাসওয়ার্ড ভুল হয়েছে! সঠিক পাসওয়ার্ড দিন।[cite: 15]</p>
+                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl shadow-lg shadow-blue-600/30 transition duration-200">প্রবেশ করুন</button>
+                <p id="loginError" class="text-rose-500 text-xs text-center font-medium hidden">পাসওয়ার্ড ভুল হয়েছে! সঠিক পাসওয়ার্ড দিন।</p>
             </div>
         </div>
     </div>
@@ -48,20 +48,20 @@
     <div id="settingsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-gear text-blue-600 mr-2"></i> সেটিংস ও পাসওয়ার্ড</h3>[cite: 15]
-                <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>[cite: 15]
+                <h3 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-gear text-blue-600 mr-2"></i> সেটিংস ও পাসওয়ার্ড</h3>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">বর্তমান পাসওয়ার্ড</label>[cite: 15]
-                    <input type="password" id="currentPass" placeholder="বর্তমান পাসওয়ার্ড দিন" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">বর্তমান পাসওয়ার্ড</label>
+                    <input type="password" id="currentPass" placeholder="বর্তমান পাসওয়ার্ড দিন" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">নতুন পাসওয়ার্ড</label>[cite: 15]
-                    <input type="password" id="newPass" placeholder="নতুন পাসওয়ার্ড দিন" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">নতুন পাসওয়ার্ড</label>
+                    <input type="password" id="newPass" placeholder="নতুন পাসওয়ার্ড দিন" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-                <button onclick="updatePassword()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl shadow-lg shadow-emerald-600/30 transition text-sm">পাসওয়ার্ড আপডেট করুন</button>[cite: 15]
-                <p id="settingsMsg" class="text-xs text-center font-medium hidden"></p>[cite: 15]
+                <button onclick="updatePassword()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl shadow-lg shadow-emerald-600/30 transition text-sm">পাসওয়ার্ড আপডেট করুন</button>
+                <p id="settingsMsg" class="text-xs text-center font-medium hidden"></p>
             </div>
         </div>
     </div>
@@ -72,30 +72,30 @@
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
                 <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                     <div class="bg-blue-100 text-blue-600 p-2 rounded-xl text-sm"><i class="fa-solid fa-file-lines"></i></div>
-                    এন্ট্রির বিস্তারিত তথ্য ও ডকুমেন্টস[cite: 15]
+                    এন্ট্রির বিস্তারিত তথ্য ও ডকুমেন্টস
                 </h3>
-                <button onclick="closeViewModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2"><i class="fa-solid fa-xmark"></i></button>[cite: 15]
+                <button onclick="closeViewModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 text-xs">
-                <div><span class="text-slate-500 block">বিভাগ:</span> <span id="modalDiv" class="font-bold text-slate-800">-</span></div>[cite: 15]
-                <div><span class="text-slate-500 block">জেলা:</span> <span id="modalDist" class="font-bold text-slate-800">-</span></div>[cite: 15]
-                <div><span class="text-slate-500 block">উপজেলা:</span> <span id="modalUpa" class="font-bold text-slate-800">-</span></div>[cite: 15]
-                <div><span class="text-slate-500 block">মৌজা:</span> <span id="modalMouza" class="font-bold text-slate-800">-</span></div>[cite: 15]
-                <div><span class="text-slate-500 block">জেএল নম্বর:</span> <span id="modalJl" class="font-bold text-slate-800">-</span></div>[cite: 15]
-                <div><span class="text-slate-500 block">খতিয়ান নম্বর:</span> <span id="modalKhatian" class="font-bold text-slate-800">-</span></div>[cite: 15]
-                <div class="col-span-2"><span class="text-slate-500 block">মালিকের নাম:</span> <span id="modalOwner" class="font-bold text-slate-800 text-sm">-</span></div>[cite: 15]
-                <div><span class="text-slate-500 block">দাগ নম্বর:</span> <span id="modalDag" class="font-bold text-slate-800">-</span></div>[cite: 15]
-                <div><span class="text-slate-500 block">মোট জমি (একর):</span> <span id="modalTotalAcre" class="font-bold text-slate-800">-</span></div>[cite: 15]
-                <div><span class="text-slate-500 block">আবেদন নম্বর:</span> <span id="modalAppNo" class="font-bold text-blue-600">-</span></div>[cite: 15]
-                <div><span class="text-slate-500 block">তারিখ:</span> <span id="modalDate" class="font-bold text-slate-800">-</span></div>[cite: 15]
-                <div><span class="text-slate-500 block">মামলা নং:</span> <span id="modalCaseNo" class="font-bold text-slate-800">-</span></div>[cite: 15]
-                <div class="col-span-2 sm:col-span-3"><span class="text-slate-500 block">সিক্রেট কোড:</span> <span id="modalCode" class="font-bold text-amber-600 font-mono">-</span></div>[cite: 15]
+                <div><span class="text-slate-500 block">বিভাগ:</span> <span id="modalDiv" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">জেলা:</span> <span id="modalDist" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">উপজেলা:</span> <span id="modalUpa" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">মৌজা:</span> <span id="modalMouza" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">জেএল নম্বর:</span> <span id="modalJl" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">খতিয়ান নম্বর:</span> <span id="modalKhatian" class="font-bold text-slate-800">-</span></div>
+                <div class="col-span-2"><span class="text-slate-500 block">মালিকের নাম:</span> <span id="modalOwner" class="font-bold text-slate-800 text-sm">-</span></div>
+                <div><span class="text-slate-500 block">দাগ নম্বর:</span> <span id="modalDag" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">মোট জমি (একর):</span> <span id="modalTotalAcre" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">আবেদন নম্বর:</span> <span id="modalAppNo" class="font-bold text-blue-600">-</span></div>
+                <div><span class="text-slate-500 block">তারিখ:</span> <span id="modalDate" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">মামলা নং:</span> <span id="modalCaseNo" class="font-bold text-slate-800">-</span></div>
+                <div class="col-span-2 sm:col-span-3"><span class="text-slate-500 block">সিক্রেট কোড:</span> <span id="modalCode" class="font-bold text-amber-600 font-mono">-</span></div>
             </div>
 
             <div>
-                <h4 class="text-xs font-bold uppercase text-slate-500 mb-3 tracking-wide">ডকুমেন্ট লিংকসমূহ (PDF)</h4>[cite: 15]
-                <div id="modalLinksContainer" class="flex flex-wrap gap-2"></div>[cite: 15]
+                <h4 class="text-xs font-bold uppercase text-slate-500 mb-3 tracking-wide">ডকুমেন্ট লিংকসমূহ (PDF)</h4>
+                <div id="modalLinksContainer" class="flex flex-wrap gap-2"></div>
             </div>
         </div>
     </div>
@@ -105,88 +105,88 @@
         <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 pb-3 border-b border-slate-100">
                 <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <div class="bg-amber-100 text-amber-600 p-2 rounded-xl text-sm"><i class="fa-solid fa-pen-to-square"></i></div>[cite: 15]
-                    তথ্য এডিট ও ম্যানেজ করুন[cite: 15]
+                    <div class="bg-amber-100 text-amber-600 p-2 rounded-xl text-sm"><i class="fa-solid fa-pen-to-square"></i></div>
+                    তথ্য এডিট ও ম্যানেজ করুন
                 </h3>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2"><i class="fa-solid fa-xmark"></i></button>[cite: 15]
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <input type="hidden" id="editDocId">[cite: 15]
+            <input type="hidden" id="editDocId">
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">বিভাগ</label>[cite: 15]
-                    <input type="text" id="editDiv" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">বিভাগ</label>
+                    <input type="text" id="editDiv" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">জেলা</label>[cite: 15]
-                    <input type="text" id="editDist" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">জেলা</label>
+                    <input type="text" id="editDist" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">উপজেলা</label>[cite: 15]
-                    <input type="text" id="editUpa" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">উপজেলা</label>
+                    <input type="text" id="editUpa" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">মৌজা</label>[cite: 15]
-                    <input type="text" id="editMouza" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">মৌজা</label>
+                    <input type="text" id="editMouza" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">জেএল নম্বর</label>[cite: 15]
-                    <input type="text" id="editJl" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">জেএল নম্বর</label>
+                    <input type="text" id="editJl" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">খতিয়ান নম্বর</label>[cite: 15]
-                    <input type="text" id="editKhatian" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">খতিয়ান নম্বর</label>
+                    <input type="text" id="editKhatian" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div class="sm:col-span-2">
-                    <label class="block font-semibold text-slate-600 mb-1">মালিকের নাম</label>[cite: 15]
-                    <input type="text" id="editOwner" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">মালিকের নাম</label>
+                    <input type="text" id="editOwner" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">দাগ নম্বর</label>[cite: 15]
-                    <input type="text" id="editDag" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">দাগ নম্বর</label>
+                    <input type="text" id="editDag" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">মোট জমি (একর)</label>[cite: 15]
-                    <input type="text" id="editTotalAcre" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">মোট জমি (একর)</label>
+                    <input type="text" id="editTotalAcre" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">আবেদন নম্বর</label>[cite: 15]
-                    <input type="text" id="editAppNo" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">আবেদন নম্বর</label>
+                    <input type="text" id="editAppNo" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-600 mb-1">তারিখ</label>[cite: 15]
-                    <input type="text" id="editDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">তারিখ</label>
+                    <input type="text" id="editDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div class="sm:col-span-2">
-                    <label class="block font-semibold text-slate-600 mb-1">মামলা নং</label>[cite: 15]
-                    <input type="text" id="editCaseNo" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block font-semibold text-slate-600 mb-1">মামলা নং</label>
+                    <input type="text" id="editCaseNo" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
             </div>
 
             <div class="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 mb-5 space-y-3">
                 <div>
-                    <label class="block text-xs font-bold text-blue-900 mb-1">সিক্রেট কোড (Code)</label>[cite: 15]
-                    <input type="text" id="editCode" placeholder="কোড লিখলে নিচের URL লিংক দেখতে পাবেন..." oninput="updateUrlPreview()" class="w-full bg-white border border-blue-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block text-xs font-bold text-blue-900 mb-1">সিক্রেট কোড (Code)</label>
+                    <input type="text" id="editCode" placeholder="কোড লিখলে নিচের URL লিংক দেখতে পাবেন..." oninput="updateUrlPreview()" class="w-full bg-white border border-blue-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div id="urlPreviewContainer" class="hidden space-y-1.5 pt-2 border-t border-blue-100">
-                    <span class="text-[11px] font-bold text-slate-500 uppercase">জেনারেটেড URL লিংকসমূহ:</span>[cite: 15]
+                    <span class="text-[11px] font-bold text-slate-500 uppercase">জেনারেটেড URL লিংকসমূহ:</span>
                     <div class="bg-white p-3 rounded-xl border border-blue-200 text-[11px] space-y-1 font-mono text-blue-700 overflow-x-auto">
-                        <div>🔗 আবেদন পত্র: <span id="previewUrlApp" class="text-slate-600"></span></div>[cite: 15]
-                        <div>🔗 নামজারী খতিয়ান: <span id="previewUrlKhat" class="text-slate-600"></span></div>[cite: 15]
-                        <div>🔗 ডিসিয়ার কপি: <span id="previewUrlDc" class="text-slate-600"></span></div>[cite: 15]
-                        <div>🔗 নামজারী কিউআর: <span id="previewUrlQr" class="text-slate-600"></span></div>[cite: 15]
+                        <div>🔗 আবেদন পত্র: <span id="previewUrlApp" class="text-slate-600"></span></div>
+                        <div>🔗 নামজারী খতিয়ান: <span id="previewUrlKhat" class="text-slate-600"></span></div>
+                        <div>🔗 ডিসিয়ার কপি: <span id="previewUrlDc" class="text-slate-600"></span></div>
+                        <div>🔗 নামজারী কিউআর: <span id="previewUrlQr" class="text-slate-600"></span></div>
                     </div>
                 </div>
             </div>
 
             <div class="flex justify-between items-center">
                 <button onclick="deleteRecordFromEdit()" class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-600 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-trash-can"></i> রেকর্ডটি ডিলিট করুন[cite: 15]
+                    <i class="fa-solid fa-trash-can"></i> রেকর্ডটি ডিলিট করুন
                 </button>
                 <div class="flex gap-2">
-                    <button onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">বাতিল</button>[cite: 15]
-                    <button onclick="saveEditedRow()" class="px-6 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition">আপডেট সংরক্ষণ</button>[cite: 15]
+                    <button onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">বাতিল</button>
+                    <button onclick="saveEditedRow()" class="px-6 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition">আপডেট সংরক্ষণ</button>
                 </div>
             </div>
         </div>
@@ -198,11 +198,11 @@
             <div class="max-w-[98%] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex items-center space-x-4 text-center md:text-left">
                     <div class="bg-blue-600 p-4 rounded-2xl text-white shadow-lg shadow-blue-600/50">
-                        <i class="fa-solid fa-fire text-amber-400 text-3xl"></i>[cite: 15]
+                        <i class="fa-solid fa-fire text-amber-400 text-3xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide">ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম</h1>[cite: 15]
-                        <p class="text-sm text-blue-200 mt-1">ফায়ারবেস ক্লাউড ডাটাবেস সিকিউরড পোর্টাল</p>[cite: 15]
+                        <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide">ল্যান্ড রেকর্ড ম্যানেজমেন্ট সিস্টেম</h1>
+                        <p class="text-sm text-blue-200 mt-1">ফায়ারবেস ক্লাউড ডাটাবেস সিকিউরড পোর্টাল</p>
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-3">
@@ -210,16 +210,16 @@
                         <i class="fa-solid fa-rotate"></i> ডাটা ফেচিং ও সিঙ্ক
                     </button>
                     <div id="totalCounter" class="bg-slate-800/80 border border-slate-700 px-5 py-2.5 rounded-2xl text-sm font-medium text-blue-400 shadow-inner flex items-center gap-2">
-                        <i class="fa-solid fa-database"></i> মোট এন্টری: <span id="counterVal" class="text-white font-bold text-base">০</span>[cite: 15]
+                        <i class="fa-solid fa-database"></i> মোট এন্ট্রি: <span id="counterVal" class="text-white font-bold text-base">০</span>
                     </div>
                     <button onclick="promptClearDatabase()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-rose-500/30 flex items-center gap-2 shadow">
-                        <i class="fa-solid fa-triangle-exclamation"></i> ডাটাবেস ক্লিয়ার[cite: 15]
+                        <i class="fa-solid fa-triangle-exclamation"></i> ডাটাবেস ক্লিয়ার
                     </button>
                     <button onclick="openSettings()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-slate-700 flex items-center gap-2 shadow">
-                        <i class="fa-solid fa-gear"></i> সেটিংস[cite: 15]
+                        <i class="fa-solid fa-gear"></i> সেটিংস
                     </button>
                     <button onclick="handleLogout()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-rose-500/30 flex items-center gap-2 shadow">
-                        <i class="fa-solid fa-right-from-bracket"></i> লগআউট[cite: 15]
+                        <i class="fa-solid fa-right-from-bracket"></i> লগআউট
                     </button>
                 </div>
             </div>
@@ -229,16 +229,16 @@
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4">
                 <div class="flex items-center gap-3">
                     <button onclick="downloadSampleExcel()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition cursor-pointer">
-                        <i class="fa-solid fa-file-arrow-down"></i> নমুনা ডাউনলোড (Excel)[cite: 15]
+                        <i class="fa-solid fa-file-arrow-down"></i> নমুনা ডাউনলোড (Excel)
                     </button>
                     <label class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer transition">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> এক্সেল আপলোড[cite: 15]
-                        <input type="file" id="excelUpload" class="hidden" accept=".xlsx, .xls, .csv" onchange="uploadExcel(event)">[cite: 15]
+                        <i class="fa-solid fa-cloud-arrow-up"></i> এক্সেল আপলোড
+                        <input type="file" id="excelUpload" class="hidden" accept=".xlsx, .xls, .csv" onchange="uploadExcel(event)">
                     </label>
                 </div>
                 <div>
                     <button onclick="downloadFilteredExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition">
-                        <i class="fa-solid fa-file-excel"></i> ফিল্টারকৃত ডেটা ডাউনলোড[cite: 15]
+                        <i class="fa-solid fa-file-excel"></i> ফিল্টারকৃত ডেটা ডাউনলোড
                     </button>
                 </div>
             </div>
@@ -246,60 +246,60 @@
             <!-- Dependent Filters -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-9 gap-3">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ</label>[cite: 15]
-                    <input type="text" id="filterDivision" list="listDivision" placeholder="বিভাগ লিখুন..." oninput="onDivisionChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
-                    <datalist id="listDivision"></datalist>[cite: 15]
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ</label>
+                    <input type="text" id="filterDivision" list="listDivision" placeholder="বিভাগ লিখুন..." oninput="onDivisionChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="listDivision"></datalist>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেলা</label>[cite: 15]
-                    <input type="text" id="filterDistrict" list="listDistrict" placeholder="জেলা লিখুন..." oninput="onDistrictChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
-                    <datalist id="listDistrict"></datalist>[cite: 15]
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেলা</label>
+                    <input type="text" id="filterDistrict" list="listDistrict" placeholder="জেলা লিখুন..." oninput="onDistrictChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="listDistrict"></datalist>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">উপজেলা</label>[cite: 15]
-                    <input type="text" id="filterUpazila" list="listUpazila" placeholder="উপজেলা লিখুন..." oninput="onUpazilaChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
-                    <datalist id="listUpazila"></datalist>[cite: 15]
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">উপজেলা</label>
+                    <input type="text" id="filterUpazila" list="listUpazila" placeholder="উপজেলা লিখুন..." oninput="onUpazilaChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="listUpazila"></datalist>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মৌজা</label>[cite: 15]
-                    <input type="text" id="filterMouza" list="listMouza" placeholder="মৌজা লিখুন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
-                    <datalist id="listMouza"></datalist>[cite: 15]
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মৌজা</label>
+                    <input type="text" id="filterMouza" list="listMouza" placeholder="মৌজা লিখুন..." oninput="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <datalist id="listMouza"></datalist>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেএল নম্বর</label>[cite: 15]
-                    <input type="text" id="filterJl" placeholder="জেএল নম্বর..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">জেএল নম্বর</label>
+                    <input type="text" id="filterJl" placeholder="জেএল নম্বর..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">খতিয়ান নম্বর</label>[cite: 15]
-                    <input type="text" id="filterKhatianSearch" placeholder="খতিয়ান..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">খতিয়ান নম্বর</label>
+                    <input type="text" id="filterKhatianSearch" placeholder="খতিয়ান..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মালিকের নাম</label>[cite: 15]
-                    <input type="text" id="filterOwner" placeholder="নাম..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">মালিকের নাম</label>
+                    <input type="text" id="filterOwner" placeholder="নাম..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">দাগ নম্বর</label>[cite: 15]
-                    <input type="text" id="filterDag" placeholder="দাগ নম্বর..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">দাগ নম্বর</label>
+                    <input type="text" id="filterDag" placeholder="দাগ নম্বর..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div class="flex items-end">
-                    <button onclick="resetFilters()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded-xl text-xs font-bold transition">রিসেট</button>[cite: 15]
+                    <button onclick="resetFilters()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded-xl text-xs font-bold transition">রিসেট</button>
                 </div>
             </div>
 
             <!-- Table Controls -->
             <div class="bg-white px-5 py-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4 text-xs">
                 <div class="flex items-center gap-2">
-                    <span class="font-semibold text-slate-600">প্রতি পেজে দেখাও:</span>[cite: 15]
-                    <select id="rowsPerPageSelect" onchange="changeRowsPerPage()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">[cite: 15]
-                        <option value="5">৫</option>[cite: 15]
-                        <option value="10" selected>১০</option>[cite: 15]
-                        <option value="50">৫০</option>[cite: 15]
-                        <option value="100">১০০</option>[cite: 15]
-                        <option value="200">২০০</option>[cite: 15]
+                    <span class="font-semibold text-slate-600">প্রতি পেজে দেখাও:</span>
+                    <select id="rowsPerPageSelect" onchange="changeRowsPerPage()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="5">৫</option>
+                        <option value="10" selected>১০</option>
+                        <option value="50">৫০</option>
+                        <option value="100">১০০</option>
+                        <option value="200">২০০</option>
                     </select>
                 </div>
                 <div id="paginationInfo" class="text-slate-500 font-medium">
-                    দেখাচ্ছে ০ থেকে ০ টি, মোট: ০ টি[cite: 15]
+                    দেখাচ্ছে ০ থেকে ০ টি, মোট: ০ টি
                 </div>
             </div>
 
@@ -367,7 +367,7 @@
             if(sessionStorage.getItem('isLoggedIn') === 'true') {
                 document.getElementById('loginModal').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-                loadRecordsFastFromFirebase(); // পেজ ওপেন হওয়ামাত্র দ্রুত ফায়ারবেস থেকে ডেটা লোড করবে
+                loadRecordsFastFromFirebase();
             }
         };
 
@@ -491,7 +491,6 @@
             }
         };
 
-        // ১. দ্রুত ফায়ারবেস থেকে ডেটা লোড করার ফাংশন (পেজ ওপেন হলে সাথে সাথে কাজ করবে)
         window.loadRecordsFastFromFirebase = async function() {
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
@@ -517,7 +516,7 @@
             }
         }
 
-        // ২. ডাটা ফেচিং ও সিঙ্ক বাটনে ক্লিক করলে ফায়ারবেস ও MySQL ডেটা মিলিয়ে আপডেট করবে এবং পপআপে সংখ্যা দেখাবে
+        // MySQL থেকে বাংলা/ইংরেজি খতিয়ান নম্বর সঠিকভাবে মিলিয়ে সিঙ্ক করার উন্নত ফাংশন
         window.syncFirebaseWithMySQL = async function() {
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
@@ -525,7 +524,6 @@
             statusBanner.classList.remove('hidden');
 
             try {
-                // ক. ফায়ারবেস থেকে লেটেস্ট ডেটা আনা
                 const q = query(collection(db, "land_records"));
                 const querySnapshot = await getDocs(q);
                 let firebaseRecords = [];
@@ -533,7 +531,6 @@
                     firebaseRecords.push({ id: docSnap.id, ...docSnap.data() });
                 });
 
-                // খ. লাইভ সার্ভার MySQL থেকে ডেটা আনা
                 let mysqlRecords = [];
                 try {
                     const response = await fetch('https://vumi.rf.gd/get_records.php');
@@ -546,16 +543,22 @@
                 let batch = writeBatch(db);
                 let batchOpCount = 0;
 
-                // গ. জেলা, উপজেলা, মৌজা ও খতিয়ান নম্বর মিলিয়ে ডেটা সিঙ্ক ও আপডেট করা
                 records = await Promise.all(firebaseRecords.map(async (fb) => {
+                    const fbDist = String(fb.district || "").trim().toLowerCase();
+                    const fbUpa = String(fb.upazila || "").trim().toLowerCase();
+                    const fbMouza = String(fb.mouza || "").trim().toLowerCase();
                     const fbKhatianEng = convertToEnglishDigits(fb.khatian);
 
                     const matchedSql = mysqlRecords.find(sql => {
+                        const sqlDist = String(sql.district || "").trim().toLowerCase();
+                        const sqlUpa = String(sql.upazila || "").trim().toLowerCase();
+                        const sqlMouza = String(sql.mouza || "").trim().toLowerCase();
+                        // MySQL-এর খতিয়ান নম্বর বাংলা বা ইংরেজি যাই হোক না কেন তা ইংরেজিতে কনভার্ট করে তুলনা করা হচ্ছে
                         const sqlKhatianEng = convertToEnglishDigits(sql.khatian);
 
-                        return String(sql.district || "").trim().toLowerCase() === String(fb.district || "").trim().toLowerCase() &&
-                               String(sql.upazila || "").trim().toLowerCase() === String(fb.upazila || "").trim().toLowerCase() &&
-                               String(sql.mouza || "").trim().toLowerCase() === String(fb.mouza || "").trim().toLowerCase() &&
+                        return sqlDist === fbDist &&
+                               sqlUpa === fbUpa &&
+                               sqlMouza === fbMouza &&
                                sqlKhatianEng === fbKhatianEng;
                     });
 
@@ -566,7 +569,6 @@
                         const newCode = matchedSql.code || fb.code || "";
                         const newStatus = newCode ? "OK" : (fb.status || "NOK");
 
-                        // যদি নতুন তথ্য পাওয়া যায়, তবে ফায়ারবেস ব্যাচ আপডেটে যোগ করা হবে
                         if (fb.applicationNo !== newAppNo || fb.date !== newDate || fb.caseNo !== newCaseNo || fb.code !== newCode) {
                             const docRef = doc(db, "land_records", fb.id);
                             batch.update(docRef, {
@@ -610,7 +612,6 @@
                 statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> সিঙ্ক সফল!`;
                 setTimeout(() => { statusBanner.classList.add('hidden'); }, 3000);
 
-                // সফলভাবে কতটি নতুন ডেটা আপডেট হলো তা পপআপে (Alert) দেখানো
                 alert(`সাকসেস মেসেজ!\n\nমোট ${updatedCount} টি নতুন ডেটা MySQL থেকে ফায়ারবেইজ ডাটাবেইজে সফলভাবে আপডেট করা হয়েছে।`);
 
                 initTableFiltersAndData();
