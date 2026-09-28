@@ -249,8 +249,8 @@
                 </div>
             </div>
 
-            <!-- Dependent Filters -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-9 gap-3">
+            <!-- Dependent Filters (Updated with Status Filter) -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-10 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ</label>
                     <input type="text" id="filterDivision" list="listDivision" placeholder="বিভাগ লিখুন..." oninput="onDivisionChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -286,6 +286,14 @@
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">দাগ নম্বর</label>
                     <input type="text" id="filterDag" placeholder="দাগ নম্বর..." onkeyup="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">অবস্থা (OK/NOK)</label>
+                    <select id="filterStatus" onchange="filterTable()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="">সব (All)</option>
+                        <option value="OK">OK</option>
+                        <option value="NOK">NOK</option>
+                    </select>
                 </div>
                 <div class="flex items-end">
                     <button onclick="resetFilters()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded-xl text-xs font-bold transition">রিসেট</button>
@@ -522,7 +530,6 @@
             }
         }
 
-        // নমুনা JSON ফাইল ডাউনলোড করার ফাংশন (আপনার কাঙ্ক্ষিত সঠিক ফরম্যাট অনুযায়ী)
         window.downloadSampleJson = function() {
             const sampleData = [
                 {
@@ -548,14 +555,14 @@
             downloadAnchor.remove();
         }
 
-        // JSON ফাইল আপলোড করে ফায়ারবেসের সাথে ডেটা সিঙ্ক ও আপডেট করার ফাংশন
+        // অপ্টিমাইজড ও ফাস্ট JSON ফাইল আপলোড এবং সিংক ফাংশন
         window.syncFirebaseWithJson = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> JSON ফাইল থেকে ডেটা ফেচিং ও সিঙ্ক চলছে...`;
+            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> JSON ফাইল থেকে ডেটা ফাস্ট সিঙ্ক চলছে...`;
             statusBanner.classList.remove('hidden');
 
             const reader = new FileReader();
@@ -575,38 +582,32 @@
                         return;
                     }
 
-                    const q = query(collection(db, "land_records"));
-                    const querySnapshot = await getDocs(q);
-                    let firebaseRecords = [];
-                    querySnapshot.forEach((docSnap) => {
-                        firebaseRecords.push({ id: docSnap.id, ...docSnap.data() });
-                    });
-
-                    let matchedListForUpdate = [];
-
-                    firebaseRecords.forEach((fb) => {
+                    // মেমরিতে থাকা রেকর্ডগুলোর মাধ্যমে দ্রুত ইন্ডেক্স ম্যাপ তৈরি (ওভারহেড কমানোর জন্য)
+                    const fbMap = new Map();
+                    records.forEach(fb => {
                         const fbDist = String(fb.district || "").trim().toLowerCase();
                         const fbUpa = String(fb.upazila || "").trim().toLowerCase();
                         const fbMouza = String(fb.mouza || "").trim().toLowerCase();
                         const fbKhatianEng = convertToEnglishDigits(fb.khatian);
+                        const key = `${fbDist}_${fbUpa}_${fbMouza}_${fbKhatianEng}`;
+                        fbMap.set(key, fb);
+                    });
 
-                        const matchedJson = jsonRecords.find(sql => {
-                            const sqlDist = String(sql.district || "").trim().toLowerCase();
-                            const sqlUpa = String(sql.upazila || "").trim().toLowerCase();
-                            const sqlMouza = String(sql.mouza || "").trim().toLowerCase();
-                            const sqlKhatianEng = convertToEnglishDigits(sql.khatian || "");
+                    let matchedListForUpdate = [];
 
-                            return (sqlDist === fbDist) &&
-                                   (sqlUpa === fbUpa) &&
-                                   (sqlMouza === fbMouza) &&
-                                   (sqlKhatianEng === fbKhatianEng);
-                        });
+                    jsonRecords.forEach(sql => {
+                        const sqlDist = String(sql.district || "").trim().toLowerCase();
+                        const sqlUpa = String(sql.upazila || "").trim().toLowerCase();
+                        const sqlMouza = String(sql.mouza || "").trim().toLowerCase();
+                        const sqlKhatianEng = convertToEnglishDigits(sql.khatian || "");
+                        const key = `${sqlDist}_${sqlUpa}_${sqlMouza}_${sqlKhatianEng}`;
 
-                        if (matchedJson) {
-                            const newAppNo = String(matchedJson.appNo || "-").trim();
-                            const newDate = String(matchedJson.appDate || "-").trim();
-                            const newCaseNo = String(matchedJson.caseNo || "-").trim();
-                            const newCode = String(matchedJson.id || fb.code || "").trim();
+                        const fb = fbMap.get(key);
+                        if (fb) {
+                            const newAppNo = String(sql.appNo || "-").trim();
+                            const newDate = String(sql.appDate || "-").trim();
+                            const newCaseNo = String(sql.caseNo || "-").trim();
+                            const newCode = String(sql.id || fb.code || "").trim();
 
                             if (String(fb.applicationNo || "").trim() !== newAppNo || 
                                 String(fb.date || "").trim() !== newDate || 
@@ -653,7 +654,7 @@
                     }
 
                     statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> অনুমোদিত ডেটা আপডেট করা হচ্ছে...`;
+                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> অনুমোদিত ডেটা ফাস্ট ব্যাচ মোডে আপডেট করা হচ্ছে...`;
                     statusBanner.classList.remove('hidden');
 
                     let batch = writeBatch(db);
@@ -795,6 +796,7 @@
             const searchKhatian = convertToEnglishDigits(document.getElementById('filterKhatianSearch').value);
             const searchOwner = document.getElementById('filterOwner').value.toLowerCase().trim();
             const searchDag = convertToEnglishDigits(document.getElementById('filterDag').value);
+            const selectedStatus = document.getElementById('filterStatus').value; // OK, NOK or empty
 
             filteredRecords = records.filter(rec => {
                 const div = (rec.division || "").toLowerCase();
@@ -805,6 +807,7 @@
                 const khatian = convertToEnglishDigits(rec.khatian);
                 const owner = (rec.owner || "").toLowerCase();
                 const dag = convertToEnglishDigits(rec.dag);
+                const recStatus = rec.status === "OK" ? "OK" : "NOK";
 
                 if(selectedDiv && !div.includes(selectedDiv)) return false;
                 if(selectedDist && !dist.includes(selectedDist)) return false;
@@ -814,6 +817,7 @@
                 if(searchKhatian && !khatian.includes(searchKhatian)) return false;
                 if(searchOwner && !owner.includes(searchOwner)) return false;
                 if(searchDag && !dag.includes(searchDag)) return false;
+                if(selectedStatus && recStatus !== selectedStatus) return false;
 
                 return true;
             });
@@ -842,6 +846,7 @@
             document.getElementById('filterKhatianSearch').value = "";
             document.getElementById('filterOwner').value = "";
             document.getElementById('filterDag').value = "";
+            document.getElementById('filterStatus').value = "";
             updateDivisionOptions();
             filterTable();
         }
