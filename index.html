@@ -411,90 +411,128 @@
 
                 if(cur === cloudPass) {
                     if(newP.length >= 4) {
-                        await updateDoc(passDocRef, { password: newP });
-                        msg.innerText = "পাসওয়ার্ড সফলভাবে ক্লাউডে আপডেট হয়েছে!";
-                        msg.className = "text-xs text-center font-medium text-emerald-600";
-                        msg.classList.remove('hidden');
-                        setTimeout(closeSettings, 1500);
-                    } else {
-                        msg.innerText = "নতুন পাসওয়ার্ড অন্তত ৪ ডিজিটের হতে হবে।";
-                        msg.className = "text-xs text-center font-medium text-rose-500";
-                        msg.classList.remove('hidden');
-                    }
-                } else {
-                    msg.innerText = "বর্তমান পাসওয়ার্ড ভুল!";
-                    msg.className = "text-xs text-center font-medium text-rose-500";
-                    msg.classList.remove('hidden');
-                }
-            } catch (err) {
-                msg.innerText = "সার্ভার ত্রুটি, পাসওয়ার্ড আপডেট করা যায়নি।";
-                msg.className = "text-xs text-center font-medium text-rose-500";
-                msg.classList.remove('hidden');
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
+            authDomain: "myjomi-220c0.firebaseapp.com",
+            projectId: "myjomi-220c0",
+            storageBucket: "myjomi-220c0.firebasestorage.app",
+            messagingSenderId: "1023755664718",
+            appId: "1:1023755664718:web:db0e30a4d8c92da8aa321f",
+            measurementId: "G-ZNBZDP5VPR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let records = [];
+        let filteredRecords = [];
+        let currentPage = 1;
+        let rowsPerPage = 10;
+        
+        const DEFAULT_PASSWORD = "01717087424";
+
+        window.onload = function() {
+            if(sessionStorage.getItem('isLoggedIn') === 'true') {
+                document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                fetchRecordsFromFirebase();
             }
-        }
+        };
 
-        window.promptClearDatabase = async function() {
-            const enteredPass = prompt("ডাটাবেসের সমস্ত ডেটা চিরতরে মুছে ফেলতে পাসওয়ার্ড দিন:");
-            if (enteredPass === null) return;
-
+        window.handleLogin = async function() {
+            const inputPass = document.getElementById('loginPassword').value.trim();
             try {
                 const passDocRef = doc(db, "settings", "app_auth");
                 const docSnap = await getDoc(passDocRef);
                 const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
 
-                if (enteredPass !== cloudPass) {
-                    alert("ভুল পাসওয়ার্ড! ডাটা ডিলিট করা হয়নি।");
-                    return;
+                if(inputPass === cloudPass) {
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    document.getElementById('loginModal').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    fetchRecordsFromFirebase();
+                } else {
+                    document.getElementById('loginError').classList.remove('hidden');
                 }
-
-                const statusBanner = document.getElementById('connectionStatus');
-                statusBanner.className = "bg-rose-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ডাটাবেস ক্লিয়ার করা হচ্ছে...`;
-                statusBanner.classList.remove('hidden');
-
-                let batch = writeBatch(db);
-                let count = 0;
-                for (let rec of records) {
-                    const docRef = doc(db, "land_records", rec.id);
-                    batch.delete(docRef);
-                    count++;
-                    if (count >= 400) {
-                        await batch.commit();
-                        batch = writeBatch(db);
-                        count = 0;
-                    }
-                }
-                if (count > 0) { await batch.commit(); }
-
-                alert("সফলভাবে ডাটাবেস সম্পূর্ণ ক্লিয়ার করা হয়েছে!");
-                await fetchRecordsFromFirebase();
             } catch (err) {
-                alert("ডাটাবেস ক্লিয়ার করতে সমস্যা হয়েছে: " + err.message);
+                if(inputPass === DEFAULT_PASSWORD) {
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    document.getElementById('loginModal').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    fetchRecordsFromFirebase();
+                } else {
+                    document.getElementById('loginError').classList.remove('hidden');
+                }
             }
-        };
+        }
 
+        window.handleLogout = function() {
+            sessionStorage.removeItem('isLoggedIn');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        window.openSettings = function() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        window.closeSettings = function() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        // ফায়ারবেস এবং লাইভ সার্ভার MySQL ডাটা ফেচ ও ম্যাচিং
         async function fetchRecordsFromFirebase() {
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের ডেটা লোড হচ্ছে...`;
+            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ক্লাউড ও লাইভ সার্ভার থেকে ডেটা সিঙ্ক করা হচ্ছে...`;
             statusBanner.classList.remove('hidden');
 
             try {
+                // ১. ফায়ারবেস ডেটা আনা
                 const q = query(collection(db, "land_records"));
                 const querySnapshot = await getDocs(q);
-                records = [];
+                let firebaseRecords = [];
                 querySnapshot.forEach((docSnap) => {
-                    records.push({ id: docSnap.id, ...docSnap.data() });
+                    firebaseRecords.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                // ২. লাইভ সার্ভার MySQL ডেটা আনা (আপনার API URL এখানে বসাবেন)
+                let mysqlRecords = [];
+                try {
+                    const response = await fetch('https://vumi.rf.gd/get_records.php'); // আপনার লাইভ সার্ভারের PHP ফাইলের লিংক দিন
+                    mysqlRecords = await response.json();
+                } catch (e) {
+                    console.error("MySQL fetch error: ", e);
+                }
+
+                // ৩. জেলা, উপজেলা, মৌজা ও খতিয়ান নম্বর মিলিয়ে ডেটা মার্জ করা
+                records = firebaseRecords.map(fb => {
+                    const matchedSql = mysqlRecords.find(sql => 
+                        String(sql.district || "").trim().toLowerCase() === String(fb.district || "").trim().toLowerCase() &&
+                        String(sql.upazila || "").trim().toLowerCase() === String(fb.upazila || "").trim().toLowerCase() &&
+                        String(sql.mouza || "").trim().toLowerCase() === String(fb.mouza || "").trim().toLowerCase() &&
+                        String(sql.khatian || "").trim() === String(fb.khatian || "").trim()
+                    );
+
+                    return {
+                        ...fb,
+                        applicationNumber: matchedSql ? matchedSql.application_number : "-",
+                        applicationDate: matchedSql ? matchedSql.application_date : "-",
+                        caseNumber: matchedSql ? matchedSql.case_number : "-"
+                    };
                 });
                 
                 statusBanner.className = "bg-emerald-600 text-white text-center py-1 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> ফায়ারবেস সংযুক্ত (${records.length} টি রেকর্ড লোড হয়েছে)`;
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> সফলভাবে সংযুক্ত (${records.length} টি রেকর্ড লোড হয়েছে)`;
                 setTimeout(() => { statusBanner.classList.add('hidden'); }, 3000);
 
                 initTableFiltersAndData();
             } catch (error) {
                 statusBanner.className = "bg-rose-600 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ফায়ারবেস ত্রুটি: ${error.message}`;
+                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ত্রুটি: ${error.message}`;
             }
         }
 
@@ -615,18 +653,12 @@
                 return true;
             });
 
-            // জেএল নম্বর এবং খতিয়ান নম্বর অনুযায়ী A2Z ক্রমানুসারে সাজানো (Sorting)
             filteredRecords.sort((a, b) => {
                 let jlA = String(a.jl || "").trim();
                 let jlB = String(b.jl || "").trim();
-                
-                // প্রথমে জেএল নম্বর তুলনা
                 let jlComp = jlA.localeCompare(jlB, undefined, { numeric: true, sensitivity: 'base' });
-                if (jlComp !== 0) {
-                    return jlComp;
-                }
+                if (jlComp !== 0) return jlComp;
 
-                // জেএল নম্বর একই হলে খতিয়ান নম্বর দিয়ে তুলনা
                 let khatA = String(a.khatian || "").trim();
                 let khatB = String(b.khatian || "").trim();
                 return khatA.localeCompare(khatB, undefined, { numeric: true, sensitivity: 'base' });
@@ -668,7 +700,7 @@
             document.getElementById('counterVal').innerText = records.length;
 
             if(totalFiltered === 0) {
-                tableBody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">কোনো রেকর্ড পাওয়া যায়নি।</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="14" class="p-6 text-center text-slate-400">কোনো রেকর্ড পাওয়া যায়নি।</td></tr>`;
                 document.getElementById('paginationInfo').innerText = `দেখাচ্ছে ০ থেকে ০ টি, মোট: ০ টি`;
                 document.getElementById('paginationControls').innerHTML = "";
                 return;
@@ -700,6 +732,9 @@
                     <td class="p-3.5 font-semibold text-slate-800 cell-owner">${rec.owner || "-"}</td>
                     <td class="p-3.5 font-semibold text-slate-800 cell-dag">${rec.dag || "-"}</td>
                     <td class="p-3.5 cell-totalacre">${rec.totalAcre || "-"}</td>
+                    <td class="p-3.5 font-medium text-slate-700">${rec.applicationNumber || "-"}</td>
+                    <td class="p-3.5 font-medium text-slate-700">${rec.applicationDate || "-"}</td>
+                    <td class="p-3.5 font-medium text-slate-700">${rec.caseNumber || "-"}</td>
                     <td class="p-3.5 text-center">${statusBadge}</td>
                     <td class="p-3.5 text-center">
                         <div class="flex items-center justify-center gap-1.5">
@@ -719,7 +754,6 @@
         function renderPaginationButtons(totalPages) {
             const container = document.getElementById('paginationControls');
             container.innerHTML = "";
-
             if(totalPages <= 1) return;
 
             const prevDisabled = currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-200";
@@ -782,15 +816,26 @@
             document.getElementById('modalDag').innerText = rec.dag || "-";
             document.getElementById('modalTotalAcre').innerText = rec.totalAcre || "-";
 
+            // অতিরিক্ত MySQL ফিল্ডগুলো ভিউ মডালে দেখানো
             const linksContainer = document.getElementById('modalLinksContainer');
+            let extraInfoHtml = `
+                <div class="grid grid-cols-3 gap-2 mb-4 p-3 bg-blue-50/50 rounded-xl border border-blue-100 text-xs">
+                    <div><span class="text-slate-500 block">আবেদন নম্বর:</span> <span class="font-bold text-slate-800">${rec.applicationNumber}</span></div>
+                    <div><span class="text-slate-500 block">আবেদনের তারিখ:</span> <span class="font-bold text-slate-800">${rec.applicationDate}</span></div>
+                    <div><span class="text-slate-500 block">মামলা নং:</span> <span class="font-bold text-slate-800">${rec.caseNumber}</span></div>
+                </div>
+            `;
+
             if(!rec.code) {
-                linksContainer.innerHTML = `<span class="text-rose-500 text-xs font-medium italic"><i class="fa-solid fa-triangle-exclamation mr-1"></i>এই রেকর্ডে এখনও কোনো কোড যুক্ত করা হয়নি (NOK অবস্থায় আছে)।</span>`;
+                linksContainer.innerHTML = extraInfoHtml + `<span class="text-rose-500 text-xs font-medium italic"><i class="fa-solid fa-triangle-exclamation mr-1"></i>এই রেকর্ডে এখনও কোনো কোড যুক্ত করা হয়নি (NOK অবস্থায় আছে)।</span>`;
             } else {
-                linksContainer.innerHTML = `
-                    <a href="https://mutation.land.gov.bd/print/${rec.code}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-blue-600"></i> আবেদন পত্র</a>
-                    <a href="https://mutation.land.gov.bd/khotian-download/${rec.code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী খতিয়ান</a>
-                    <a href="https://mutation.land.gov.bd/online-dcr/${rec.code}" target="_blank" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-amber-600"></i> ডিসিয়ার কপি</a>
-                    <a href="https://mutation.land.gov.bd/qr-vk/${rec.code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী কিউআর</a>
+                linksContainer.innerHTML = extraInfoHtml + `
+                    <div class="flex flex-wrap gap-2">
+                        <a href="https://mutation.land.gov.bd/print/${rec.code}" target="_blank" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-blue-600"></i> আবেদন পত্র</a>
+                        <a href="https://mutation.land.gov.bd/khotian-download/${rec.code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী খতিয়ান</a>
+                        <a href="https://mutation.land.gov.bd/online-dcr/${rec.code}" target="_blank" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-amber-600"></i> ডিসিয়ার কপি</a>
+                        <a href="https://mutation.land.gov.bd/qr-vk/${rec.code}" target="_blank" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm"><i class="fa-solid fa-file-pdf text-purple-600"></i> নামজারী কিউআর</a>
+                    </div>
                 `;
             }
             document.getElementById('viewModal').classList.remove('hidden');
@@ -816,7 +861,6 @@
             document.getElementById('editTotalAcre').value = rec.totalAcre || "";
             document.getElementById('editCode').value = rec.code || "";
             
-            updateUrlPreview();
             document.getElementById('editModal').classList.remove('hidden');
         }
 
@@ -824,20 +868,6 @@
             document.getElementById('editModal').classList.add('hidden');
         }
 
-        window.updateUrlPreview = function() {
-            const code = document.getElementById('editCode').value.trim();
-            const container = document.getElementById('urlPreviewContainer');
-            if(code) {
-                container.classList.remove('hidden');
-                document.getElementById('previewUrlApp').innerText = `https://mutation.land.gov.bd/print/${code}`;
-                document.getElementById('previewUrlKhat').innerText = `https://mutation.land.gov.bd/khotian-download/${code}`;
-                document.getElementById('previewUrlDc').innerText = `https://mutation.land.gov.bd/online-dcr/${code}`;
-                document.getElementById('previewUrlQr').innerText = `https://mutation.land.gov.bd/qr-vk/${code}`;
-            } else {
-                container.classList.add('hidden');
-            }
-        }  
-        
         window.saveEditedRow = async function() {
             const id = document.getElementById('editDocId').value;
             const updatedData = {
@@ -866,142 +896,14 @@
         }
 
         window.deleteRecord = async function(id) {
-            const enteredPass = prompt("এই রেকর্ডটি মুছে ফেলতে পাসওয়ার্ড দিন:");
-            if (enteredPass === null) return;
-
+            if(!confirm("আপনি কি নিশ্চিতভাবে এই রেকর্ডটি ডিলিট করতে চান?")) return;
             try {
-                const passDocRef = doc(db, "settings", "app_auth");
-                const docSnap = await getDoc(passDocRef);
-                const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
-
-                if (enteredPass !== cloudPass) {
-                    alert("ভুল পাসওয়ার্ড! রেকর্ড ডিলিট করা হয়নি।");
-                    return;
-                }
-
                 await deleteDoc(doc(db, "land_records", id));
                 await fetchRecordsFromFirebase();
                 alert("রেকর্ডটি সফলভাবে মুছে ফেলা হয়েছে!");
             } catch (error) {
                 alert("রেকর্ড ডিলিট করতে সমস্যা হয়েছে: " + error.message);
             }
-        }
-
-        window.deleteRecordFromEdit = function() {
-            const id = document.getElementById('editDocId').value;
-            closeEditModal();
-            deleteRecord(id);
-        }
-
-        window.downloadSampleExcel = function() {
-            const sampleData = [
-                { "বিভাগ": "ঢাকা", "জেলা": "ঢাকা", "উপজেলা": "সাভার", "মৌজা": "AMINABAD", "জেএল নম্বর": "১২", "খতিয়ান নম্বর": "৪৫/১", "মালিকের নাম": "আব্দুর রহমান", "দাগ নম্বর": "১০৮", "মোট জমি (একর)": "০.০২" }
-            ];
-            const worksheet = XLSX.utils.json_to_sheet(sampleData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Sample");
-            XLSX.writeFile(workbook, "Land_Record_Sample.xlsx");
-        }
-
-        window.uploadExcel = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const statusBanner = document.getElementById('connectionStatus');
-            statusBanner.className = "bg-blue-600 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> এক্সেল ফাইল প্রসেস ও আপলোড হচ্ছে...`;
-            statusBanner.classList.add('hidden'); // ফিক্সড: ব্যানার ব্লকিং রোধ করা হলো
-
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const rawJsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-                    if(!rawJsonData || rawJsonData.length === 0) {
-                        alert("এক্সেল ফাইলে কোনো ডেটা পাওয়া যায়নি!");
-                        return;
-                    }
-
-                    let batch = writeBatch(db);
-                    let operationCounter = 0;
-                    let totalNewAdded = 0;
-                    let duplicateCount = 0;
-
-                    for (let rawItem of rawJsonData) {
-                        const item = {};
-                        Object.keys(rawItem).forEach(key => {
-                            item[key.trim()] = rawItem[key];
-                        });
-
-                        const newDivision = String(item["বিভাগ"] || item["Division"] || "-").trim();
-                        const newDistrict = String(item["জেলা"] || item["District"] || "-").trim();
-                        const newUpazila = String(item["উপজেলা"] || item["Upazila"] || "-").trim();
-                        const newMouza = String(item["মৌজা"] || item["Mouza"] || "-").trim();
-                        const newJl = String(item["জেএল নম্বর"] || item["JL"] || "-").trim();
-                        const newKhatian = String(item["খতিয়ান নম্বর"] || item["Khatian"] || "-").trim();
-                        const newOwner = String(item["মালিকের নাম"] || item["Owner"] || "-").trim();
-                        const newDag = String(item["দাগ নম্বর"] || item["Dag"] || "-").trim();
-                        const newTotalAcre = String(item["মোট জমি (একর)"] || item["Acre"] || "-").trim();
-
-                        const isDuplicate = records.some(r => 
-                            String(r.division || "").trim() === newDivision &&
-                            String(r.district || "").trim() === newDistrict &&
-                            String(r.upazila || "").trim() === newUpazila &&
-                            String(r.mouza || "").trim() === newMouza &&
-                            String(r.jl || "").trim() === newJl &&
-                            String(r.khatian || "").trim() === newKhatian &&
-                            String(r.owner || "").trim() === newOwner &&
-                            String(r.dag || "").trim() === newDag &&
-                            String(r.totalAcre || "").trim() === newTotalAcre
-                        );
-
-                        if (isDuplicate) {
-                            duplicateCount++;
-                            continue;
-                        }
-
-                        const newRec = {
-                            division: newDivision,
-                            district: newDistrict,
-                            upazila: newUpazila,
-                            mouza: newMouza,
-                            jl: newJl,
-                            khatian: newKhatian,
-                            owner: newOwner,
-                            dag: newDag,
-                            totalAcre: newTotalAcre,
-                            code: "",
-                            status: "NOK"
-                        };
-
-                        const newDocRef = doc(collection(db, "land_records"));
-                        batch.set(newDocRef, newRec);
-                        operationCounter++;
-                        totalNewAdded++;
-
-                        if (operationCounter >= 400) {
-                            await batch.commit();
-                            batch = writeBatch(db);
-                            operationCounter = 0;
-                        }
-                    }
-
-                    if (operationCounter > 0) { await batch.commit(); }
-
-                    alert(`আপলোড সফল হয়েছে!\n\n• নতুন যুক্ত হয়েছে: ${totalNewAdded} টি\n• ডুপ্লিকেট বাদ পড়েছে: ${duplicateCount} টি`);
-                    await fetchRecordsFromFirebase();
-                } catch (err) {
-                    alert("এক্সেল আপলোড করতে সমস্যা হয়েছে: " + err.message);
-                } finally {
-                    event.target.value = "";
-                }
-            };
-            
-            reader.readAsArrayBuffer(file);
         }
 
         window.downloadFilteredExcel = function() {
@@ -1014,18 +916,16 @@
                 "খতিয়ান নম্বর": recs.khatian || "-",
                 "মালিকের নাম": recs.owner || "-",
                 "দাগ নম্বর": recs.dag || "-",
-                "মোট জমি (একর)": recs.totalAcre || "-"
+                "মোট জমি (একর)": recs.totalAcre || "-",
+                "আবেদন নম্বর": recs.applicationNumber || "-",
+                "আবেদনের তারিখ": recs.applicationDate || "-",
+                "মামলা নং": recs.caseNumber || "-"
             }));
-
-            if (exportData.length === 0) {
-                alert("ডাউনলোড করার মত কোনো ডেটা পাওয়া যায়নি!");
-                return;
-            }
 
             const worksheet = XLSX.utils.json_to_sheet(exportData);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered_Records");
-            XLSX.writeFile(workbook, "Filtered_Land_Records.xlsx");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Merged_Records");
+            XLSX.writeFile(workbook, "Land_Records_With_MySQL.xlsx");
         }
     </script>
 </body>
