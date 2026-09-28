@@ -243,11 +243,6 @@
                     </label>
                 </div>
                 <div>
-                    <button onclick="downloadFilteredExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition">
-                        <i class="fa-solid fa-file-excel"></i> ফিল্টারকৃত ডেটা ডাউনলোড
-                    </button>
-                </div>
-                <div>
                 <!-- JSON Upload & Sync and Sample JSON Download -->
                     <button onclick="downloadSampleJson()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition flex items-center gap-2 shadow">
                         <i class="fa-solid fa-file-arrow-down"></i> নমুনা JSON ডাউনলোড
@@ -256,7 +251,13 @@
                         <i class="fa-solid fa-cloud-arrow-up"></i> JSON আপলোড ও সিঙ্ক
                         <input type="file" id="jsonUploadInput" class="hidden" accept=".json" onchange="syncFirebaseWithJson(event)">
                     </label>
-                     </div>
+                </div>
+                <div>
+                    <button onclick="downloadFilteredExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition">
+                        <i class="fa-solid fa-file-excel"></i> ফিল্টারকৃত ডেটা ডাউনলোড
+                    </button>
+                </div>
+                
             </div>
 
             <!-- Dependent Filters (Updated with Status Filter) -->
