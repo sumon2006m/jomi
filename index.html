@@ -522,25 +522,24 @@
             }
         }
 
-        // নমুনা JSON ফাইল ডাউনলোড করার ফাংশন
+        // নমুনা JSON ফাইল ডাউনলোড করার ফাংশন (আপনার কাঙ্ক্ষিত সঠিক ফরম্যাট অনুযায়ী)
         window.downloadSampleJson = function() {
             const sampleData = [
                 {
-                    "division": "ঢাকা",
-                    "district": "ঢাকা",
-                    "upazila": "সাভার",
-                    "mouza": "AMINABAD",
-                    "jl": "১২",
-                    "khatian": "৪৫/১",
-                    "owner": "আব্দুর রহমান",
-                    "dag": "১০৮",
-                    "applicationNo": "APP-2026-001",
-                    "date": "2026-09-28",
-                    "caseNo": "CASE-105",
-                    "code": "ABC123XYZ"
+                    "id": "3d0023e2",
+                    "mouza": "দাড়িয়াল",
+                    "upazila": "বাকেরগঞ্জ",
+                    "district": "বরিশাল",
+                    "appNo": "২৩৪১৯৩৬",
+                    "appDate": "১৯-০১-২০২৩",
+                    "khatian": "2340",
+                    "caseNo": "৪,৫৫৫(IX-I)/২০২২-২৩",
+                    "print": "https://mutation.land.gov.bd/print/3d0023e2",
+                    "qr": "https://mutation.land.gov.bd/qr-vk/3d0023e2",
+                    "saveTime": "8/10/2026 12:57:57 PM"
                 }
             ];
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sampleData, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sampleData, null, 4));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
             downloadAnchor.setAttribute("download", "land_record_sync_sample.json");
@@ -549,7 +548,7 @@
             downloadAnchor.remove();
         }
 
-        // সরাসরি JSON ফাইল আপলোড করে ফায়ারবেসের সাথে ডেটা সিঙ্ক ও আপডেট করার ফাংশন (অনুমতি সহ)
+        // JSON ফাইল আপলোড করে ফায়ারবেসের সাথে ডেটা সিঙ্ক ও আপডেট করার ফাংশন
         window.syncFirebaseWithJson = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -592,10 +591,10 @@
                         const fbKhatianEng = convertToEnglishDigits(fb.khatian);
 
                         const matchedJson = jsonRecords.find(sql => {
-                            const sqlDist = String(sql.district || sql["জেলা"] || "").trim().toLowerCase();
-                            const sqlUpa = String(sql.upazila || sql["উপজেলা"] || "").trim().toLowerCase();
-                            const sqlMouza = String(sql.mouza || sql["মৌজা"] || "").trim().toLowerCase();
-                            const sqlKhatianEng = convertToEnglishDigits(sql.khatian || sql["খতিয়ান নম্বর"] || "");
+                            const sqlDist = String(sql.district || "").trim().toLowerCase();
+                            const sqlUpa = String(sql.upazila || "").trim().toLowerCase();
+                            const sqlMouza = String(sql.mouza || "").trim().toLowerCase();
+                            const sqlKhatianEng = convertToEnglishDigits(sql.khatian || "");
 
                             return (sqlDist === fbDist) &&
                                    (sqlUpa === fbUpa) &&
@@ -604,14 +603,15 @@
                         });
 
                         if (matchedJson) {
-                            const newAppNo = String(matchedJson.appNo || matchedJson.app_no || matchedJson["আবেদন নম্বর"] || "-").trim();
-                            const newDate = String(matchedJson.appDate || matchedJson.app_date || matchedJson["তারিখ"] || "-").trim();
-                            const newCaseNo = String(matchedJson.caseNo || matchedJson.case_no || matchedJson["মামলা নং"] || "-").trim();
-                            const newCode = String(matchedJson.id || matchedJson.code || matchedJson["কোড"] || fb.code || "").trim();
+                            const newAppNo = String(matchedJson.appNo || "-").trim();
+                            const newDate = String(matchedJson.appDate || "-").trim();
+                            const newCaseNo = String(matchedJson.caseNo || "-").trim();
+                            const newCode = String(matchedJson.id || fb.code || "").trim();
 
                             if (String(fb.applicationNo || "").trim() !== newAppNo || 
                                 String(fb.date || "").trim() !== newDate || 
-                                String(fb.caseNo || "").trim() !== newCaseNo) {
+                                String(fb.caseNo || "").trim() !== newCaseNo ||
+                                String(fb.code || "").trim() !== newCode) {
                                 
                                 matchedListForUpdate.push({
                                     id: fb.id,
