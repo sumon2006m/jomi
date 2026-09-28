@@ -206,9 +206,15 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-3">
-                    <button onclick="syncFirebaseWithMySQL()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition flex items-center gap-2 shadow">
-                        <i class="fa-solid fa-rotate"></i> ডাটা ফেচিং ও সিঙ্ক
+                    <!-- JSON Upload & Sync and Sample JSON Download -->
+                    <button onclick="downloadSampleJson()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-file-arrow-down"></i> নমুনা JSON ডাউনলোড
                     </button>
+                    <label class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition flex items-center gap-2 shadow cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> JSON আপলোড ও সিঙ্ক
+                        <input type="file" id="jsonUploadInput" class="hidden" accept=".json" onchange="syncFirebaseWithJson(event)">
+                    </label>
+
                     <div id="totalCounter" class="bg-slate-800/80 border border-slate-700 px-5 py-2.5 rounded-2xl text-sm font-medium text-blue-400 shadow-inner flex items-center gap-2">
                         <i class="fa-solid fa-database"></i> মোট এন্ট্রি: <span id="counterVal" class="text-white font-bold text-base">০</span>
                     </div>
@@ -516,118 +522,147 @@
             }
         }
 
-        // MySQL থেকে ডেটা ফেচিং এবং ফায়ারবেসের সাথে সিঙ্ক করার আপডেট করা ফাংশন
-        window.syncFirebaseWithMySQL = async function() {
+        // নমুনা JSON ফাইল ডাউনলোড করার ফাংশন
+        window.downloadSampleJson = function() {
+            const sampleData = [
+                {
+                    "division": "ঢাকা",
+                    "district": "ঢাকা",
+                    "upazila": "সাভার",
+                    "mouza": "AMINABAD",
+                    "jl": "১২",
+                    "khatian": "৪৫/১",
+                    "owner": "আব্দুর রহমান",
+                    "dag": "১০৮",
+                    "applicationNo": "APP-2026-001",
+                    "date": "2026-09-28",
+                    "caseNo": "CASE-105",
+                    "code": "ABC123XYZ"
+                }
+            ];
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sampleData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "land_record_sync_sample.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // সরাসরি JSON ফাইল আপলোড করে ফায়ারবেসের সাথে ডেটা সিঙ্ক ও আপডেট করার ফাংশন
+        window.syncFirebaseWithJson = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> MySQL সার্ভারের সাথে ডেটা ফেচিং ও সিঙ্ক চলছে...`;
+            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> JSON ফাইল থেকে ডেটা ফেচিং ও সিঙ্ক চলছে...`;
             statusBanner.classList.remove('hidden');
 
-            try {
-                const q = query(collection(db, "land_records"));
-                const querySnapshot = await getDocs(q);
-                let firebaseRecords = [];
-                querySnapshot.forEach((docSnap) => {
-                    firebaseRecords.push({ id: docSnap.id, ...docSnap.data() });
-                });
-
-                let mysqlRecords = [];
+            const reader = new FileReader();
+            reader.onload = async function(e) {
                 try {
-                    const response = await fetch('https://vumi.rf.gd/get_records.php');
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                    const jsonContent = e.target.result;
+                    const jsonRecords = JSON.parse(jsonContent);
+
+                    if (!jsonRecords || !Array.isArray(jsonRecords) || jsonRecords.length === 0) {
+                        alert("JSON ফাইল থেকে কোনো বৈধ ডেটা পাওয়া যায়নি!");
+                        statusBanner.classList.add('hidden');
+                        event.target.value = "";
+                        return;
                     }
-                    mysqlRecords = await response.json();
-                    console.log("সফলভাবে MySQL ডেটা পাওয়া গেছে:", mysqlRecords);
-                } catch (e) {
-                    console.error("MySQL fetch error: ", e);
-                }
 
-                if (!mysqlRecords || mysqlRecords.length === 0) {
-                    alert("MySQL সার্ভার থেকে কোনো ডেটা পাওয়া যায়নি!");
-                    statusBanner.classList.add('hidden');
-                    return;
-                }
-
-                let updatedCount = 0;
-                let batch = writeBatch(db);
-                let batchOpCount = 0;
-
-                records = await Promise.all(firebaseRecords.map(async (fb) => {
-                    const fbDist = String(fb.district || "").trim().toLowerCase();
-                    const fbUpa = String(fb.upazila || "").trim().toLowerCase();
-                    const fbMouza = String(fb.mouza || "").trim().toLowerCase();
-                    const fbKhatianEng = convertToEnglishDigits(fb.khatian);
-
-                    const matchedSql = mysqlRecords.find(sql => {
-                        const sqlDist = String(sql.district || "").trim().toLowerCase();
-                        const sqlUpa = String(sql.upazila || "").trim().toLowerCase();
-                        const sqlMouza = String(sql.mouza || "").trim().toLowerCase();
-                        const sqlKhatianEng = convertToEnglishDigits(sql.khatian);
-
-                        return (sqlDist === fbDist || !sqlDist || !fbDist) &&
-                               (sqlUpa === fbUpa || !sqlUpa || !fbUpa) &&
-                               (sqlMouza === fbMouza || !sqlMouza || !fbMouza) &&
-                               sqlKhatianEng === fbKhatianEng;
+                    const q = query(collection(db, "land_records"));
+                    const querySnapshot = await getDocs(q);
+                    let firebaseRecords = [];
+                    querySnapshot.forEach((docSnap) => {
+                        firebaseRecords.push({ id: docSnap.id, ...docSnap.data() });
                     });
 
-                    if (matchedSql) {
-                        const newAppNo = matchedSql.app_no || matchedSql.applicationNo || "-";
-                        const newDate = matchedSql.app_date || matchedSql.date || "-";
-                        const newCaseNo = matchedSql.case_no || matchedSql.caseNo || "-";
-                        const newCode = matchedSql.code || fb.code || "";
-                        const newStatus = newCode ? "OK" : (fb.status || "NOK");
+                    let updatedCount = 0;
+                    let batch = writeBatch(db);
+                    let batchOpCount = 0;
 
-                        if (fb.applicationNo !== newAppNo || fb.date !== newDate || fb.caseNo !== newCaseNo || fb.code !== newCode) {
-                            const docRef = doc(db, "land_records", fb.id);
-                            batch.update(docRef, {
+                    records = await Promise.all(firebaseRecords.map(async (fb) => {
+                        const fbDist = String(fb.district || "").trim().toLowerCase();
+                        const fbUpa = String(fb.upazila || "").trim().toLowerCase();
+                        const fbMouza = String(fb.mouza || "").trim().toLowerCase();
+                        const fbKhatianEng = convertToEnglishDigits(fb.khatian);
+
+                        const matchedJson = jsonRecords.find(sql => {
+                            const sqlDist = String(sql.district || sql["জেলা"] || "").trim().toLowerCase();
+                            const sqlUpa = String(sql.upazila || sql["উপজেলা"] || "").trim().toLowerCase();
+                            const sqlMouza = String(sql.mouza || sql["মৌজা"] || "").trim().toLowerCase();
+                            const sqlKhatianEng = convertToEnglishDigits(sql.khatian || sql["খতিয়ান নম্বর"] || "");
+
+                            return (sqlDist === fbDist || !sqlDist || !fbDist) &&
+                                   (sqlUpa === fbUpa || !sqlUpa || !fbUpa) &&
+                                   (sqlMouza === fbMouza || !sqlMouza || !fbMouza) &&
+                                   sqlKhatianEng === fbKhatianEng;
+                        });
+
+                        if (matchedJson) {
+                            const newAppNo = matchedJson.app_no || matchedJson.applicationNo || matchedJson["আবেদন নম্বর"] || "-";
+                            const newDate = matchedJson.app_date || matchedJson.date || matchedJson["তারিখ"] || "-";
+                            const newCaseNo = matchedJson.case_no || matchedJson.caseNo || matchedJson["মামলা নং"] || "-";
+                            const newCode = matchedJson.code || matchedJson["কোড"] || fb.code || "";
+                            const newStatus = newCode ? "OK" : (fb.status || "NOK");
+
+                            if (fb.applicationNo !== newAppNo || fb.date !== newDate || fb.caseNo !== newCaseNo || fb.code !== newCode) {
+                                const docRef = doc(db, "land_records", fb.id);
+                                batch.update(docRef, {
+                                    applicationNo: newAppNo,
+                                    date: newDate,
+                                    caseNo: newCaseNo,
+                                    code: newCode,
+                                    status: newStatus
+                                });
+                                updatedCount++;
+                                batchOpCount++;
+
+                                if (batchOpCount >= 400) {
+                                    await batch.commit();
+                                    batch = writeBatch(db);
+                                    batchOpCount = 0;
+                                }
+                            }
+
+                            return {
+                                ...fb,
                                 applicationNo: newAppNo,
                                 date: newDate,
                                 caseNo: newCaseNo,
                                 code: newCode,
                                 status: newStatus
-                            });
-                            updatedCount++;
-                            batchOpCount++;
-
-                            if (batchOpCount >= 400) {
-                                await batch.commit();
-                                batch = writeBatch(db);
-                                batchOpCount = 0;
-                            }
+                            };
+                        } else {
+                            return {
+                                ...fb,
+                                status: fb.code ? "OK" : "NOK"
+                            };
                         }
+                    }));
 
-                        return {
-                            ...fb,
-                            applicationNo: newAppNo,
-                            date: newDate,
-                            caseNo: newCaseNo,
-                            code: newCode,
-                            status: newStatus
-                        };
-                    } else {
-                        return {
-                            ...fb,
-                            status: fb.code ? "OK" : "NOK"
-                        };
+                    if (batchOpCount > 0) {
+                        await batch.commit();
                     }
-                }));
+                    
+                    statusBanner.className = "bg-emerald-600 text-white text-center py-1 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
+                    statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> JSON সিঙ্ক সফল!`;
+                    setTimeout(() => { statusBanner.classList.add('hidden'); }, 3000);
 
-                if (batchOpCount > 0) {
-                    await batch.commit();
+                    alert(`সাকসেস মেসেজ!\n\nমোট ${updatedCount} টি ডেটা JSON ফাইল থেকে ফায়ারবেস ডাটাবেজে সফলভাবে আপডেট করা হয়েছে।`);
+
+                    initTableFiltersAndData();
+                } catch (err) {
+                    statusBanner.className = "bg-rose-600 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
+                    statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ত্রুটি: ${err.message}`;
+                    alert("JSON ফাইল প্রসেস করতে সমস্যা হয়েছে: " + err.message);
+                } finally {
+                    event.target.value = "";
                 }
-                
-                statusBanner.className = "bg-emerald-600 text-white text-center py-1 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> সিঙ্ক সফল!`;
-                setTimeout(() => { statusBanner.classList.add('hidden'); }, 3000);
-
-                alert(`সাকসেস মেসেজ!\n\nমোট ${updatedCount} টি ডেটা MySQL থেকে ফায়ারবেইজ ডাটাবেইজে সফলভাবে আপডেট করা হয়েছে।`);
-
-                initTableFiltersAndData();
-            } catch (error) {
-                statusBanner.className = "bg-rose-600 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ত্রুটি: ${error.message}`;
-            }
+            };
+            reader.readAsText(file);
         }
 
         function initTableFiltersAndData() {
