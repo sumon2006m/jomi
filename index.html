@@ -206,6 +206,9 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-3">
+                    <button onclick="fetchRecordsFromFirebase()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-rotate"></i> ডাটা ফেচিং ও সিঙ্ক
+                    </button>
                     <div id="totalCounter" class="bg-slate-800/80 border border-slate-700 px-5 py-2.5 rounded-2xl text-sm font-medium text-blue-400 shadow-inner flex items-center gap-2">
                         <i class="fa-solid fa-database"></i> মোট এন্ট্রি: <span id="counterVal" class="text-white font-bold text-base">০</span>
                     </div>
@@ -488,66 +491,111 @@
             }
         };
 
-        // সিঙ্গল এবং আপডেট করা fetchRecordsFromFirebase ফাংশন (ফায়ারবেস ও MySQL মার্জসহ)
-async function fetchRecordsFromFirebase() {
-    const statusBanner = document.getElementById('connectionStatus');
-    statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-    statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ক্লাউড ও লাইভ সার্ভার থেকে ডেটা সিঙ্ক করা হচ্ছে...`;
-    statusBanner.classList.remove('hidden');
+        // ফায়ারবেস ও MySQL ডেটা সিঙ্ক এবং ফায়ারবেসে পার্মানেন্ট আপডেট করার ফাংশন
+        window.fetchRecordsFromFirebase = async function() {
+            const statusBanner = document.getElementById('connectionStatus');
+            statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
+            statusBanner.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ক্লাউড ও লাইভ সার্ভার থেকে ডেটা সিঙ্ক ও আপডেট করা হচ্ছে...`;
+            statusBanner.classList.remove('hidden');
 
-    try {
-        // ১. ফায়ারবেস ডেটা আনা
-        const q = query(collection(db, "land_records"));
-        const querySnapshot = await getDocs(q);
-        let firebaseRecords = [];
-        querySnapshot.forEach((docSnap) => {
-            firebaseRecords.push({ id: docSnap.id, ...docSnap.data() });
-        });
+            try {
+                // ১. ফায়ারবেস ডেটা আনা
+                const q = query(collection(db, "land_records"));
+                const querySnapshot = await getDocs(q);
+                let firebaseRecords = [];
+                querySnapshot.forEach((docSnap) => {
+                    firebaseRecords.push({ id: docSnap.id, ...docSnap.data() });
+                });
 
-        // ২. লাইভ সার্ভার MySQL ডেটা আনা
-        let mysqlRecords = [];
-        try {
-            const response = await fetch('https://vumi.rf.gd/get_records.php');
-            mysqlRecords = await response.json();
-        } catch (e) {
-            console.error("MySQL fetch error: ", e);
+                // ২. লাইভ সার্ভার MySQL ডেটা আনা
+                let mysqlRecords = [];
+                try {
+                    const response = await fetch('https://vumi.rf.gd/get_records.php');
+                    mysqlRecords = await response.json();
+                } catch (e) {
+                    console.error("MySQL fetch error: ", e);
+                }
+
+                let updatedCount = 0;
+                let unmatchedCount = 0;
+                let batch = writeBatch(db);
+                let batchOpCount = 0;
+
+                // ৩. জেলা, উপজেলা, মৌজা ও খতিয়ান নম্বর মিলিয়ে ফায়ারবেস আপডেট করা
+                records = await Promise.all(firebaseRecords.map(async (fb) => {
+                    const fbKhatianEng = convertToEnglishDigits(fb.khatian);
+
+                    const matchedSql = mysqlRecords.find(sql => {
+                        const sqlKhatianEng = convertToEnglishDigits(sql.khatian);
+
+                        return String(sql.district || "").trim().toLowerCase() === String(fb.district || "").trim().toLowerCase() &&
+                               String(sql.upazila || "").trim().toLowerCase() === String(fb.upazila || "").trim().toLowerCase() &&
+                               String(sql.mouza || "").trim().toLowerCase() === String(fb.mouza || "").trim().toLowerCase() &&
+                               sqlKhatianEng === fbKhatianEng;
+                    });
+
+                    if (matchedSql) {
+                        const newAppNo = matchedSql.app_no || "-";
+                        const newDate = matchedSql.app_date || "-";
+                        const newCaseNo = matchedSql.case_no || "-";
+                        const newCode = matchedSql.code || fb.code || "";
+                        const newStatus = newCode ? "OK" : (fb.status || "NOK");
+
+                        // যদি ডেটায় পরিবর্তন থাকে তবে ফায়ারবেস ব্যাচ আপডেটে যুক্ত করা হবে
+                        if (fb.applicationNo !== newAppNo || fb.date !== newDate || fb.caseNo !== newCaseNo || fb.code !== newCode) {
+                            const docRef = doc(db, "land_records", fb.id);
+                            batch.update(docRef, {
+                                applicationNo: newAppNo,
+                                date: newDate,
+                                caseNo: newCaseNo,
+                                code: newCode,
+                                status: newStatus
+                            });
+                            updatedCount++;
+                            batchOpCount++;
+
+                            if (batchOpCount >= 400) {
+                                await batch.commit();
+                                batch = writeBatch(db);
+                                batchOpCount = 0;
+                            }
+                        }
+
+                        return {
+                            ...fb,
+                            applicationNo: newAppNo,
+                            date: newDate,
+                            caseNo: newCaseNo,
+                            code: newCode,
+                            status: newStatus
+                        };
+                    } else {
+                        unmatchedCount++;
+                        return {
+                            ...fb,
+                            status: fb.code ? "OK" : "NOK"
+                        };
+                    }
+                }));
+
+                // বাকী ব্যাচ কমিট করা
+                if (batchOpCount > 0) {
+                    await batch.commit();
+                }
+                
+                statusBanner.className = "bg-emerald-600 text-white text-center py-1 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
+                statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> সিঙ্ক সফল! (${records.length} টি রেকর্ড লোড হয়েছে)`;
+                setTimeout(() => { statusBanner.classList.add('hidden'); }, 3000);
+
+                // আপডেট ও অমিলের সংখ্যা অ্যালার্টের মাধ্যমে প্রদর্শন
+                alert(`সিঙ্ক ও আপডেট সম্পন্ন!\n\n• সফলভাবে আপডেট হয়েছে: ${updatedCount} টি\n• MySQL-এর সাথে মিল পাওয়া যায়নি: ${unmatchedCount} টি`);
+
+                initTableFiltersAndData();
+            } catch (error) {
+                statusBanner.className = "bg-rose-600 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
+                statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ত্রুটি: ${error.message}`;
+            }
         }
-
-        // ৩. জেলা, উপজেলা, মৌজা ও খতিয়ান নম্বর মিলিয়ে ডেটা মার্জ করা
-        records = firebaseRecords.map(fb => {
-            // ফায়ারবেসের খতিয়ান নম্বরটি ইংরেজি ফরম্যাটে কনভার্ট করে নেওয়া হলো
-            const fbKhatianEng = convertToEnglishDigits(fb.khatian);
-
-            const matchedSql = mysqlRecords.find(sql => {
-                // মাইএসকিউএলের খতিয়ান নম্বরটি এখানে কনভার্ট করা হচ্ছে
-                const sqlKhatianEng = convertToEnglishDigits(sql.khatian);
-
-                return String(sql.district || "").trim().toLowerCase() === String(fb.district || "").trim().toLowerCase() &&
-                       String(sql.upazila || "").trim().toLowerCase() === String(fb.upazila || "").trim().toLowerCase() &&
-                       String(sql.mouza || "").trim().toLowerCase() === String(fb.mouza || "").trim().toLowerCase() &&
-                       sqlKhatianEng === fbKhatianEng; // দুটিই এখন ইংরেজি সংখ্যায় তুলনামূলক সমান
-            });
-
-            return {
-                ...fb,
-                applicationNo: matchedSql ? matchedSql.app_no : (fb.applicationNo || "-"),
-                date: matchedSql ? matchedSql.app_date : (fb.date || "-"),
-                caseNo: matchedSql ? matchedSql.case_no : (fb.caseNo || "-"),
-                code: fb.code || (matchedSql ? matchedSql.code : ""),
-                status: (fb.code || (matchedSql ? matchedSql.code : "")) ? "OK" : "NOK"
-            };
-        });
-        
-        statusBanner.className = "bg-emerald-600 text-white text-center py-1 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-        statusBanner.innerHTML = `<i class="fa-solid fa-circle-check"></i> সফলভাবে সংযুক্ত (${records.length} টি রেকর্ড লোড হয়েছে)`;
-        setTimeout(() => { statusBanner.classList.add('hidden'); }, 3000);
-
-        initTableFiltersAndData();
-    } catch (error) {
-        statusBanner.className = "bg-rose-600 text-white text-center py-1.5 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
-        statusBanner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ত্রুটি: ${error.message}`;
-    }
-}
 
         function initTableFiltersAndData() {
             updateDivisionOptions();
