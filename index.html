@@ -207,16 +207,16 @@
                 </div>
                 <div class="flex flex-wrap items-center justify-center gap-3">
                     <!-- JSON Upload & Sync and Sample JSON Download -->
-                    <button onclick="downloadSampleJson()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition flex items-center gap-2 shadow">
+                    <!-- <button onclick="downloadSampleJson()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition flex items-center gap-2 shadow">
                         <i class="fa-solid fa-file-arrow-down"></i> নমুনা JSON ডাউনলোড
                     </button>
                     <label class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition flex items-center gap-2 shadow cursor-pointer">
                         <i class="fa-solid fa-cloud-arrow-up"></i> JSON আপলোড ও সিঙ্ক
                         <input type="file" id="jsonUploadInput" class="hidden" accept=".json" onchange="syncFirebaseWithJson(event)">
-                    </label>
+                    </label> -->
 
                     <div id="totalCounter" class="bg-slate-800/80 border border-slate-700 px-5 py-2.5 rounded-2xl text-sm font-medium text-blue-400 shadow-inner flex items-center gap-2">
-                        <i class="fa-solid fa-database"></i> মোট এন্ট্রি: <span id="counterVal" class="text-white font-bold text-base">০</span>
+                        <i class="fa-solid fa-database"></i> মোট এন্ট্রি: <span id="counterVal" class="text-white font-bold text-base">০</span> টি।
                     </div>
                     <button onclick="promptClearDatabase()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-rose-500/30 flex items-center gap-2 shadow">
                         <i class="fa-solid fa-triangle-exclamation"></i> ডাটাবেস ক্লিয়ার
@@ -247,6 +247,15 @@
                         <i class="fa-solid fa-file-excel"></i> ফিল্টারকৃত ডেটা ডাউনলোড
                     </button>
                 </div>
+
+                <!-- JSON Upload & Sync and Sample JSON Download -->
+                    <button onclick="downloadSampleJson()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-file-arrow-down"></i> নমুনা JSON ডাউনলোড
+                    </button>
+                    <label class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition flex items-center gap-2 shadow cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> JSON আপলোড ও সিঙ্ক
+                        <input type="file" id="jsonUploadInput" class="hidden" accept=".json" onchange="syncFirebaseWithJson(event)">
+                    </label>
             </div>
 
             <!-- Dependent Filters (Updated with Status Filter) -->
