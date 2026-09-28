@@ -20,7 +20,7 @@
 
     <!-- Connection Status Banner (Top Floating) -->
     <div id="connectionStatus" class="bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2 transition-all">
-        <i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...
+        <i class="fa-solid fa-circle-notch fa-spin"></i> ফায়ারবেস ক্লাউডের সাথে সংযোগ স্থাপন করা হচ্ছে...[cite: 7]
     </div>
 
     <!-- Login Modal -->
@@ -151,27 +151,13 @@
             <div class="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 mb-5 space-y-3">
                 <div>
                     <label class="block text-xs font-bold text-blue-900 mb-1">সিক্রেট কোড (Code)</label>
-                    <input type="text" id="editCode" placeholder="কোড লিখলে নিচের URL লিংক দেখতে পাবেন..." oninput="updateUrlPreview()" class="w-full bg-white border border-blue-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div id="urlPreviewContainer" class="hidden space-y-1.5 pt-2 border-t border-blue-100">
-                    <span class="text-[11px] font-bold text-slate-500 uppercase">জেনারেটেড URL লিংকসমূহ:</span>
-                    <div class="bg-white p-3 rounded-xl border border-blue-200 text-[11px] space-y-1 font-mono text-blue-700 overflow-x-auto">
-                        <div>🔗 আবেদন পত্র: <span id="previewUrlApp" class="text-slate-600"></span></div>
-                        <div>🔗 নামজারী খতিয়ান: <span id="previewUrlKhat" class="text-slate-600"></span></div>
-                        <div>🔗 ডিসিয়ার কপি: <span id="previewUrlDc" class="text-slate-600"></span></div>
-                        <div>🔗 নামজারী কিউআর: <span id="previewUrlQr" class="text-slate-600"></span></div>
-                    </div>
+                    <input type="text" id="editCode" placeholder="কোড লিখলে নিচের URL লিংক দেখতে পাবেন..." class="w-full bg-white border border-blue-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
             </div>
 
-            <div class="flex justify-between items-center">
-                <button onclick="deleteRecordFromEdit()" class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-600 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-trash-can"></i> রেকর্ডটি ডিলিট করুন
-                </button>
-                <div class="flex gap-2">
-                    <button onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">বাতিল</button>
-                    <button onclick="saveEditedRow()" class="px-6 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition">আপডেট সংরক্ষণ</button>
-                </div>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">বাতিল</button>
+                <button onclick="saveEditedRow()" class="px-6 py-2.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition">আপডেট সংরক্ষণ</button>
             </div>
         </div>
     </div>
@@ -193,10 +179,6 @@
                     <div id="totalCounter" class="bg-slate-800/80 border border-slate-700 px-5 py-2.5 rounded-2xl text-sm font-medium text-blue-400 shadow-inner flex items-center gap-2">
                         <i class="fa-solid fa-database"></i> মোট এন্ট্রি: <span id="counterVal" class="text-white font-bold text-base">০</span>
                     </div>
-                    <!-- Clear Database Button -->
-                    <button onclick="promptClearDatabase()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-rose-500/30 flex items-center gap-2 shadow">
-                        <i class="fa-solid fa-triangle-exclamation"></i> ডাটাবেস ক্লিয়ার
-                    </button>
                     <button onclick="openSettings()" class="bg-slate-800/80 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-slate-700 flex items-center gap-2 shadow">
                         <i class="fa-solid fa-gear"></i> সেটিংস
                     </button>
@@ -210,22 +192,13 @@
         <main class="flex-1 p-6 max-w-[98%] mx-auto w-full space-y-6">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4">
                 <div class="flex items-center gap-3">
-                    <button onclick="downloadSampleExcel()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition cursor-pointer">
-                        <i class="fa-solid fa-file-arrow-down"></i> নমুনা ডাউনলোড (Excel)
-                    </button>
-                    <label class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer transition">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> এক্সেল আপলোড
-                        <input type="file" id="excelUpload" class="hidden" accept=".xlsx, .xls, .csv" onchange="uploadExcel(event)">
-                    </label>
-                </div>
-                <div>
                     <button onclick="downloadFilteredExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition">
                         <i class="fa-solid fa-file-excel"></i> ফিল্টারকৃত ডেটা ডাউনলোড
                     </button>
                 </div>
             </div>
 
-            <!-- Dependent Filters (বিভাগ, জেলা, উপজেলা, মৌজা নির্ভরশীল ফিল্টার) -->
+            <!-- Dependent Filters -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-9 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ</label>
@@ -268,7 +241,7 @@
                 </div>
             </div>
 
-            <!-- Table Controls (Rows Per Page & Counter Info) -->
+            <!-- Table Controls -->
             <div class="bg-white px-5 py-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4 text-xs">
                 <div class="flex items-center gap-2">
                     <span class="font-semibold text-slate-600">প্রতি পেজে দেখাও:</span>
@@ -285,7 +258,7 @@
                 </div>
             </div>
 
-            <!-- Table -->
+            <!-- Table (MySQL-এর ফিল্ডগুলোর হেডারসহ) -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse" id="dataTable">
@@ -300,28 +273,29 @@
                                 <th class="p-3.5">মালিকের নাম</th>
                                 <th class="p-3.5">দাগ নম্বর</th>
                                 <th class="p-3.5">মোট জমি (একর)</th>
+                                <th class="p-3.5">আবেদন নম্বর</th>
+                                <th class="p-3.5">আবেদনের তারিখ</th>
+                                <th class="p-3.5">মামলা নং</th>
                                 <th class="p-3.5 text-center">অবস্থা (OK/NOK)</th>
                                 <th class="p-3.5 text-center">এ্যাকশন</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="text-xs text-slate-600 divide-y divide-slate-100">
-                            <!-- Firebase records will be rendered here dynamically -->
+                            <!-- Records rendered dynamically -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Pagination Controls (Footer) -->
-            <div class="flex justify-center items-center gap-2 py-2" id="paginationControls">
-                <!-- Pagination buttons generated dynamically -->
-            </div>
+            <!-- Pagination Controls -->
+            <div class="flex justify-center items-center gap-2 py-2" id="paginationControls"></div>
         </main>
     </div>
 
     <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch, query, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
@@ -343,7 +317,6 @@
         
         const DEFAULT_PASSWORD = "01717087424";
 
-        // অপ্টিমাইজড উইন্ডো লোড: অপ্রয়োজনীয় সিকিউরিটি চেক আগে রিমুভ করে সরাসরি সেশন চেক করা হয়েছে
         window.onload = function() {
             if(sessionStorage.getItem('isLoggedIn') === 'true') {
                 document.getElementById('loginModal').classList.add('hidden');
@@ -368,7 +341,6 @@
                     document.getElementById('loginError').classList.remove('hidden');
                 }
             } catch (err) {
-                // অফলাইন বা ক্লাউড কানেকশন ধীরগতির হলেও যেন ডিফল্ট পাসওয়ার্ড দিয়ে লগইন করা যায়
                 if(inputPass === DEFAULT_PASSWORD) {
                     sessionStorage.setItem('isLoggedIn', 'true');
                     document.getElementById('loginModal').classList.add('hidden');
@@ -384,8 +356,6 @@
             sessionStorage.removeItem('isLoggedIn');
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('loginModal').classList.remove('hidden');
-            document.getElementById('loginPassword').value = "";
-            document.getElementById('loginError').classList.add('hidden');
         }
 
         window.openSettings = function() {
@@ -394,9 +364,6 @@
 
         window.closeSettings = function() {
             document.getElementById('settingsModal').classList.add('hidden');
-            document.getElementById('settingsMsg').classList.add('hidden');
-            document.getElementById('currentPass').value = "";
-            document.getElementById('newPass').value = "";
         }
 
         window.updatePassword = async function() {
@@ -411,76 +378,25 @@
 
                 if(cur === cloudPass) {
                     if(newP.length >= 4) {
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
-            authDomain: "myjomi-220c0.firebaseapp.com",
-            projectId: "myjomi-220c0",
-            storageBucket: "myjomi-220c0.firebasestorage.app",
-            messagingSenderId: "1023755664718",
-            appId: "1:1023755664718:web:db0e30a4d8c92da8aa321f",
-            measurementId: "G-ZNBZDP5VPR"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        let records = [];
-        let filteredRecords = [];
-        let currentPage = 1;
-        let rowsPerPage = 10;
-        
-        const DEFAULT_PASSWORD = "01717087424";
-
-        window.onload = function() {
-            if(sessionStorage.getItem('isLoggedIn') === 'true') {
-                document.getElementById('loginModal').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                fetchRecordsFromFirebase();
-            }
-        };
-
-        window.handleLogin = async function() {
-            const inputPass = document.getElementById('loginPassword').value.trim();
-            try {
-                const passDocRef = doc(db, "settings", "app_auth");
-                const docSnap = await getDoc(passDocRef);
-                const cloudPass = docSnap.exists() ? docSnap.data().password : DEFAULT_PASSWORD;
-
-                if(inputPass === cloudPass) {
-                    sessionStorage.setItem('isLoggedIn', 'true');
-                    document.getElementById('loginModal').classList.add('hidden');
-                    document.getElementById('dashboard').classList.remove('hidden');
-                    fetchRecordsFromFirebase();
+                        await setDoc(passDocRef, { password: newP });
+                        msg.className = "text-xs text-center font-medium text-emerald-600";
+                        msg.innerText = "পাসওয়ার্ড সফলভাবে আপডেট হয়েছে!";
+                        msg.classList.remove('hidden');
+                    } else {
+                        msg.className = "text-xs text-center font-medium text-rose-500";
+                        msg.innerText = "নতুন পাসওয়ার্ড অন্তত ৪ অক্ষরের হতে হবে!";
+                        msg.classList.remove('hidden');
+                    }
                 } else {
-                    document.getElementById('loginError').classList.remove('hidden');
+                    msg.className = "text-xs text-center font-medium text-rose-500";
+                    msg.innerText = "বর্তমান পাসওয়ার্ড ভুল!";
+                    msg.classList.remove('hidden');
                 }
-            } catch (err) {
-                if(inputPass === DEFAULT_PASSWORD) {
-                    sessionStorage.setItem('isLoggedIn', 'true');
-                    document.getElementById('loginModal').classList.add('hidden');
-                    document.getElementById('dashboard').classList.remove('hidden');
-                    fetchRecordsFromFirebase();
-                } else {
-                    document.getElementById('loginError').classList.remove('hidden');
-                }
+            } catch (e) {
+                msg.className = "text-xs text-center font-medium text-rose-500";
+                msg.innerText = "ত্রুটি: " + e.message;
+                msg.classList.remove('hidden');
             }
-        }
-
-        window.handleLogout = function() {
-            sessionStorage.removeItem('isLoggedIn');
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('loginModal').classList.remove('hidden');
-        }
-
-        window.openSettings = function() {
-            document.getElementById('settingsModal').classList.remove('hidden');
-        }
-
-        window.closeSettings = function() {
-            document.getElementById('settingsModal').classList.add('hidden');
         }
 
         // ফায়ারবেস এবং লাইভ সার্ভার MySQL ডাটা ফেচ ও ম্যাচিং
@@ -499,10 +415,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
                     firebaseRecords.push({ id: docSnap.id, ...docSnap.data() });
                 });
 
-                // ২. লাইভ সার্ভার MySQL ডেটা আনা (আপনার API URL এখানে বসাবেন)
+                // ২. লাইভ সার্ভার MySQL ডেটা আনা
                 let mysqlRecords = [];
                 try {
-                    const response = await fetch('https://vumi.rf.gd/get_records.php'); // আপনার লাইভ সার্ভারের PHP ফাইলের লিংক দিন
+                    const response = await fetch('https://vumi.rf.gd/get_records.php');
                     mysqlRecords = await response.json();
                 } catch (e) {
                     console.error("MySQL fetch error: ", e);
@@ -519,10 +435,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 
                     return {
                         ...fb,
-                        applicationNumber: matchedSql ? matchedSql.application_number : "-",
-                        applicationDate: matchedSql ? matchedSql.application_date : "-",
-                        caseNumber: matchedSql ? matchedSql.case_number : "-",
-                        code: fb.code || (matchedSql ? matchedSql.code : ""), // ফায়ারবেসে না থাকলে MySQL থেকে কোড নিয়ে নিবে
+                        applicationNumber: matchedSql ? matchedSql.app_no : "-",
+                        applicationDate: matchedSql ? matchedSql.app_date : "-",
+                        caseNumber: matchedSql ? matchedSql.case_no : "-",
+                        code: fb.code || (matchedSql ? matchedSql.code : ""),
                         status: (fb.code || (matchedSql ? matchedSql.code : "")) ? "OK" : "NOK"
                     };
                 });
@@ -818,7 +734,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
             document.getElementById('modalDag').innerText = rec.dag || "-";
             document.getElementById('modalTotalAcre').innerText = rec.totalAcre || "-";
 
-            // অতিরিক্ত MySQL ফিল্ডগুলো ভিউ মডালে দেখানো
             const linksContainer = document.getElementById('modalLinksContainer');
             let extraInfoHtml = `
                 <div class="grid grid-cols-3 gap-2 mb-4 p-3 bg-blue-50/50 rounded-xl border border-blue-100 text-xs">
