@@ -87,6 +87,10 @@
                 <div class="col-span-2"><span class="text-slate-500 block">মালিকের নাম:</span> <span id="modalOwner" class="font-bold text-slate-800 text-sm">-</span></div>
                 <div><span class="text-slate-500 block">দাগ নম্বর:</span> <span id="modalDag" class="font-bold text-slate-800">-</span></div>
                 <div><span class="text-slate-500 block">মোট জমি (একর):</span> <span id="modalTotalAcre" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">আবেদন নম্বর:</span> <span id="modalAppNo" class="font-bold text-blue-600">-</span></div>
+                <div><span class="text-slate-500 block">তারিখ:</span> <span id="modalDate" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-500 block">মামলা নং:</span> <span id="modalCaseNo" class="font-bold text-slate-800">-</span></div>
+                <div class="col-span-2 sm:col-span-3"><span class="text-slate-500 block">সিক্রেট কোড:</span> <span id="modalCode" class="font-bold text-amber-600 font-mono">-</span></div>
             </div>
 
             <div>
@@ -146,6 +150,18 @@
                     <label class="block font-semibold text-slate-600 mb-1">মোট জমি (একর)</label>
                     <input type="text" id="editTotalAcre" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">আবেদন নম্বর</label>
+                    <input type="text" id="editAppNo" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">তারিখ</label>
+                    <input type="text" id="editDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block font-semibold text-slate-600 mb-1">মামলা নং</label>
+                    <input type="text" id="editCaseNo" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
             </div>
 
             <div class="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 mb-5 space-y-3">
@@ -193,7 +209,6 @@
                     <div id="totalCounter" class="bg-slate-800/80 border border-slate-700 px-5 py-2.5 rounded-2xl text-sm font-medium text-blue-400 shadow-inner flex items-center gap-2">
                         <i class="fa-solid fa-database"></i> মোট এন্ট্রি: <span id="counterVal" class="text-white font-bold text-base">০</span>
                     </div>
-                    <!-- Clear Database Button -->
                     <button onclick="promptClearDatabase()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white px-4 py-2.5 rounded-2xl text-sm font-medium transition border border-rose-500/30 flex items-center gap-2 shadow">
                         <i class="fa-solid fa-triangle-exclamation"></i> ডাটাবেস ক্লিয়ার
                     </button>
@@ -225,7 +240,7 @@
                 </div>
             </div>
 
-            <!-- Dependent Filters (বিভাগ, জেলা, উপজেলা, মৌজা নির্ভরশীল ফিল্টার) -->
+            <!-- Dependent Filters -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-9 gap-3">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">বিভাগ</label>
@@ -268,7 +283,7 @@
                 </div>
             </div>
 
-            <!-- Table Controls (Rows Per Page & Counter Info) -->
+            <!-- Table Controls -->
             <div class="bg-white px-5 py-3.5 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap justify-between items-center gap-4 text-xs">
                 <div class="flex items-center gap-2">
                     <span class="font-semibold text-slate-600">প্রতি পেজে দেখাও:</span>
@@ -300,28 +315,30 @@
                                 <th class="p-3.5">মালিকের নাম</th>
                                 <th class="p-3.5">দাগ নম্বর</th>
                                 <th class="p-3.5">মোট জমি (একর)</th>
+                                <th class="p-3.5">আবেদন নম্বর</th>
+                                <th class="p-3.5">তারিখ</th>
+                                <th class="p-3.5">মামলা নং</th>
+                                <th class="p-3.5">কোড</th>
                                 <th class="p-3.5 text-center">অবস্থা (OK/NOK)</th>
                                 <th class="p-3.5 text-center">এ্যাকশন</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="text-xs text-slate-600 divide-y divide-slate-100">
-                            <!-- Firebase records will be rendered here dynamically -->
+                            <!-- Records rendered here -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Pagination Controls (Footer) -->
-            <div class="flex justify-center items-center gap-2 py-2" id="paginationControls">
-                <!-- Pagination buttons generated dynamically -->
-            </div>
+            <!-- Pagination Footer -->
+            <div class="flex justify-center items-center gap-2 py-2" id="paginationControls"></div>
         </main>
     </div>
 
     <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch, query, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, writeBatch, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWBP3s-6qzFioAeL_-nAVZiOWTyZUhxSk",
@@ -613,15 +630,11 @@
                 return true;
             });
 
-            // জেএল নম্বর এবং খতিয়ান নম্বর অনুযায়ী A2Z ক্রমানুসারে সাজানো (Sorting)
             filteredRecords.sort((a, b) => {
                 let jlA = convertToEnglishDigits(a.jl);
                 let jlB = convertToEnglishDigits(b.jl);
-                
                 let jlComp = jlA.localeCompare(jlB, undefined, { numeric: true, sensitivity: 'base' });
-                if (jlComp !== 0) {
-                    return jlComp;
-                }
+                if (jlComp !== 0) return jlComp;
 
                 let khatA = convertToEnglishDigits(a.khatian);
                 let khatB = convertToEnglishDigits(b.khatian);
@@ -664,7 +677,7 @@
             document.getElementById('counterVal').innerText = records.length;
 
             if(totalFiltered === 0) {
-                tableBody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">কোনো রেকর্ড পাওয়া যায়নি।</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="15" class="p-6 text-center text-slate-400">কোনো রেকর্ড পাওয়া যায়নি।</td></tr>`;
                 document.getElementById('paginationInfo').innerText = `দেখাচ্ছে ০ থেকে ০ টি, মোট: ০ টি`;
                 document.getElementById('paginationControls').innerHTML = "";
                 return;
@@ -687,15 +700,19 @@
                     : `<div id="statusContainer-${rec.id}" class="inline-block"><button onclick="toggleOkNok('${rec.id}')" class="bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1 rounded-full font-bold text-[11px] transition shadow-sm">NOK</button></div>`;
 
                 tr.innerHTML = `
-                    <td class="p-3.5 font-medium cell-div">${rec.division || "-"}</td>
-                    <td class="p-3.5 cell-dist">${rec.district || "-"}</td>
-                    <td class="p-3.5 cell-upa">${rec.upazila || "-"}</td>
-                    <td class="p-3.5 cell-mouza">${rec.mouza || "-"}</td>
-                    <td class="p-3.5 cell-jl">${rec.jl || "-"}</td>
-                    <td class="p-3.5 font-semibold text-blue-600 cell-khatian">${rec.khatian || "-"}</td>
-                    <td class="p-3.5 font-semibold text-slate-800 cell-owner">${rec.owner || "-"}</td>
-                    <td class="p-3.5 font-semibold text-slate-800 cell-dag">${rec.dag || "-"}</td>
-                    <td class="p-3.5 cell-totalacre">${rec.totalAcre || "-"}</td>
+                    <td class="p-3.5 font-medium">${rec.division || "-"}</td>
+                    <td class="p-3.5">${rec.district || "-"}</td>
+                    <td class="p-3.5">${rec.upazila || "-"}</td>
+                    <td class="p-3.5">${rec.mouza || "-"}</td>
+                    <td class="p-3.5">${rec.jl || "-"}</td>
+                    <td class="p-3.5 font-semibold text-blue-600">${rec.khatian || "-"}</td>
+                    <td class="p-3.5 font-semibold text-slate-800">${rec.owner || "-"}</td>
+                    <td class="p-3.5 font-semibold text-slate-800">${rec.dag || "-"}</td>
+                    <td class="p-3.5">${rec.totalAcre || "-"}</td>
+                    <td class="p-3.5 font-bold text-blue-600">${rec.applicationNo || "-"}</td>
+                    <td class="p-3.5">${rec.date || "-"}</td>
+                    <td class="p-3.5">${rec.caseNo || "-"}</td>
+                    <td class="p-3.5 font-mono text-amber-600">${rec.code || "-"}</td>
                     <td class="p-3.5 text-center">${statusBadge}</td>
                     <td class="p-3.5 text-center">
                         <div class="flex items-center justify-center gap-1.5">
@@ -777,6 +794,10 @@
             document.getElementById('modalOwner').innerText = rec.owner || "-";
             document.getElementById('modalDag').innerText = rec.dag || "-";
             document.getElementById('modalTotalAcre').innerText = rec.totalAcre || "-";
+            document.getElementById('modalAppNo').innerText = rec.applicationNo || "-";
+            document.getElementById('modalDate').innerText = rec.date || "-";
+            document.getElementById('modalCaseNo').innerText = rec.caseNo || "-";
+            document.getElementById('modalCode').innerText = rec.code || "-";
 
             const linksContainer = document.getElementById('modalLinksContainer');
             if(!rec.code) {
@@ -810,6 +831,9 @@
             document.getElementById('editOwner').value = rec.owner || "";
             document.getElementById('editDag').value = rec.dag || "";
             document.getElementById('editTotalAcre').value = rec.totalAcre || "";
+            document.getElementById('editAppNo').value = rec.applicationNo || "";
+            document.getElementById('editDate').value = rec.date || "";
+            document.getElementById('editCaseNo').value = rec.caseNo || "";
             document.getElementById('editCode').value = rec.code || "";
             
             updateUrlPreview();
@@ -846,6 +870,9 @@
                 owner: document.getElementById('editOwner').value,
                 dag: document.getElementById('editDag').value,
                 totalAcre: document.getElementById('editTotalAcre').value,
+                applicationNo: document.getElementById('editAppNo').value,
+                date: document.getElementById('editDate').value,
+                caseNo: document.getElementById('editCaseNo').value,
                 code: document.getElementById('editCode').value.trim(),
                 status: document.getElementById('editCode').value.trim() ? "OK" : "NOK"
             };
@@ -891,7 +918,21 @@
 
         window.downloadSampleExcel = function() {
             const sampleData = [
-                { "বিভাগ": "ঢাকা", "জেলা": "ঢাকা", "উপজেলা": "সাভার", "মৌজা": "AMINABAD", "জেএল নম্বর": "১২", "খতিয়ান নম্বর": "৪৫/১", "মালিকের নাম": "আব্দুর রহমান", "দাগ নম্বর": "১০৮", "মোট জমি (একর)": "০.০২" }
+                { 
+                    "বিভাগ": "ঢাকা", 
+                    "জেলা": "ঢাকা", 
+                    "উপজেলা": "সাভার", 
+                    "মৌজা": "AMINABAD", 
+                    "জেএল নম্বর": "১২", 
+                    "খতিয়ান নম্বর": "৪৫/১", 
+                    "মালিকের নাম": "আব্দুর রহমান", 
+                    "দাগ নম্বর": "১০৮", 
+                    "মোট জমি (একর)": "০.০২",
+                    "আবেদন নম্বর": "APP-2026-001",
+                    "তারিখ": "2026-09-28",
+                    "মামলা নং": "CASE-105",
+                    "কোড": "ABC123XYZ"
+                }
             ];
             const worksheet = XLSX.utils.json_to_sheet(sampleData);
             const workbook = XLSX.utils.book_new();
@@ -942,8 +983,11 @@
                         const newOwner = String(item["মালিকের নাম"] || item["Owner"] || "-").trim();
                         const newDag = String(item["দাগ নম্বর"] || item["Dag"] || "-").trim();
                         const newTotalAcre = String(item["মোট জমি (একর)"] || item["Acre"] || "-").trim();
+                        const newAppNo = String(item["আবেদন নম্বর"] || item["ApplicationNo"] || "-").trim();
+                        const newDate = String(item["তারিখ"] || item["Date"] || "-").trim();
+                        const newCaseNo = String(item["মামলা নং"] || item["CaseNo"] || "-").trim();
+                        const newCode = String(item["কোড"] || item["Code"] || "").trim();
 
-                        // বাংলা ও ইংরেজি খতিয়ান/জেএল/দাগ স্বাভাবিকীকরণ করে ডুপ্লিকেট চেক
                         const isDuplicate = records.some(r => 
                             String(r.division || "").trim() === newDivision &&
                             String(r.district || "").trim() === newDistrict &&
@@ -952,8 +996,7 @@
                             convertToEnglishDigits(r.jl) === convertToEnglishDigits(newJl) &&
                             convertToEnglishDigits(r.khatian) === convertToEnglishDigits(newKhatian) &&
                             String(r.owner || "").trim() === newOwner &&
-                            convertToEnglishDigits(r.dag) === convertToEnglishDigits(newDag) &&
-                            convertToEnglishDigits(r.totalAcre) === convertToEnglishDigits(newTotalAcre)
+                            convertToEnglishDigits(r.dag) === convertToEnglishDigits(newDag)
                         );
 
                         if (isDuplicate) {
@@ -971,8 +1014,11 @@
                             owner: newOwner,
                             dag: newDag,
                             totalAcre: newTotalAcre,
-                            code: "",
-                            status: "NOK"
+                            applicationNo: newAppNo,
+                            date: newDate,
+                            caseNo: newCaseNo,
+                            code: newCode,
+                            status: newCode ? "OK" : "NOK"
                         };
 
                         const newDocRef = doc(collection(db, "land_records"));
@@ -1012,7 +1058,11 @@
                 "খতিয়ান নম্বর": recs.khatian || "-",
                 "মালিকের নাম": recs.owner || "-",
                 "দাগ নম্বর": recs.dag || "-",
-                "মোট জমি (একর)": recs.totalAcre || "-"
+                "মোট জমি (একর)": recs.totalAcre || "-",
+                "আবেদন নম্বর": recs.applicationNo || "-",
+                "তারিখ": recs.date || "-",
+                "মামলা নং": recs.caseNo || "-",
+                "কোড": recs.code || "-"
             }));
 
             if (exportData.length === 0) {
