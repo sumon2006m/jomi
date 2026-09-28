@@ -521,7 +521,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
                         ...fb,
                         applicationNumber: matchedSql ? matchedSql.application_number : "-",
                         applicationDate: matchedSql ? matchedSql.application_date : "-",
-                        caseNumber: matchedSql ? matchedSql.case_number : "-"
+                        caseNumber: matchedSql ? matchedSql.case_number : "-",
+                        code: fb.code || (matchedSql ? matchedSql.code : ""), // ফায়ারবেসে না থাকলে MySQL থেকে কোড নিয়ে নিবে
+                        status: (fb.code || (matchedSql ? matchedSql.code : "")) ? "OK" : "NOK"
                     };
                 });
                 
