@@ -516,7 +516,7 @@
             }
         }
 
-        // MySQL থেকে ডেটা ফেচিং এবং ফায়ারবেসের সাথে সিঙ্ক করার ফ্লেক্সিবল ও উন্নত ফাংশন
+        // MySQL থেকে ডেটা ফেচিং এবং ফায়ারবেসের সাথে সিঙ্ক করার আপডেট করা ফাংশন
         window.syncFirebaseWithMySQL = async function() {
             const statusBanner = document.getElementById('connectionStatus');
             statusBanner.className = "bg-amber-500 text-white text-center py-2 text-xs font-semibold px-4 shadow-sm flex items-center justify-center gap-2";
@@ -559,7 +559,6 @@
                     const fbMouza = String(fb.mouza || "").trim().toLowerCase();
                     const fbKhatianEng = convertToEnglishDigits(fb.khatian);
 
-                    // MySQL ডেটার সাথে নিখুঁত মেলবন্ধন (district, upazila, mouza এবং khatian)
                     const matchedSql = mysqlRecords.find(sql => {
                         const sqlDist = String(sql.district || "").trim().toLowerCase();
                         const sqlUpa = String(sql.upazila || "").trim().toLowerCase();
